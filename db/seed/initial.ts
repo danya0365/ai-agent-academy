@@ -1,0 +1,14 @@
+import { ensureUser } from "./helpers";
+
+/**
+ * initial seed — user ที่จำเป็นต่อระบบ (แอดมิน)
+ * ปลอดภัยรันบน production
+ */
+export async function seedInitial(): Promise<void> {
+  const email = process.env.ADMIN_EMAIL || "admin@example.com";
+  const password = process.env.ADMIN_PASSWORD || "admin1234";
+  const name = process.env.ADMIN_NAME || "ผู้ดูแลระบบ";
+
+  await ensureUser({ email, password, name, role: "admin" });
+  console.log(`✓ [initial] แอดมินพร้อมใช้งาน: ${email}`);
+}
