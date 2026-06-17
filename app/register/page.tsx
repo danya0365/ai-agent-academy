@@ -39,9 +39,9 @@ function RegisterForm() {
   }
 
   return (
-    <div className="mx-auto max-w-md px-4 py-12">
-      <h1 className="mb-6 text-2xl font-bold text-slate-900">สมัครสมาชิก</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="mx-auto max-w-md px-4 py-12 sm:px-6">
+      <h1 className="mb-6 text-2xl font-black tracking-tight text-foreground">สมัครสมาชิก</h1>
+      <form onSubmit={handleSubmit} className="card space-y-4 p-6">
         <Field label="ชื่อ-นามสกุล">
           <input
             type="text"
@@ -71,22 +71,20 @@ function RegisterForm() {
         </Field>
 
         {error && (
-          <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+          <p className="rounded-xl border-2 border-border bg-error-surface px-3 py-2 text-sm text-error">
+            {error}
+          </p>
         )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-lg bg-indigo-600 px-4 py-3 font-medium text-white hover:bg-indigo-700 disabled:bg-slate-300"
-        >
+        <button type="submit" disabled={loading} className="btn btn-primary w-full">
           {loading ? "กำลังสมัคร..." : "สมัครสมาชิก"}
         </button>
       </form>
-      <p className="mt-4 text-center text-sm text-slate-600">
+      <p className="mt-4 text-center text-sm text-muted">
         มีบัญชีอยู่แล้ว?{" "}
         <Link
           href={`/login?next=${encodeURIComponent(next)}`}
-          className="font-medium text-indigo-600 hover:underline"
+          className="font-bold text-brand-700 hover:underline"
         >
           เข้าสู่ระบบ
         </Link>
@@ -98,7 +96,7 @@ function RegisterForm() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm font-medium text-slate-700">{label}</span>
+      <span className="mb-1.5 block text-sm font-bold text-foreground">{label}</span>
       {children}
     </label>
   );

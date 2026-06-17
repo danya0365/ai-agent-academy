@@ -47,11 +47,11 @@ export default async function SessionsPage({
 
   return (
     <div>
-      <Link href="/admin/courses" className="text-sm text-indigo-600 hover:underline">
+      <Link href="/admin/courses" className="text-sm font-medium text-muted hover:text-foreground">
         ← กลับ
       </Link>
-      <h1 className="mb-1 mt-3 text-2xl font-bold text-slate-900">จัดการรอบเรียน</h1>
-      <p className="mb-6 text-slate-500">{course.title}</p>
+      <h1 className="mb-1 mt-3 text-2xl font-black tracking-tight text-foreground">จัดการรอบเรียน</h1>
+      <p className="mb-6 text-muted">{course.title}</p>
       <SessionManager courseId={id} sessions={rows} />
     </div>
   );

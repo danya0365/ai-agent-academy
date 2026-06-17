@@ -1,0 +1,77 @@
+/* ============================================
+   Template: bold (DEFAULT) — Bold Edutech
+   ครีม/ขาว ตัวอักษรเข้ม · brand=indigo · accent=amber
+   โครงสร้าง neo-brutalist: ขอบเข้ม (--border) ใช้เป็นสีเงา offset ด้วย
+   ============================================ */
+
+:root,
+[data-theme="bold"] {
+  /* Brand — indigo (500 = สีปุ่ม primary, เข้มพอให้ตัวอักษรขาวอ่านออก) */
+  --brand-50: #eef2ff;
+  --brand-100: #e0e7ff;
+  --brand-200: #c7d2fe;
+  --brand-300: #a5b4fc;
+  --brand-400: #818cf8;
+  --brand-500: #4f46e5;
+  --brand-600: #4338ca;
+  --brand-700: #3730a3;
+  --brand-800: #312e81;
+  --brand-900: #1e1b4b;
+
+  /* Accent — amber */
+  --accent-100: #fef3c7;
+  --accent-400: #fbbf24;
+  --accent-500: #f59e0b;
+  --accent-600: #d97706;
+
+  /* Surface / semantic */
+  --background: #fffdf5;
+  --foreground: #15161c;
+  --card: #ffffff;
+  --card-foreground: #15161c;
+  --muted: #6b7280;
+  --muted-surface: #f4f1e9;
+  --border: #15161c;
+  --ring: #818cf8;
+  --on-brand: #ffffff;
+
+  /* Status */
+  --success: #15803d;
+  --success-surface: #dcfce7;
+  --warning: #b45309;
+  --warning-surface: #fef3c7;
+  --error: #b91c1c;
+  --error-surface: #fee2e2;
+
+  /* Fonts */
+  --font-body: var(--font-noto-thai), system-ui, sans-serif;
+  --font-heading-family: var(--font-noto-thai), system-ui, sans-serif;
+}
+
+[data-theme="bold"].dark,
+.dark[data-theme="bold"] {
+  /* 50–300 = พื้น/ขอบเข้ม, 500/600 = ยังอิ่ม (ปุ่ม primary คงไว้ on-brand=#fff),
+     700–900 = สีอ่อน/ข้อความ */
+  --brand-50: #1e1b3a;
+  --brand-100: #272358;
+  --brand-200: #312c6b;
+  --brand-300: #3b357f;
+  --brand-500: #6366f1;
+  --brand-600: #4f46e5;
+  --brand-700: #a5b4fc;
+  --brand-800: #c7d2fe;
+  --brand-900: #e0e7ff;
+
+  --background: #0b1020;
+  --foreground: #f8fafc;
+  --card: #141a2e;
+  --card-foreground: #f8fafc;
+  --muted: #94a3b8;
+  --muted-surface: #141a2e;
+  --border: #e2e8f0;
+  --ring: #818cf8;
+
+  --success-surface: #14532d;
+  --warning-surface: #451a03;
+  --error-surface: #450a0a;
+}

@@ -11,9 +11,9 @@ export default async function AdminLayout({
   await requireAdmin();
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-6 flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
-        <span className="mr-2 font-bold text-slate-900">แผงแอดมิน</span>
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <div className="mb-6 flex flex-wrap items-center gap-2 border-b-2 border-border pb-3">
+        <span className="mr-1 font-extrabold text-foreground">แผงแอดมิน</span>
         <AdminLink href="/admin">ภาพรวม</AdminLink>
         <AdminLink href="/admin/enrollments">ตรวจสลิป</AdminLink>
         <AdminLink href="/admin/courses">จัดการคอร์ส</AdminLink>
@@ -27,7 +27,7 @@ function AdminLink({ href, children }: { href: string; children: React.ReactNode
   return (
     <Link
       href={href}
-      className="rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+      className="rounded-full px-3 py-1.5 text-sm font-medium text-muted transition hover:bg-muted-surface hover:text-foreground"
     >
       {children}
     </Link>

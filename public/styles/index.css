@@ -1,0 +1,129 @@
+/* ============================================
+   AI Agent Academy — CSS entry point
+   ลำดับ @import ห้ามสลับ (tailwind ต้องมาก่อน)
+   ============================================ */
+
+@import "tailwindcss";
+
+/* Tailwind theme mapping (var() only — no hardcoded colors here) */
+@import "./theme.css";
+
+/* Template palettes. `bold` = default (ผูกกับ :root ด้วย) */
+@import "./themes/bold.css";
+@import "./themes/ocean.css";
+@import "./themes/grape.css";
+
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-body);
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-heading-family);
+  }
+}
+
+/* ============================================
+   โครงสร้าง Bold (neo-brutalist) — คลาสร่วม ใช้ var(token) ล้วน
+   ห้าม hardcode hex; สีเงา offset = var(--border) เพื่อให้สลับธีม/ดาร์กได้
+   ============================================ */
+@layer components {
+  .card {
+    background-color: var(--card);
+    color: var(--card-foreground);
+    border: 2px solid var(--border);
+    border-radius: 1rem;
+    box-shadow: 4px 4px 0 0 var(--border);
+  }
+  .card-flat {
+    background-color: var(--card);
+    color: var(--card-foreground);
+    border: 2px solid var(--border);
+    border-radius: 1rem;
+  }
+  /* hover ยกการ์ด/ลิงก์เบาๆ */
+  .lift {
+    transition:
+      transform 0.12s ease,
+      box-shadow 0.12s ease;
+  }
+  .lift:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 0 var(--border);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 2px solid var(--border);
+    border-radius: 9999px;
+    padding: 0.625rem 1.25rem;
+    font-weight: 700;
+    line-height: 1.25rem;
+    box-shadow: 3px 3px 0 0 var(--border);
+    transition:
+      transform 0.1s ease,
+      box-shadow 0.1s ease;
+    cursor: pointer;
+  }
+  .btn:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 0 var(--border);
+  }
+  .btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 0 var(--border);
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: 3px 3px 0 0 var(--border);
+  }
+  .btn-primary {
+    background-color: var(--brand-500);
+    color: var(--on-brand);
+  }
+  .btn-accent {
+    background-color: var(--accent-500);
+    color: var(--foreground);
+  }
+  .btn-secondary {
+    background-color: var(--card);
+    color: var(--foreground);
+  }
+
+  .input {
+    width: 100%;
+    border: 2px solid var(--border);
+    border-radius: 0.75rem;
+    background-color: var(--card);
+    color: var(--foreground);
+    padding: 0.625rem 0.875rem;
+    outline: none;
+    transition: box-shadow 0.1s ease;
+  }
+  .input::placeholder {
+    color: var(--muted);
+  }
+  .input:focus {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 45%, transparent);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border: 1.5px solid var(--border);
+    border-radius: 9999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.25rem;
+  }
+}

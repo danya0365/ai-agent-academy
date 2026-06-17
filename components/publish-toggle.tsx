@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { togglePublish } from "@/actions/admin";
+import { cn } from "@/lib/cn";
 
 export function PublishToggle({
   courseId,
@@ -16,11 +17,12 @@ export function PublishToggle({
     <button
       onClick={() => startTransition(() => togglePublish(courseId).then(() => {}))}
       disabled={pending}
-      className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+      className={cn(
+        "badge transition disabled:opacity-50",
         isPublished
-          ? "bg-green-100 text-green-700 hover:bg-green-200"
-          : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-      } disabled:opacity-50`}
+          ? "bg-success-surface text-success"
+          : "bg-muted-surface text-muted",
+      )}
     >
       {isPublished ? "เผยแพร่อยู่" : "ซ่อนอยู่"}
     </button>

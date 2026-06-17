@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { desc } from "drizzle-orm";
+import { Plus } from "lucide-react";
 import { db } from "@/db";
 import { courses } from "@/db/schema";
 import { formatBaht, COURSE_TYPE_LABELS } from "@/lib/format";
@@ -12,49 +13,41 @@ export default async function AdminCoursesPage() {
 
   return (
     <div>
-      <div className="mb-5 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-900">จัดการคอร์ส</h1>
-        <Link
-          href="/admin/courses/new"
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-        >
-          + เพิ่มคอร์ส
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <h1 className="text-2xl font-black tracking-tight text-foreground sm:text-3xl">จัดการคอร์ส</h1>
+        <Link href="/admin/courses/new" className="btn btn-primary text-sm">
+          <Plus className="size-4" /> เพิ่มคอร์ส
         </Link>
       </div>
 
       {list.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500">
-          ยังไม่มีคอร์ส
-        </p>
+        <p className="card-flat p-8 text-center text-muted">ยังไม่มีคอร์ส</p>
       ) : (
         <div className="space-y-3">
           {list.map((c) => (
             <div
               key={c.id}
-              className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4"
+              className="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
             >
               <div>
-                <div className="flex items-center gap-2">
-                  <p className="font-semibold text-slate-900">{c.title}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="font-extrabold text-foreground">{c.title}</p>
                   <PublishToggle courseId={c.id} isPublished={c.isPublished} />
                 </div>
-                <p className="text-sm text-slate-500">
+                <p className="mt-1 text-sm text-muted">
                   {COURSE_TYPE_LABELS[c.type]} · {formatBaht(c.price)} · /{c.slug}
                 </p>
               </div>
-              <div className="flex gap-2 text-sm">
+              <div className="flex flex-wrap gap-2 text-sm">
                 {c.type === "scheduled" && (
                   <Link
                     href={`/admin/courses/${c.id}/sessions`}
-                    className="rounded-lg border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-50"
+                    className="btn btn-secondary text-sm"
                   >
                     จัดการรอบเรียน
                   </Link>
                 )}
-                <Link
-                  href={`/admin/courses/${c.id}/edit`}
-                  className="rounded-lg border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-50"
-                >
+                <Link href={`/admin/courses/${c.id}/edit`} className="btn btn-secondary text-sm">
                   แก้ไข
                 </Link>
               </div>

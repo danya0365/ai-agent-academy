@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { FlaskConical } from "lucide-react";
 import { signIn } from "@/lib/auth-client";
 import { getTestUsers, type TestUser } from "@/actions/dev-auth";
+import { cn } from "@/lib/cn";
 
 /**
  * Quick-login สำหรับทดสอบ — แสดงรายชื่อบัญชี seed คลิกแล้วเข้าได้เลย
@@ -37,12 +39,17 @@ export function DevQuickLogin({ next }: { next: string }) {
   }
 
   return (
-    <div className="mt-8 rounded-lg border border-dashed border-amber-300 bg-amber-50 p-4">
-      <p className="text-sm font-semibold text-amber-800">🧪 เข้าสู่ระบบด่วน (สำหรับทดสอบ)</p>
-      <p className="mb-3 text-xs text-amber-700">แสดงเฉพาะตอน dev — ไม่แสดงใน production</p>
+    <div className="mt-8 rounded-2xl border-2 border-dashed border-border bg-muted-surface p-4">
+      <p className="flex items-center gap-1.5 text-sm font-bold text-foreground">
+        <FlaskConical className="size-4" />
+        เข้าสู่ระบบด่วน (สำหรับทดสอบ)
+      </p>
+      <p className="mb-3 text-xs text-muted">แสดงเฉพาะตอน dev — ไม่แสดงใน production</p>
 
       {error && (
-        <p className="mb-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+        <p className="mb-2 rounded-lg border-2 border-border bg-error-surface px-3 py-2 text-sm text-error">
+          {error}
+        </p>
       )}
 
       <div className="space-y-1.5">
@@ -52,18 +59,22 @@ export function DevQuickLogin({ next }: { next: string }) {
             type="button"
             onClick={() => quickLogin(u)}
             disabled={loadingEmail !== null}
-            className="flex w-full items-center justify-between gap-3 rounded-md border border-amber-200 bg-white px-3 py-2 text-left text-sm hover:bg-amber-100 disabled:opacity-50"
+            className={cn(
+              "flex w-full items-center justify-between gap-3 rounded-xl border-2 border-border bg-card px-3 py-2 text-left text-sm transition hover:bg-muted-surface",
+              loadingEmail !== null && "opacity-50",
+            )}
           >
             <span className="min-w-0 truncate">
-              <span className="font-medium text-slate-900">{u.name}</span>{" "}
-              <span className="text-slate-500">· {u.email}</span>
+              <span className="font-bold text-foreground">{u.name}</span>{" "}
+              <span className="text-muted">· {u.email}</span>
             </span>
             <span
-              className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
+              className={cn(
+                "badge shrink-0",
                 u.role === "admin"
-                  ? "bg-indigo-100 text-indigo-700"
-                  : "bg-slate-100 text-slate-600"
-              }`}
+                  ? "bg-brand-500 text-on-brand"
+                  : "bg-muted-surface text-muted",
+              )}
             >
               {loadingEmail === u.email ? "..." : u.role}
             </span>

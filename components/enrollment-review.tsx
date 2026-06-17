@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Check, X } from "lucide-react";
 import { approveEnrollment, rejectEnrollment } from "@/actions/admin";
 
 export function EnrollmentReview({
@@ -32,33 +33,35 @@ export function EnrollmentReview({
     });
   }
 
-  // ปุ่มจะแสดงเมื่อยังตรวจสอบได้
   const canReview = status === "slip_uploaded" || status === "pending_payment";
   if (!canReview) return null;
 
   return (
-    <div className="mt-3 border-t border-slate-100 pt-3">
+    <div className="mt-3 border-t-2 border-border pt-3">
       {error && (
-        <p className="mb-2 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+        <p className="mb-2 rounded-xl border-2 border-border bg-error-surface px-3 py-2 text-sm text-error">
+          {error}
+        </p>
       )}
 
       {!rejecting ? (
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {status === "slip_uploaded" && (
             <button
               onClick={doApprove}
               disabled={pending}
-              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:bg-slate-300"
+              className="btn bg-success text-on-brand text-sm"
             >
+              <Check className="size-4" />
               {pending ? "กำลังบันทึก..." : "อนุมัติ"}
             </button>
           )}
           <button
             onClick={() => setRejecting(true)}
             disabled={pending}
-            className="rounded-lg border border-red-300 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50"
+            className="btn btn-secondary text-sm text-error"
           >
-            ปฏิเสธ
+            <X className="size-4" /> ปฏิเสธ
           </button>
         </div>
       ) : (
@@ -70,17 +73,17 @@ export function EnrollmentReview({
             onChange={(e) => setReason(e.target.value)}
             className="input"
           />
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={doReject}
               disabled={pending}
-              className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:bg-slate-300"
+              className="btn bg-error text-on-brand text-sm"
             >
               {pending ? "กำลังบันทึก..." : "ยืนยันการปฏิเสธ"}
             </button>
             <button
               onClick={() => setRejecting(false)}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-600 hover:bg-slate-50"
+              className="btn btn-secondary text-sm"
             >
               ยกเลิก
             </button>

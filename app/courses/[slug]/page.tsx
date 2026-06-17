@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { Calendar, Zap } from "lucide-react";
 import { getCourseBySlug } from "@/lib/queries";
 import { formatBaht, COURSE_TYPE_LABELS } from "@/lib/format";
 import { EnrollForm } from "@/components/enroll-form";
@@ -15,37 +16,29 @@ export default async function CourseDetailPage({
   if (!data || !data.course.isPublished) notFound();
 
   const { course, sessions } = data;
+  const scheduled = course.type === "scheduled";
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
+    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
       <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
         {/* รายละเอียดคอร์ส */}
         <div>
-          <span
-            className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
-              course.type === "scheduled"
-                ? "bg-purple-100 text-purple-700"
-                : "bg-emerald-100 text-emerald-700"
-            }`}
-          >
+          <span className="badge bg-card text-foreground">
+            {scheduled ? <Calendar className="size-3.5" /> : <Zap className="size-3.5" />}
             {COURSE_TYPE_LABELS[course.type]}
           </span>
-          <h1 className="mt-3 text-3xl font-bold text-slate-900">{course.title}</h1>
-          <p className="mt-2 text-2xl font-bold text-indigo-600">
-            {formatBaht(course.price)}
-          </p>
-          <div className="mt-6 whitespace-pre-line leading-relaxed text-slate-700">
+          <h1 className="mt-4 text-3xl font-black tracking-tight text-foreground sm:text-4xl">
+            {course.title}
+          </h1>
+          <p className="mt-3 text-2xl font-black text-brand-700">{formatBaht(course.price)}</p>
+          <div className="mt-6 whitespace-pre-line leading-relaxed text-muted">
             {course.description}
           </div>
         </div>
 
         {/* กล่องสมัคร */}
-        <div className="lg:sticky lg:top-6 lg:self-start">
-          <EnrollForm
-            courseId={course.id}
-            type={course.type}
-            sessions={sessions}
-          />
+        <div className="lg:sticky lg:top-20 lg:self-start">
+          <EnrollForm courseId={course.id} type={course.type} sessions={sessions} />
         </div>
       </div>
     </div>

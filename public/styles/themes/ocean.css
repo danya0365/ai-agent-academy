@@ -1,0 +1,69 @@
+/* ============================================
+   Template: ocean — โทนฟ้า-เขียว · brand=cyan · accent=emerald
+   ============================================ */
+
+[data-theme="ocean"] {
+  /* Brand — cyan */
+  --brand-50: #ecfeff;
+  --brand-100: #cffafe;
+  --brand-200: #a5f3fc;
+  --brand-300: #67e8f9;
+  --brand-400: #22d3ee;
+  --brand-500: #0891b2;
+  --brand-600: #0e7490;
+  --brand-700: #155e75;
+  --brand-800: #164e63;
+  --brand-900: #083344;
+
+  /* Accent — emerald */
+  --accent-100: #d1fae5;
+  --accent-400: #34d399;
+  --accent-500: #10b981;
+  --accent-600: #059669;
+
+  --background: #f3fbfd;
+  --foreground: #0c1a1f;
+  --card: #ffffff;
+  --card-foreground: #0c1a1f;
+  --muted: #5b7782;
+  --muted-surface: #e6f7fa;
+  --border: #0c1a1f;
+  --ring: #67e8f9;
+  --on-brand: #ffffff;
+
+  --success: #15803d;
+  --success-surface: #dcfce7;
+  --warning: #b45309;
+  --warning-surface: #fef3c7;
+  --error: #b91c1c;
+  --error-surface: #fee2e2;
+
+  --font-body: var(--font-noto-thai), system-ui, sans-serif;
+  --font-heading-family: var(--font-noto-thai), system-ui, sans-serif;
+}
+
+[data-theme="ocean"].dark,
+.dark[data-theme="ocean"] {
+  --brand-50: #07242b;
+  --brand-100: #0b2f38;
+  --brand-200: #114350;
+  --brand-300: #155e75;
+  --brand-500: #0891b2;
+  --brand-600: #0e7490;
+  --brand-700: #67e8f9;
+  --brand-800: #a5f3fc;
+  --brand-900: #cffafe;
+
+  --background: #06171c;
+  --foreground: #ecfeff;
+  --card: #0c1f26;
+  --card-foreground: #ecfeff;
+  --muted: #8aa6b0;
+  --muted-surface: #0c1f26;
+  --border: #cbe8ef;
+  --ring: #22d3ee;
+
+  --success-surface: #14532d;
+  --warning-surface: #451a03;
+  --error-surface: #450a0a;
+}

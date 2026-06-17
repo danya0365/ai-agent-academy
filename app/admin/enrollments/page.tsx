@@ -7,6 +7,7 @@ import {
   STATUS_COLORS,
 } from "@/lib/format";
 import { EnrollmentReview } from "@/components/enrollment-review";
+import { cn } from "@/lib/cn";
 import type { EnrollmentStatus } from "@/db/schema";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +19,13 @@ const FILTERS: { key: EnrollmentStatus | "all"; label: string }[] = [
   { key: "pending_payment", label: "รอชำระเงิน" },
   { key: "all", label: "ทั้งหมด" },
 ];
+
+const VERIFY: Record<string, { label: string; cls: string }> = {
+  verified: { label: "ผ่าน", cls: "bg-success-surface text-success" },
+  failed: { label: "ไม่ผ่าน", cls: "bg-error-surface text-error" },
+  unconfigured: { label: "ยังไม่เปิดใช้", cls: "bg-muted-surface text-muted" },
+  manual: { label: "ต้องตรวจมือ", cls: "bg-muted-surface text-muted" },
+};
 
 export default async function AdminEnrollmentsPage({
   searchParams,
@@ -32,18 +40,21 @@ export default async function AdminEnrollmentsPage({
 
   return (
     <div>
-      <h1 className="mb-4 text-2xl font-bold text-slate-900">ตรวจสอบการสมัคร</h1>
+      <h1 className="mb-4 text-2xl font-black tracking-tight text-foreground sm:text-3xl">
+        ตรวจสอบการสมัคร
+      </h1>
 
       <div className="mb-5 flex flex-wrap gap-2">
         {FILTERS.map((f) => (
           <Link
             key={f.key}
             href={`/admin/enrollments?status=${f.key}`}
-            className={`rounded-full px-3 py-1.5 text-sm font-medium ${
+            className={cn(
+              "rounded-full border-2 border-border px-3 py-1.5 text-sm font-bold transition",
               active === f.key
-                ? "bg-indigo-600 text-white"
-                : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
-            }`}
+                ? "bg-brand-500 text-on-brand"
+                : "bg-card text-muted hover:text-foreground",
+            )}
           >
             {f.label}
           </Link>
@@ -51,93 +62,67 @@ export default async function AdminEnrollmentsPage({
       </div>
 
       {rows.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-slate-500">
-          ไม่มีรายการในสถานะนี้
-        </p>
+        <p className="card-flat p-8 text-center text-muted">ไม่มีรายการในสถานะนี้</p>
       ) : (
         <div className="space-y-3">
-          {rows.map(({ enrollment, course, session, customer }) => (
-            <div
-              key={enrollment.id}
-              className="rounded-xl border border-slate-200 bg-white p-4"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="font-semibold text-slate-900">{course.title}</p>
-                  <p className="text-sm text-slate-500">
-                    {customer.name} · {customer.email}
-                  </p>
-                  {session && (
-                    <p className="text-sm text-slate-500">
-                      รอบ: {formatDateTime(session.startAt)}
+          {rows.map(({ enrollment, course, session, customer }) => {
+            const v = enrollment.slipVerifyStatus
+              ? VERIFY[enrollment.slipVerifyStatus]
+              : null;
+            return (
+              <div key={enrollment.id} className="card p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <p className="font-extrabold text-foreground">{course.title}</p>
+                    <p className="text-sm text-muted">
+                      {customer.name} · {customer.email}
                     </p>
-                  )}
-                  <p className="text-sm text-slate-500">
-                    ยอด: {formatBaht(enrollment.amount)}
-                    {enrollment.slipUploadedAt && (
-                      <> · ส่งสลิป {formatDateTime(enrollment.slipUploadedAt)}</>
+                    {session && (
+                      <p className="text-sm text-muted">รอบ: {formatDateTime(session.startAt)}</p>
                     )}
-                  </p>
-                  {enrollment.rejectReason && (
-                    <p className="text-sm text-red-600">
-                      เหตุผลที่ปฏิเสธ: {enrollment.rejectReason}
-                    </p>
-                  )}
-                  {enrollment.slipVerifyStatus && (
-                    <p className="mt-1 text-sm">
-                      <span
-                        className={`rounded px-1.5 py-0.5 text-xs font-medium ${
-                          enrollment.slipVerifyStatus === "verified"
-                            ? "bg-green-100 text-green-700"
-                            : enrollment.slipVerifyStatus === "failed"
-                              ? "bg-red-100 text-red-700"
-                              : "bg-slate-100 text-slate-600"
-                        }`}
-                      >
-                        ตรวจอัตโนมัติ:{" "}
-                        {enrollment.slipVerifyStatus === "verified"
-                          ? "ผ่าน"
-                          : enrollment.slipVerifyStatus === "failed"
-                            ? "ไม่ผ่าน"
-                            : enrollment.slipVerifyStatus === "unconfigured"
-                              ? "ยังไม่เปิดใช้"
-                              : "ต้องตรวจมือ"}
-                      </span>
-                      {enrollment.verifyNote && (
-                        <span className="ml-2 text-slate-500">{enrollment.verifyNote}</span>
+                    <p className="text-sm text-muted">
+                      ยอด: {formatBaht(enrollment.amount)}
+                      {enrollment.slipUploadedAt && (
+                        <> · ส่งสลิป {formatDateTime(enrollment.slipUploadedAt)}</>
                       )}
                     </p>
-                  )}
+                    {enrollment.rejectReason && (
+                      <p className="text-sm text-error">เหตุผลที่ปฏิเสธ: {enrollment.rejectReason}</p>
+                    )}
+                    {v && (
+                      <p className="mt-1 flex flex-wrap items-center gap-2 text-sm">
+                        <span className={`badge ${v.cls}`}>ตรวจอัตโนมัติ: {v.label}</span>
+                        {enrollment.verifyNote && (
+                          <span className="text-muted">{enrollment.verifyNote}</span>
+                        )}
+                      </p>
+                    )}
+                  </div>
+                  <span className={`badge ${STATUS_COLORS[enrollment.status]}`}>
+                    {STATUS_LABELS[enrollment.status]}
+                  </span>
                 </div>
-                <span
-                  className={`rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_COLORS[enrollment.status]}`}
-                >
-                  {STATUS_LABELS[enrollment.status]}
-                </span>
+
+                {enrollment.slipPath && (
+                  <a
+                    href={`/api/slips/${enrollment.slipPath}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-3 inline-block"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={`/api/slips/${enrollment.slipPath}`}
+                      alt="สลิป"
+                      className="h-32 rounded-xl border-2 border-border object-cover"
+                    />
+                  </a>
+                )}
+
+                <EnrollmentReview enrollmentId={enrollment.id} status={enrollment.status} />
               </div>
-
-              {enrollment.slipPath && (
-                <a
-                  href={`/api/slips/${enrollment.slipPath}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-3 inline-block"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`/api/slips/${enrollment.slipPath}`}
-                    alt="สลิป"
-                    className="h-32 rounded-lg border border-slate-200 object-cover"
-                  />
-                </a>
-              )}
-
-              <EnrollmentReview
-                enrollmentId={enrollment.id}
-                status={enrollment.status}
-              />
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

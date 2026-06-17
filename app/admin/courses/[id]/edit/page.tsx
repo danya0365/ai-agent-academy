@@ -18,10 +18,10 @@ export default async function EditCoursePage({
 
   return (
     <div>
-      <Link href="/admin/courses" className="text-sm text-indigo-600 hover:underline">
+      <Link href="/admin/courses" className="text-sm font-medium text-muted hover:text-foreground">
         ← กลับ
       </Link>
-      <h1 className="mb-6 mt-3 text-2xl font-bold text-slate-900">แก้ไขคอร์ส</h1>
+      <h1 className="mb-6 mt-3 text-2xl font-black tracking-tight text-foreground">แก้ไขคอร์ส</h1>
       <CourseForm
         initial={{
           id: course.id,

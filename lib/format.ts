@@ -27,11 +27,12 @@ export const STATUS_LABELS: Record<EnrollmentStatus, string> = {
   rejected: "สลิปไม่ผ่าน",
 };
 
+// ใช้ token utilities (semantic theme) — สลับธีม/ดาร์กได้
 export const STATUS_COLORS: Record<EnrollmentStatus, string> = {
-  pending_payment: "bg-amber-100 text-amber-800",
-  slip_uploaded: "bg-blue-100 text-blue-800",
-  confirmed: "bg-green-100 text-green-800",
-  rejected: "bg-red-100 text-red-800",
+  pending_payment: "bg-warning-surface text-warning",
+  slip_uploaded: "bg-brand-100 text-brand-700",
+  confirmed: "bg-success-surface text-success",
+  rejected: "bg-error-surface text-error",
 };
 
 export const COURSE_TYPE_LABELS: Record<CourseType, string> = {

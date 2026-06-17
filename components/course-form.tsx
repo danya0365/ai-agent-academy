@@ -36,42 +36,30 @@ export function CourseForm({ initial }: { initial?: Initial }) {
   }
 
   return (
-    <form action={handleSubmit} className="max-w-xl space-y-4">
-      <label className="block">
-        <span className="mb-1 block text-sm font-medium text-slate-700">ชื่อคอร์ส</span>
+    <form action={handleSubmit} className="card max-w-xl space-y-4 p-6">
+      <Label text="ชื่อคอร์ส">
         <input name="title" defaultValue={initial?.title} required className="input" />
-      </label>
+      </Label>
 
       {!isEdit && (
-        <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">
-            slug (URL) — เว้นว่างเพื่อสร้างอัตโนมัติ
-          </span>
+        <Label text="slug (URL) — เว้นว่างเพื่อสร้างอัตโนมัติ">
           <input name="slug" placeholder="เช่น ai-basics" className="input" />
-        </label>
+        </Label>
       )}
 
-      <label className="block">
-        <span className="mb-1 block text-sm font-medium text-slate-700">รายละเอียด</span>
-        <textarea
-          name="description"
-          defaultValue={initial?.description}
-          rows={6}
-          className="input"
-        />
-      </label>
+      <Label text="รายละเอียด">
+        <textarea name="description" defaultValue={initial?.description} rows={6} className="input" />
+      </Label>
 
-      <div className="grid grid-cols-2 gap-4">
-        <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">ประเภท</span>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Label text="ประเภท">
           <select name="type" defaultValue={initial?.type ?? "scheduled"} className="input">
             <option value="scheduled">มีรอบเรียน</option>
             <option value="open">เรียนได้ทันที (สมัครได้ตลอด)</option>
           </select>
-        </label>
+        </Label>
 
-        <label className="block">
-          <span className="mb-1 block text-sm font-medium text-slate-700">ราคา (บาท)</span>
+        <Label text="ราคา (บาท)">
           <input
             name="price"
             type="number"
@@ -80,7 +68,7 @@ export function CourseForm({ initial }: { initial?: Initial }) {
             required
             className="input"
           />
-        </label>
+        </Label>
       </div>
 
       <label className="flex items-center gap-2">
@@ -88,22 +76,29 @@ export function CourseForm({ initial }: { initial?: Initial }) {
           type="checkbox"
           name="isPublished"
           defaultChecked={initial?.isPublished ?? false}
-          className="h-4 w-4"
+          className="size-4 accent-brand-500"
         />
-        <span className="text-sm text-slate-700">เผยแพร่ (แสดงในหน้าคอร์ส)</span>
+        <span className="text-sm text-foreground">เผยแพร่ (แสดงในหน้าคอร์ส)</span>
       </label>
 
       {error && (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+        <p className="rounded-xl border-2 border-border bg-error-surface px-3 py-2 text-sm text-error">
+          {error}
+        </p>
       )}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-lg bg-indigo-600 px-5 py-2.5 font-medium text-white hover:bg-indigo-700 disabled:bg-slate-300"
-      >
+      <button type="submit" disabled={pending} className="btn btn-primary">
         {pending ? "กำลังบันทึก..." : isEdit ? "บันทึกการแก้ไข" : "สร้างคอร์ส"}
       </button>
     </form>
+  );
+}
+
+function Label({ text, children }: { text: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-sm font-bold text-foreground">{text}</span>
+      {children}
+    </label>
   );
 }

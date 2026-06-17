@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { LogOut } from "lucide-react";
 import { signOut } from "@/lib/auth-client";
 
 export function SignOutButton() {
@@ -14,9 +15,11 @@ export function SignOutButton() {
 
   return (
     <button
+      type="button"
       onClick={handleSignOut}
-      className="px-2 py-1 text-slate-600 hover:text-slate-900"
+      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-muted transition hover:text-foreground"
     >
+      <LogOut className="size-4" />
       ออกจากระบบ
     </button>
   );

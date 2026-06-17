@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { requireUser } from "@/lib/session";
 import { getEnrollmentForUser } from "@/lib/queries";
 import { generatePromptPayQR, getBankInfo } from "@/lib/promptpay";
@@ -30,49 +31,52 @@ export default async function PayPage({
     enrollment.status === "pending_payment" || enrollment.status === "rejected";
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10">
-      <Link href="/my-courses" className="text-sm text-indigo-600 hover:underline">
-        ← กลับไปคอร์สของฉัน
+    <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
+      <Link
+        href="/my-courses"
+        className="inline-flex items-center gap-1 text-sm font-medium text-muted transition hover:text-foreground"
+      >
+        <ArrowLeft className="size-4" /> กลับไปคอร์สของฉัน
       </Link>
 
-      <h1 className="mt-3 text-2xl font-bold text-slate-900">ชำระเงิน</h1>
+      <h1 className="mt-3 text-2xl font-black tracking-tight text-foreground sm:text-3xl">
+        ชำระเงิน
+      </h1>
 
-      <div className="mt-4 rounded-xl border border-slate-200 bg-white p-5">
-        <div className="flex items-center justify-between">
+      <div className="card mt-4 p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="font-semibold text-slate-900">{course.title}</p>
+            <p className="font-extrabold text-foreground">{course.title}</p>
             {session && (
-              <p className="text-sm text-slate-500">
-                รอบเรียน: {formatDateTime(session.startAt)}
-              </p>
+              <p className="text-sm text-muted">รอบเรียน: {formatDateTime(session.startAt)}</p>
             )}
           </div>
-          <span
-            className={`rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_COLORS[enrollment.status]}`}
-          >
+          <span className={`badge ${STATUS_COLORS[enrollment.status]}`}>
             {STATUS_LABELS[enrollment.status]}
           </span>
         </div>
-        <p className="mt-3 text-2xl font-bold text-indigo-600">
-          {formatBaht(enrollment.amount)}
-        </p>
+        <p className="mt-3 text-3xl font-black text-brand-700">{formatBaht(enrollment.amount)}</p>
       </div>
 
       {enrollment.status === "confirmed" && (
-        <div className="mt-4 rounded-xl border border-green-200 bg-green-50 p-5 text-green-800">
-          ✅ ยืนยันการชำระเงินเรียบร้อยแล้ว ขอบคุณที่สมัครเรียน!
+        <div className="card mt-4 flex items-start gap-2 bg-success-surface p-5 text-success">
+          <CheckCircle2 className="mt-0.5 size-5 shrink-0" />
+          <span className="font-medium">ยืนยันการชำระเงินเรียบร้อยแล้ว ขอบคุณที่สมัครเรียน!</span>
         </div>
       )}
 
       {enrollment.status === "slip_uploaded" && (
-        <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-5 text-blue-800">
-          ได้รับสลิปแล้ว กำลังรอแอดมินตรวจสอบ จะแจ้งผลให้ทราบเร็ว ๆ นี้
+        <div className="card mt-4 flex items-start gap-2 p-5">
+          <Clock className="mt-0.5 size-5 shrink-0 text-brand-700" />
+          <span className="text-muted">ได้รับสลิปแล้ว กำลังรอแอดมินตรวจสอบ จะแจ้งผลให้ทราบเร็ว ๆ นี้</span>
         </div>
       )}
 
       {enrollment.status === "rejected" && enrollment.rejectReason && (
-        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-5 text-red-800">
-          <p className="font-medium">สลิปไม่ผ่านการตรวจสอบ</p>
+        <div className="card mt-4 bg-error-surface p-5 text-error">
+          <p className="flex items-center gap-2 font-extrabold">
+            <XCircle className="size-5" /> สลิปไม่ผ่านการตรวจสอบ
+          </p>
           <p className="mt-1 text-sm">เหตุผล: {enrollment.rejectReason}</p>
           <p className="mt-1 text-sm">กรุณาแนบสลิปใหม่อีกครั้งด้านล่าง</p>
         </div>
@@ -80,33 +84,33 @@ export default async function PayPage({
 
       {canUpload && (
         <>
-          {/* ข้อมูลการโอนเงิน */}
-          <div className="mt-6 rounded-xl border border-slate-200 bg-white p-5">
-            <h2 className="mb-3 font-semibold text-slate-900">ช่องทางการชำระเงิน</h2>
+          <div className="card mt-6 p-5">
+            <h2 className="mb-3 font-extrabold text-foreground">ช่องทางการชำระเงิน</h2>
             <div className="grid gap-6 sm:grid-cols-2">
               <div className="space-y-1 text-sm">
-                <p className="text-slate-500">โอนเงินเข้าบัญชี</p>
-                <p className="font-medium text-slate-900">{bank.bankName}</p>
-                <p className="font-mono text-lg text-slate-900">{bank.accountNumber}</p>
-                <p className="text-slate-700">{bank.accountName}</p>
-                <p className="pt-2 text-slate-500">ยอดที่ต้องโอน</p>
-                <p className="text-lg font-bold text-indigo-600">
-                  {formatBaht(enrollment.amount)}
-                </p>
+                <p className="text-muted">โอนเงินเข้าบัญชี</p>
+                <p className="font-bold text-foreground">{bank.bankName}</p>
+                <p className="font-mono text-lg text-foreground">{bank.accountNumber}</p>
+                <p className="text-foreground">{bank.accountName}</p>
+                <p className="pt-2 text-muted">ยอดที่ต้องโอน</p>
+                <p className="text-lg font-black text-brand-700">{formatBaht(enrollment.amount)}</p>
               </div>
               {qr && (
                 <div className="flex flex-col items-center">
-                  <p className="mb-2 text-sm text-slate-500">สแกนจ่ายด้วยพร้อมเพย์</p>
+                  <p className="mb-2 text-sm text-muted">สแกนจ่ายด้วยพร้อมเพย์</p>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={qr} alt="PromptPay QR" className="w-44 rounded-lg border" />
+                  <img
+                    src={qr}
+                    alt="PromptPay QR"
+                    className="w-44 rounded-xl border-2 border-border"
+                  />
                 </div>
               )}
             </div>
           </div>
 
-          {/* อัปโหลดสลิป */}
-          <div className="mt-6 rounded-xl border border-slate-200 bg-white p-5">
-            <h2 className="mb-3 font-semibold text-slate-900">
+          <div className="card mt-6 p-5">
+            <h2 className="mb-3 font-extrabold text-foreground">
               {enrollment.status === "rejected" ? "แนบสลิปใหม่" : "แนบสลิปการโอนเงิน"}
             </h2>
             <SlipUploadForm enrollmentId={enrollment.id} />

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { sql, eq } from "drizzle-orm";
+import { Clock, Wallet, BadgeCheck, Users, BookOpen, ArrowRight } from "lucide-react";
 import { db } from "@/db";
 import { courses, enrollments } from "@/db/schema";
 import { formatBaht } from "@/lib/format";
@@ -29,42 +30,57 @@ export default async function AdminDashboard() {
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold text-slate-900">ภาพรวม</h1>
+      <h1 className="mb-6 text-2xl font-black tracking-tight text-foreground sm:text-3xl">ภาพรวม</h1>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Link
-          href="/admin/enrollments"
-          className="rounded-xl border-2 border-blue-200 bg-blue-50 p-5 transition hover:border-blue-400"
-        >
-          <p className="text-sm text-blue-700">สลิปรอตรวจสอบ</p>
-          <p className="mt-1 text-3xl font-bold text-blue-700">{pendingReview}</p>
-          <p className="mt-1 text-xs text-blue-600">คลิกเพื่อตรวจสอบ →</p>
+        <Link href="/admin/enrollments" className="card lift bg-brand-50 p-5">
+          <div className="flex items-center gap-2 text-brand-700">
+            <Clock className="size-5" />
+            <p className="text-sm font-bold">สลิปรอตรวจสอบ</p>
+          </div>
+          <p className="mt-2 text-3xl font-black text-brand-700">{pendingReview}</p>
+          <p className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-brand-700">
+            คลิกเพื่อตรวจสอบ <ArrowRight className="size-3.5" />
+          </p>
         </Link>
 
-        <Stat label="รายได้ที่ยืนยันแล้ว" value={formatBaht(revenue)} />
-        <Stat label="ยืนยันแล้วทั้งหมด" value={`${confirmedCount} รายการ`} />
-        <Stat label="ผู้สมัครทั้งหมด" value={`${totalEnrollments} รายการ`} />
+        <Stat icon={Wallet} label="รายได้ที่ยืนยันแล้ว" value={formatBaht(revenue)} />
+        <Stat icon={BadgeCheck} label="ยืนยันแล้วทั้งหมด" value={`${confirmedCount} รายการ`} />
+        <Stat icon={Users} label="ผู้สมัครทั้งหมด" value={`${totalEnrollments} รายการ`} />
       </div>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
-        <Link
-          href="/admin/courses"
-          className="rounded-xl border border-slate-200 bg-white p-5 hover:border-indigo-300"
-        >
-          <p className="text-sm text-slate-500">คอร์สทั้งหมด</p>
-          <p className="mt-1 text-2xl font-bold text-slate-900">{courseCount} คอร์ส</p>
-          <p className="mt-1 text-xs text-indigo-600">จัดการคอร์ส →</p>
+        <Link href="/admin/courses" className="card lift p-5">
+          <div className="flex items-center gap-2 text-muted">
+            <BookOpen className="size-5" />
+            <p className="text-sm font-medium">คอร์สทั้งหมด</p>
+          </div>
+          <p className="mt-2 text-2xl font-black text-foreground">{courseCount} คอร์ส</p>
+          <p className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-brand-700">
+            จัดการคอร์ส <ArrowRight className="size-3.5" />
+          </p>
         </Link>
       </div>
     </div>
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof Clock;
+  label: string;
+  value: string;
+}) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
-      <p className="text-sm text-slate-500">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-slate-900">{value}</p>
+    <div className="card p-5">
+      <div className="flex items-center gap-2 text-muted">
+        <Icon className="size-5" />
+        <p className="text-sm font-medium">{label}</p>
+      </div>
+      <p className="mt-2 text-2xl font-black text-foreground">{value}</p>
     </div>
   );
 }

@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { Noto_Sans_Thai } from "next/font/google";
-import "./globals.css";
+import "@/public/styles/index.css";
 import { Navbar } from "@/components/navbar";
+import { ThemeProvider, ThemeScript } from "@/components/theme/theme-provider";
 
+// body face — ใช้ทุกธีม (variable font → ครบทุกน้ำหนักรวม extrabold/black)
 const notoThai = Noto_Sans_Thai({
   variable: "--font-noto-thai",
   subsets: ["thai", "latin"],
-  weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -21,13 +23,31 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="th" className={`${notoThai.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <footer className="border-t border-slate-200 py-6 text-center text-sm text-slate-500">
-          © {new Date().getFullYear()} AI Agent Academy · สอนทุกอย่างเกี่ยวกับ AI
-        </footer>
+    <html
+      lang="th"
+      data-theme="bold"
+      className={`${notoThai.variable} h-full antialiased`}
+      suppressHydrationWarning
+    >
+      <head>
+        <ThemeScript />
+      </head>
+      <body className="flex min-h-full flex-col bg-background text-foreground">
+        <ThemeProvider>
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <footer className="border-t-2 border-border">
+            <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-8 text-sm text-muted sm:flex-row sm:px-6">
+              <div className="flex items-center gap-2 font-extrabold text-foreground">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg border-2 border-border bg-brand-500 text-on-brand">
+                  AI
+                </span>
+                AI Agent Academy
+              </div>
+              <span>© {new Date().getFullYear()} · สอนทุกอย่างเกี่ยวกับ AI</span>
+            </div>
+          </footer>
+        </ThemeProvider>
       </body>
     </html>
   );

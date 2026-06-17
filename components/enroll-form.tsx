@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { enroll } from "@/actions/enrollments";
 import { formatDateTime } from "@/lib/format";
+import { cn } from "@/lib/cn";
 
 type SessionOption = {
   id: string;
@@ -31,7 +32,6 @@ export function EnrollForm({
     setError(null);
     startTransition(async () => {
       const res = await enroll(courseId, type === "scheduled" ? selected : null);
-      // ถ้าสำเร็จ action จะ redirect เอง — ที่นี่จะได้ผลเฉพาะกรณี error
       if (res && !res.ok) setError(res.error);
     });
   }
@@ -41,12 +41,12 @@ export function EnrollForm({
     sessions.filter((s) => s.isOpen && s.seatsLeft > 0).length === 0;
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <div className="card p-5">
       {type === "scheduled" && (
         <>
-          <h3 className="mb-3 font-semibold text-slate-900">เลือกรอบเรียน</h3>
+          <h3 className="mb-3 font-extrabold text-foreground">เลือกรอบเรียน</h3>
           {sessions.length === 0 ? (
-            <p className="text-sm text-slate-500">ยังไม่มีรอบเรียนเปิดรับสมัคร</p>
+            <p className="text-sm text-muted">ยังไม่มีรอบเรียนเปิดรับสมัคร</p>
           ) : (
             <div className="space-y-2">
               {sessions.map((s) => {
@@ -54,13 +54,14 @@ export function EnrollForm({
                 return (
                   <label
                     key={s.id}
-                    className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 ${
+                    className={cn(
+                      "flex cursor-pointer items-start gap-3 rounded-xl border-2 p-3 transition",
                       full
-                        ? "cursor-not-allowed border-slate-200 bg-slate-50 opacity-60"
+                        ? "cursor-not-allowed border-border bg-muted-surface opacity-60"
                         : selected === s.id
-                          ? "border-indigo-500 bg-indigo-50"
-                          : "border-slate-200 hover:border-indigo-300"
-                    }`}
+                          ? "border-brand-500 bg-brand-50"
+                          : "border-border hover:bg-muted-surface",
+                    )}
                   >
                     <input
                       type="radio"
@@ -69,22 +70,16 @@ export function EnrollForm({
                       disabled={full}
                       checked={selected === s.id}
                       onChange={() => setSelected(s.id)}
-                      className="mt-1"
+                      className="mt-1 accent-brand-500"
                     />
                     <div className="flex-1">
-                      <div className="font-medium text-slate-900">
-                        {formatDateTime(s.startAt)}
-                      </div>
-                      {s.location && (
-                        <div className="text-sm text-slate-500">{s.location}</div>
-                      )}
-                      <div className="mt-1 text-sm">
+                      <div className="font-bold text-foreground">{formatDateTime(s.startAt)}</div>
+                      {s.location && <div className="text-sm text-muted">{s.location}</div>}
+                      <div className="mt-1 text-sm font-medium">
                         {full ? (
-                          <span className="font-medium text-red-600">รอบนี้เต็มแล้ว</span>
+                          <span className="text-error">รอบนี้เต็มแล้ว</span>
                         ) : (
-                          <span className="text-emerald-600">
-                            เหลือ {s.seatsLeft} ที่นั่ง
-                          </span>
+                          <span className="text-success">เหลือ {s.seatsLeft} ที่นั่ง</span>
                         )}
                       </div>
                     </div>
@@ -97,23 +92,21 @@ export function EnrollForm({
       )}
 
       {type === "open" && (
-        <p className="mb-3 text-sm text-slate-600">
+        <p className="mb-3 text-sm text-muted">
           คอร์สนี้เรียนได้ทันที สมัครแล้วเริ่มเรียนได้เลยหลังยืนยันการชำระเงิน
         </p>
       )}
 
       {error && (
-        <p className="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+        <p className="mt-3 rounded-xl border-2 border-border bg-error-surface px-3 py-2 text-sm text-error">
+          {error}
+        </p>
       )}
 
       <button
         onClick={handleEnroll}
-        disabled={
-          pending ||
-          noBookableSession ||
-          (type === "scheduled" && !selected)
-        }
-        className="mt-4 w-full rounded-lg bg-indigo-600 px-4 py-3 font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+        disabled={pending || noBookableSession || (type === "scheduled" && !selected)}
+        className="btn btn-primary mt-4 w-full"
       >
         {pending ? "กำลังดำเนินการ..." : noBookableSession ? "เต็มทุกรอบแล้ว" : "สมัครเรียน"}
       </button>

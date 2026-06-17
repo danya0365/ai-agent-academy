@@ -1,39 +1,38 @@
 import Link from "next/link";
+import { Calendar, Zap, ArrowRight } from "lucide-react";
 import type { courses } from "@/db/schema";
 import { formatBaht, COURSE_TYPE_LABELS } from "@/lib/format";
 
 type Course = typeof courses.$inferSelect;
 
+// สีแถบ cover แบบ deterministic จาก id (ใช้ token utilities — ไม่ hardcode hex)
+const COVERS = ["bg-brand-500", "bg-accent-500", "bg-brand-700"];
+function coverClass(id: string): string {
+  let sum = 0;
+  for (let i = 0; i < id.length; i++) sum += id.charCodeAt(i);
+  return COVERS[sum % COVERS.length];
+}
+
 export function CourseCard({ course }: { course: Course }) {
+  const scheduled = course.type === "scheduled";
   return (
-    <Link
-      href={`/courses/${course.slug}`}
-      className="group flex flex-col rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-indigo-300 hover:shadow-md"
-    >
-      <div className="mb-3 flex items-center gap-2">
-        <span
-          className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-            course.type === "scheduled"
-              ? "bg-purple-100 text-purple-700"
-              : "bg-emerald-100 text-emerald-700"
-          }`}
-        >
+    <Link href={`/courses/${course.slug}`} className="card lift group flex flex-col overflow-hidden p-0">
+      <div className={`relative h-24 ${coverClass(course.id)}`}>
+        <span className="badge absolute left-3 top-3 bg-card text-foreground">
+          {scheduled ? <Calendar className="size-3.5" /> : <Zap className="size-3.5" />}
           {COURSE_TYPE_LABELS[course.type]}
         </span>
       </div>
-      <h3 className="mb-2 text-lg font-semibold text-slate-900 group-hover:text-indigo-600">
-        {course.title}
-      </h3>
-      <p className="mb-4 line-clamp-3 flex-1 text-sm text-slate-600">
-        {course.description}
-      </p>
-      <div className="flex items-center justify-between">
-        <span className="text-lg font-bold text-indigo-600">
-          {formatBaht(course.price)}
-        </span>
-        <span className="text-sm font-medium text-indigo-600 group-hover:underline">
-          ดูรายละเอียด →
-        </span>
+      <div className="flex flex-1 flex-col p-5">
+        <h3 className="text-lg font-extrabold leading-snug text-foreground">{course.title}</h3>
+        <p className="mt-2 line-clamp-3 flex-1 text-sm text-muted">{course.description}</p>
+        <div className="mt-4 flex items-center justify-between border-t-2 border-border pt-3">
+          <span className="text-lg font-extrabold text-foreground">{formatBaht(course.price)}</span>
+          <span className="inline-flex items-center gap-1 text-sm font-bold text-brand-700 transition-all group-hover:gap-2">
+            ดูรายละเอียด
+            <ArrowRight className="size-4" />
+          </span>
+        </div>
       </div>
     </Link>
   );

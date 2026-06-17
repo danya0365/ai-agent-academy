@@ -65,45 +65,41 @@ export function SessionManager({
   return (
     <div className="space-y-6">
       {error && (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>
+        <p className="rounded-xl border-2 border-border bg-error-surface px-3 py-2 text-sm text-error">
+          {error}
+        </p>
       )}
 
       {/* รายการรอบเรียน */}
       <div className="space-y-3">
         {sessions.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-slate-500">
-            ยังไม่มีรอบเรียน
-          </p>
+          <p className="card-flat p-6 text-center text-muted">ยังไม่มีรอบเรียน</p>
         ) : (
           sessions.map((s) =>
             editing === s.id ? (
               <form
                 key={s.id}
                 action={(fd) => handleUpdate(s.id, fd)}
-                className="space-y-3 rounded-xl border border-indigo-200 bg-white p-4"
+                className="card space-y-3 border-brand-500 p-4"
               >
                 <SessionFields s={s} />
-                <label className="flex items-center gap-2 text-sm">
+                <label className="flex items-center gap-2 text-sm text-foreground">
                   <input
                     type="checkbox"
                     name="isOpen"
                     defaultChecked={s.isOpen}
-                    className="h-4 w-4"
+                    className="size-4 accent-brand-500"
                   />
                   เปิดรับสมัคร
                 </label>
                 <div className="flex gap-2">
-                  <button
-                    type="submit"
-                    disabled={pending}
-                    className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-                  >
+                  <button type="submit" disabled={pending} className="btn btn-primary text-sm">
                     บันทึก
                   </button>
                   <button
                     type="button"
                     onClick={() => setEditing(null)}
-                    className="rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-600"
+                    className="btn btn-secondary text-sm"
                   >
                     ยกเลิก
                   </button>
@@ -112,26 +108,23 @@ export function SessionManager({
             ) : (
               <div
                 key={s.id}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4"
+                className="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div>
-                  <p className="font-medium text-slate-900">{formatDateTime(s.startAt)}</p>
-                  <p className="text-sm text-slate-500">
+                  <p className="font-bold text-foreground">{formatDateTime(s.startAt)}</p>
+                  <p className="text-sm text-muted">
                     {s.location || "ไม่ระบุสถานที่"} · ที่นั่ง {s.reserved}/{s.capacity}
                     {!s.isOpen && " · ปิดรับสมัคร"}
                   </p>
                 </div>
                 <div className="flex gap-2 text-sm">
-                  <button
-                    onClick={() => setEditing(s.id)}
-                    className="rounded-lg border border-slate-300 px-3 py-1.5 font-medium text-slate-700 hover:bg-slate-50"
-                  >
+                  <button onClick={() => setEditing(s.id)} className="btn btn-secondary text-sm">
                     แก้ไข
                   </button>
                   <button
                     onClick={() => handleDelete(s.id)}
                     disabled={pending}
-                    className="rounded-lg border border-red-300 px-3 py-1.5 font-medium text-red-700 hover:bg-red-50"
+                    className="btn btn-secondary text-sm text-error"
                   >
                     ลบ
                   </button>
@@ -143,17 +136,10 @@ export function SessionManager({
       </div>
 
       {/* เพิ่มรอบใหม่ */}
-      <form
-        action={handleCreate}
-        className="space-y-3 rounded-xl border border-slate-200 bg-white p-4"
-      >
-        <h3 className="font-semibold text-slate-900">เพิ่มรอบเรียนใหม่</h3>
+      <form action={handleCreate} className="card space-y-3 p-4">
+        <h3 className="font-extrabold text-foreground">เพิ่มรอบเรียนใหม่</h3>
         <SessionFields />
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:bg-slate-300"
-        >
+        <button type="submit" disabled={pending} className="btn btn-primary text-sm">
           {pending ? "กำลังบันทึก..." : "เพิ่มรอบเรียน"}
         </button>
       </form>
@@ -164,39 +150,16 @@ export function SessionManager({
 function SessionFields({ s }: { s?: SessionRow }) {
   return (
     <div className="grid gap-3 sm:grid-cols-2">
-      <label className="block">
-        <span className="mb-1 block text-sm font-medium text-slate-700">เริ่ม</span>
-        <input
-          type="datetime-local"
-          name="startAt"
-          required
-          defaultValue={s?.startAtLocal}
-          className="input"
-        />
-      </label>
-      <label className="block">
-        <span className="mb-1 block text-sm font-medium text-slate-700">สิ้นสุด</span>
-        <input
-          type="datetime-local"
-          name="endAt"
-          required
-          defaultValue={s?.endAtLocal}
-          className="input"
-        />
-      </label>
-      <label className="block">
-        <span className="mb-1 block text-sm font-medium text-slate-700">จำนวนที่นั่ง</span>
-        <input
-          type="number"
-          name="capacity"
-          min={1}
-          required
-          defaultValue={s?.capacity ?? 20}
-          className="input"
-        />
-      </label>
-      <label className="block">
-        <span className="mb-1 block text-sm font-medium text-slate-700">สถานที่</span>
+      <Label text="เริ่ม">
+        <input type="datetime-local" name="startAt" required defaultValue={s?.startAtLocal} className="input" />
+      </Label>
+      <Label text="สิ้นสุด">
+        <input type="datetime-local" name="endAt" required defaultValue={s?.endAtLocal} className="input" />
+      </Label>
+      <Label text="จำนวนที่นั่ง">
+        <input type="number" name="capacity" min={1} required defaultValue={s?.capacity ?? 20} className="input" />
+      </Label>
+      <Label text="สถานที่">
         <input
           type="text"
           name="location"
@@ -204,7 +167,16 @@ function SessionFields({ s }: { s?: SessionRow }) {
           defaultValue={s?.location ?? ""}
           className="input"
         />
-      </label>
+      </Label>
     </div>
+  );
+}
+
+function Label({ text, children }: { text: string; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-sm font-bold text-foreground">{text}</span>
+      {children}
+    </label>
   );
 }

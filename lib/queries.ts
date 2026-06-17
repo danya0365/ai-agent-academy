@@ -56,6 +56,16 @@ export async function getPublishedCourses() {
   return db.select().from(courses).where(eq(courses.isPublished, true)).all();
 }
 
+/** จำนวนผู้เรียนจริง = distinct user ที่มี enrollment ยืนยันแล้ว (สำหรับสถิติหน้าแรก) */
+export async function getLearnerCount(): Promise<number> {
+  const row = await db
+    .select({ n: sql<number>`count(distinct ${enrollments.userId})` })
+    .from(enrollments)
+    .where(eq(enrollments.status, "confirmed"))
+    .get();
+  return Number(row?.n ?? 0);
+}
+
 /** ดึงคอร์สตาม slug พร้อมรอบเรียนและที่นั่งเหลือ */
 export async function getCourseBySlug(slug: string) {
   const course = await db.select().from(courses).where(eq(courses.slug, slug)).get();
