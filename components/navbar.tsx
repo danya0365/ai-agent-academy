@@ -35,6 +35,23 @@ export async function Navbar() {
                   แอดมิน
                 </Link>
               )}
+              {/* ผู้ใช้ปัจจุบัน — ให้รู้ว่ากำลังล็อกอินเป็นใคร */}
+              <span
+                className="flex items-center gap-2 px-2 py-1"
+                title={user.email}
+              >
+                <span className="hidden text-slate-400 sm:inline">{user.email}</span>
+                <span className="font-medium text-slate-800">{user.name}</span>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                    user.role === "admin"
+                      ? "bg-indigo-100 text-indigo-700"
+                      : "bg-slate-100 text-slate-600"
+                  }`}
+                >
+                  {user.role === "admin" ? "แอดมิน" : "ลูกค้า"}
+                </span>
+              </span>
               <SignOutButton />
             </>
           ) : (

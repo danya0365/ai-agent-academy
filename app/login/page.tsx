@@ -4,6 +4,7 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "@/lib/auth-client";
+import { DevQuickLogin } from "@/components/dev-quick-login";
 
 function LoginForm() {
   const router = useRouter();
@@ -75,6 +76,8 @@ function LoginForm() {
           สมัครสมาชิก
         </Link>
       </p>
+
+      <DevQuickLogin next={next} />
     </div>
   );
 }
