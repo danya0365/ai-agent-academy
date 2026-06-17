@@ -83,6 +83,31 @@ export default async function AdminEnrollmentsPage({
                       เหตุผลที่ปฏิเสธ: {enrollment.rejectReason}
                     </p>
                   )}
+                  {enrollment.slipVerifyStatus && (
+                    <p className="mt-1 text-sm">
+                      <span
+                        className={`rounded px-1.5 py-0.5 text-xs font-medium ${
+                          enrollment.slipVerifyStatus === "verified"
+                            ? "bg-green-100 text-green-700"
+                            : enrollment.slipVerifyStatus === "failed"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-slate-100 text-slate-600"
+                        }`}
+                      >
+                        ตรวจอัตโนมัติ:{" "}
+                        {enrollment.slipVerifyStatus === "verified"
+                          ? "ผ่าน"
+                          : enrollment.slipVerifyStatus === "failed"
+                            ? "ไม่ผ่าน"
+                            : enrollment.slipVerifyStatus === "unconfigured"
+                              ? "ยังไม่เปิดใช้"
+                              : "ต้องตรวจมือ"}
+                      </span>
+                      {enrollment.verifyNote && (
+                        <span className="ml-2 text-slate-500">{enrollment.verifyNote}</span>
+                      )}
+                    </p>
+                  )}
                 </div>
                 <span
                   className={`rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_COLORS[enrollment.status]}`}

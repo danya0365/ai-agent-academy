@@ -1,4 +1,10 @@
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
+import {
+  sqliteTable,
+  text,
+  integer,
+  index,
+  uniqueIndex,
+} from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 
 /* ────────────────────────────────────────────────────────────
@@ -111,6 +117,11 @@ export type EnrollmentStatus =
   | "confirmed"
   | "rejected";
 
+// ผลการตรวจสลิปอัตโนมัติ:
+//  verified = ผ่านและอนุมัติอัตโนมัติ, failed = ตรวจแล้วไม่ผ่านเกณฑ์,
+//  manual = ต้องตรวจมือ, unconfigured = ยังไม่ตั้งค่า provider
+export type SlipVerifyStatus = "verified" | "failed" | "manual" | "unconfigured";
+
 export const enrollments = sqliteTable(
   "enrollments",
   {
@@ -131,6 +142,10 @@ export const enrollments = sqliteTable(
     slipUploadedAt: integer("slip_uploaded_at", { mode: "timestamp" }),
     reviewedAt: integer("reviewed_at", { mode: "timestamp" }),
     rejectReason: text("reject_reason"),
+    // ผลการตรวจสลิปอัตโนมัติ
+    slipTransRef: text("slip_trans_ref"), // เลขอ้างอิงรายการจากสลิป (กันสลิปซ้ำ)
+    slipVerifyStatus: text("slip_verify_status").$type<SlipVerifyStatus>(),
+    verifyNote: text("verify_note"), // เหตุผล/รายละเอียดให้แอดมินเห็น
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .$defaultFn(() => new Date()),
@@ -138,6 +153,8 @@ export const enrollments = sqliteTable(
   (t) => [
     index("enrollments_user_course_idx").on(t.userId, t.courseId),
     index("enrollments_session_status_idx").on(t.sessionId, t.status),
+    // กันสลิปซ้ำ — SQLite ยอมให้ค่า null ซ้ำกันได้
+    uniqueIndex("enrollments_slip_trans_ref_unique").on(t.slipTransRef),
   ],
 );
 

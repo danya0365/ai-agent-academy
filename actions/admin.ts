@@ -1,11 +1,12 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { courses, courseSessions, enrollments } from "@/db/schema";
 import { requireAdmin } from "@/lib/session";
+import { confirmEnrollment } from "@/lib/enrollment-confirm";
 import type { CourseType } from "@/db/schema";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
@@ -26,47 +27,8 @@ function slugify(input: string): string {
 export async function approveEnrollment(id: string): Promise<ActionResult> {
   await requireAdmin();
 
-  try {
-    await db.transaction(async (tx) => {
-      const e = await tx.select().from(enrollments).where(eq(enrollments.id, id)).get();
-      if (!e) throw new Error("ไม่พบรายการลงทะเบียน");
-      if (e.status !== "slip_uploaded") {
-        throw new Error("รายการนี้ไม่อยู่ในสถานะรอตรวจสอบ");
-      }
-
-      // hard seat check สำหรับคอร์สที่มีรอบเรียน
-      if (e.sessionId) {
-        const session = await tx
-          .select()
-          .from(courseSessions)
-          .where(eq(courseSessions.id, e.sessionId))
-          .get();
-        if (session) {
-          const confirmedRows = await tx
-            .select()
-            .from(enrollments)
-            .where(
-              and(
-                eq(enrollments.sessionId, e.sessionId),
-                eq(enrollments.status, "confirmed"),
-              ),
-            )
-            .all();
-          if (confirmedRows.length >= session.capacity) {
-            throw new Error("รอบนี้ที่นั่งเต็มแล้ว ไม่สามารถยืนยันได้");
-          }
-        }
-      }
-
-      await tx
-        .update(enrollments)
-        .set({ status: "confirmed", reviewedAt: new Date(), rejectReason: null })
-        .where(eq(enrollments.id, id))
-        .run();
-    });
-  } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : "เกิดข้อผิดพลาด" };
-  }
+  const result = await confirmEnrollment(id);
+  if (!result.ok) return result;
 
   revalidatePath("/admin/enrollments");
   revalidatePath("/admin");

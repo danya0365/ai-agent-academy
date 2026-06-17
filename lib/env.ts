@@ -4,6 +4,11 @@
  */
 import { config } from "dotenv";
 
+// ENV_FILE override — โหลดก่อนเพื่อให้ได้ precedence (dotenv ไม่ทับ key ที่ถูกตั้งแล้ว)
+// ใช้ยิงคำสั่งไปที่ prod จากเครื่อง เช่น ENV_FILE=.env.local.production
+const envFile = process.env.ENV_FILE;
+if (envFile) config({ path: envFile });
+
 config({ path: ".env.local" });
 config({ path: ".env" });
 
