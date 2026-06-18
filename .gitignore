@@ -37,6 +37,10 @@ yarn-error.log*
 # local database (sqlite/libsql)
 local.db*
 
+# migration self-test scratch (db/selftest-migrate.ts)
+.tmp-*.db*
+/.tmp-mig/
+
 # uploaded payment slips
 /uploads/
 

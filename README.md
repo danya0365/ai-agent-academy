@@ -104,6 +104,8 @@ LINE_ADMIN_TARGET_ID=<userId หรือ groupId ปลายทาง>
 | `npm run dev` | รันเซิร์ฟเวอร์พัฒนา |
 | `npm run build` / `npm start` | build (มี auto-migrate ตอน production) / รัน production |
 | `npm run db:generate` | สร้างไฟล์ migration จาก schema (หลังแก้ `db/schema.ts`) |
+| `npm run db:check` | สแกน migration ใหม่สุดหา SQL ที่ไม่ปลอดภัยต่อ zero-downtime (ก่อน commit) |
+| `npm run db:selftest` | จำลอง migration pipeline แบบ Vercel กับ DB ชั่วคราว (พิสูจน์ว่าใช้ได้) |
 | `npm run db:migrate` | apply migration ลง DB local (`.env.local`) |
 | `npm run db:migrate:prod` | apply migration ลง Turso (ใช้ `.env.local.production`) |
 | `npm run db:baseline:prod` | ปั๊ม Turso ที่มีตารางแล้วว่า migration apply แล้ว (ครั้งเดียว, ไม่แตะข้อมูล) |
@@ -146,9 +148,11 @@ LINE_ADMIN_TARGET_ID=<userId หรือ groupId ปลายทาง>
 
 ใช้ migration files เป็น source of truth (commit โฟลเดอร์ `drizzle/` ลง git)
 
-**แก้สคีมา:** แก้ `db/schema.ts` → `npm run db:generate` (ได้ไฟล์ `drizzle/NNNN_*.sql`) → commit → `npm run db:migrate` (local)
+**แก้สคีมา:** แก้ `db/schema.ts` → `npm run db:generate` (ได้ไฟล์ `drizzle/NNNN_*.sql`) → `npm run db:check` → commit → `npm run db:migrate` (local)
 
 **Auto-migrate บน Vercel:** build command คือ `tsx db/migrate.ts && next build` — `db/migrate.ts` จะรัน migration **เฉพาะตอน production deploy** (`VERCEL_ENV=production`); preview/local build จะข้าม (ไม่แตะ DB)
+
+**ความปลอดภัย/Zero-downtime:** `db/migrate.ts` มี guard บล็อก migration อันตราย (DROP/RENAME/ADD NOT NULL/UNIQUE) ตอน build — destructive ที่ตั้งใจทำต้องตั้ง `ALLOW_DESTRUCTIVE_MIGRATION=1` 👉 อ่านวิธีอัปเดตแบบไม่ล่มใน **[MIGRATIONS.md](./MIGRATIONS.md)**
 
 ## ขึ้น Vercel (ครั้งแรก)
 
