@@ -144,3 +144,24 @@ for (;;) {
 | `npm run db:migrate` | apply migration ลง DB local |
 | `npm run db:migrate:prod` | apply migration ลง Turso เอง (ใช้ `.env.local.production`) |
 | `npm run db:baseline:prod` | ปั๊ม Turso ที่มีตารางแล้วว่า migration apply แล้ว (ครั้งเดียว) |
+
+---
+
+## 11. Backup & DR (สำรอง/กู้คืน)
+
+เพราะ migration **ไม่มี auto-rollback** (ข้อ 8) — backup คือเซฟตี้เน็ตจริง โดยเฉพาะก่อน destructive migration
+
+**ฐานข้อมูล (Turso):**
+- Turso มี managed backup (point-in-time) อยู่แล้ว — แต่ควร snapshot เองเป็นระยะด้วย
+- snapshot ก่อน migration เสี่ยง / รายวัน:
+  ```bash
+  turso db shell <db-name> ".dump" > backup-$(date +%F).sql
+  ```
+- กู้คืน: สร้าง DB ใหม่จาก dump แล้วชี้ `DATABASE_URL` ไปตัวใหม่ → redeploy
+
+**ไฟล์สลิป (Cloudflare R2):**
+- เปิด **bucket versioning** หรือ lifecycle rule กันไฟล์หายตอนลบ/เขียนทับพลาด
+- สลิปอ้างจาก `enrollments.slipPath` ใน DB — สำรอง DB + R2 คู่กันเสมอ
+
+**สรุป:** RPO ~24 ชม. (ถ้า snapshot รายวัน) · RTO ระดับนาที (ชี้ env ใหม่ + redeploy) ·
+ก่อน destructive migration ที่ตั้ง `ALLOW_DESTRUCTIVE_MIGRATION=1` → snapshot ก่อนทุกครั้ง

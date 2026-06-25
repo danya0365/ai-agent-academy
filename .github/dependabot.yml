@@ -1,0 +1,17 @@
+version: 2
+updates:
+  # npm dependencies — รวมเป็น PR เดียวต่อสัปดาห์ ลด noise
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      npm-dependencies:
+        patterns: ["*"]
+
+  # GitHub Actions versions (เช่น actions/checkout)
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly

@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Migration safety check
+        run: npm run db:check
+
+      - name: Migration pipeline self-test
+        run: npm run db:selftest
+
+      - name: Build
+        run: npm run build
+        env:
+          # ค่า dummy สำหรับ build เท่านั้น (หน้าเป็น force-dynamic ไม่แตะ DB ตอน build)
+          DATABASE_URL: "file:./local.db"
+          BETTER_AUTH_SECRET: "ci-dummy-secret-not-used-at-runtime"
+          NEXT_TELEMETRY_DISABLED: "1"
