@@ -13,6 +13,26 @@ const getCommitSha = () => {
   }
 };
 
+// security headers ทุก response — จงใจ conservative กับ CSP (แค่ frame-ancestors/
+// object-src/base-uri) เพื่อไม่ให้ inline ThemeScript / next/font พัง การล็อก
+// script-src เต็มรูปต้องทำ nonce pipeline (ค่อยทำทีหลัง report-only ก่อน)
+// HSTS มีผลเฉพาะบน HTTPS (prod) — บน http dev ไม่มีผล ไม่เสียหาย
+// แอปนี้ไม่ใช้ camera/mic/geolocation → ปิดทั้งหมด (slip upload ใช้ file input ไม่ต้องขอ camera)
+const SECURITY_HEADERS = [
+  {
+    key: "Strict-Transport-Security",
+    value: "max-age=63072000; includeSubDomains; preload",
+  },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+  {
+    key: "Content-Security-Policy",
+    value: "frame-ancestors 'self'; object-src 'none'; base-uri 'self'",
+  },
+];
+
 const nextConfig: NextConfig = {
   env: {
     // แหล่งเดียวของเลขเวอร์ชั่น = field "version" ใน package.json
@@ -25,6 +45,9 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "5mb",
     },
+  },
+  async headers() {
+    return [{ source: "/:path*", headers: SECURITY_HEADERS }];
   },
 };
 

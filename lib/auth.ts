@@ -16,6 +16,18 @@ export const auth = betterAuth({
     enabled: true,
     // เฟส 1 ไม่ส่งอีเมลยืนยัน
     requireEmailVerification: false,
+    minPasswordLength: 10, // ↑ จาก default 8 (เทียบ easy-stamp ที่ 10)
+  },
+  // จำกัด origin สำหรับ CSRF/origin check ให้เหลือโดเมนจริง
+  trustedOrigins: [process.env.BETTER_AUTH_URL || "http://localhost:3000"],
+  // rate limit กัน brute-force — เปิดบน production (default ของ better-auth ก็เปิดบน prod)
+  // built-in special rules: /sign-in, /sign-up, /change-password = 3 ครั้ง/10 วิ;
+  // request-password-reset/forget-password = 3 ครั้ง/60 วิ
+  // storage "memory" = per-instance บน serverless; ถ้าต้องการ cross-instance จริงจัง
+  // อัปเกรดเป็น storage "database" (ต้องเพิ่มตาราง rateLimit ใน schema)
+  rateLimit: {
+    enabled: process.env.NODE_ENV === "production",
+    storage: "memory",
   },
   user: {
     additionalFields: {
