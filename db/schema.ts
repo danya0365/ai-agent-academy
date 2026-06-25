@@ -69,6 +69,23 @@ export const verification = sqliteTable("verification", {
   updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
 });
 
+/**
+ * ตาราง rate limit ของ Better Auth (storage: "database") — ให้ rate limit ใช้ได้
+ * ข้าม serverless instance บน Vercel (memory ใช้ร่วมกันไม่ได้)
+ * property keys ต้องตรงกับ field ของ better-auth: id / key / count / lastRequest
+ * index บน key เป็นแบบ "ไม่ unique" จงใจ — เพื่อให้ migration เป็น additive ล้วน (ผ่าน guard)
+ */
+export const rateLimit = sqliteTable(
+  "rate_limit",
+  {
+    id: text("id").primaryKey(),
+    key: text("key"),
+    count: integer("count"),
+    lastRequest: integer("last_request"),
+  },
+  (t) => [index("rate_limit_key_idx").on(t.key)],
+);
+
 /* ────────────────────────────────────────────────────────────
  * ตารางของแอป: คอร์ส / รอบเรียน / การลงทะเบียน
  * ──────────────────────────────────────────────────────────── */

@@ -10,6 +10,7 @@ export const auth = betterAuth({
       session: schema.session,
       account: schema.account,
       verification: schema.verification,
+      rateLimit: schema.rateLimit,
     },
   }),
   emailAndPassword: {
@@ -23,11 +24,11 @@ export const auth = betterAuth({
   // rate limit กัน brute-force — เปิดบน production (default ของ better-auth ก็เปิดบน prod)
   // built-in special rules: /sign-in, /sign-up, /change-password = 3 ครั้ง/10 วิ;
   // request-password-reset/forget-password = 3 ครั้ง/60 วิ
-  // storage "memory" = per-instance บน serverless; ถ้าต้องการ cross-instance จริงจัง
-  // อัปเกรดเป็น storage "database" (ต้องเพิ่มตาราง rateLimit ใน schema)
+  // storage "database" = ใช้ตาราง rate_limit ร่วมกันได้ข้าม serverless instance บน Vercel
+  // (memory ใช้ร่วมกันไม่ได้) — ตาราง rateLimit อยู่ใน db/schema.ts
   rateLimit: {
     enabled: process.env.NODE_ENV === "production",
-    storage: "memory",
+    storage: "database",
   },
   user: {
     additionalFields: {

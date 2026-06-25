@@ -132,23 +132,30 @@ async function main() {
   const dInit = runMigrate({ DATABASE_URL: "file:.tmp-d.db", RUN_MIGRATE: "1" });
   check("d0 apply 0000 สำเร็จ", dInit.code === 0, dInit.out);
 
-  // สร้างโฟลเดอร์ migration ปลอม: 0000 (เดิม) + 0001_drop_courses (ใหม่กว่า → pending)
+  // สร้างโฟลเดอร์ migration ปลอม: copy ทุก migration จริง + เพิ่ม drop_courses ต่อท้าย
+  // (when ใหม่กว่าทุกตัว → เป็น pending ตัวเดียว → guard ต้องบล็อก)
   mkdirSync(path.join(TMP_MIG, "meta"), { recursive: true });
   const realJournal = JSON.parse(readFileSync("drizzle/meta/_journal.json", "utf8"));
-  const base = realJournal.entries[0];
-  copyFileSync(`drizzle/${base.tag}.sql`, path.join(TMP_MIG, `${base.tag}.sql`));
+  for (const e of realJournal.entries) {
+    copyFileSync(`drizzle/${e.tag}.sql`, path.join(TMP_MIG, `${e.tag}.sql`));
+  }
+  const maxWhen = Math.max(...realJournal.entries.map((e: { when: number }) => e.when));
   const dropEntry = {
-    idx: 1,
-    version: base.version,
-    when: base.when + 1000,
-    tag: "0001_drop_courses",
+    idx: realJournal.entries.length,
+    version: realJournal.entries[0].version,
+    when: maxWhen + 1000,
+    tag: "9999_drop_courses",
     breakpoints: true,
   };
-  writeFileSync(path.join(TMP_MIG, "0001_drop_courses.sql"), "DROP TABLE `courses`;");
+  writeFileSync(path.join(TMP_MIG, "9999_drop_courses.sql"), "DROP TABLE `courses`;");
   writeFileSync(
     path.join(TMP_MIG, "meta", "_journal.json"),
     JSON.stringify(
-      { version: realJournal.version, dialect: realJournal.dialect, entries: [base, dropEntry] },
+      {
+        version: realJournal.version,
+        dialect: realJournal.dialect,
+        entries: [...realJournal.entries, dropEntry],
+      },
       null,
       2,
     ),
