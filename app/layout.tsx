@@ -3,6 +3,7 @@ import { Noto_Sans_Thai } from "next/font/google";
 import "@/public/styles/index.css";
 import { Navbar } from "@/components/navbar";
 import { ThemeProvider, ThemeScript } from "@/components/theme/theme-provider";
+import { AppVersion } from "@/components/app-version";
 
 // body face — ใช้ทุกธีม (variable font → ครบทุกน้ำหนักรวม extrabold/black)
 const notoThai = Noto_Sans_Thai({
@@ -44,7 +45,10 @@ export default function RootLayout({
                 </span>
                 AI Agent Academy
               </div>
-              <span>© {new Date().getFullYear()} · สอนทุกอย่างเกี่ยวกับ AI</span>
+              <div className="flex flex-col items-center gap-1 sm:items-end">
+                <span>© {new Date().getFullYear()} · สอนทุกอย่างเกี่ยวกับ AI</span>
+                <AppVersion />
+              </div>
             </div>
           </footer>
         </ThemeProvider>
