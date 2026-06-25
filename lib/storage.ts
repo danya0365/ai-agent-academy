@@ -32,6 +32,33 @@ export const MAX_SLIP_BYTES = 5 * 1024 * 1024; // 5MB
 
 export class SlipValidationError extends Error {}
 
+/**
+ * ตรวจ "magic bytes" ของไฟล์จริง — กันไฟล์ปลอมนามสกุล/MIME (เช่น .html/.js/.svg
+ * ที่ตั้งชื่อเป็น .png) เพราะ file.type/นามสกุลเชื่อไม่ได้ (client ปลอมได้)
+ * คืนนามสกุลตามชนิดจริง หรือ null ถ้าไม่ใช่รูปที่อนุญาต
+ */
+function sniffImageExt(buf: Buffer): "jpg" | "png" | "webp" | null {
+  if (buf.length >= 3 && buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) {
+    return "jpg";
+  }
+  if (
+    buf.length >= 8 &&
+    buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47 &&
+    buf[4] === 0x0d && buf[5] === 0x0a && buf[6] === 0x1a && buf[7] === 0x0a
+  ) {
+    return "png";
+  }
+  // WEBP = container "RIFF"...."WEBP"
+  if (
+    buf.length >= 12 &&
+    buf.toString("ascii", 0, 4) === "RIFF" &&
+    buf.toString("ascii", 8, 12) === "WEBP"
+  ) {
+    return "webp";
+  }
+  return null;
+}
+
 function contentTypeFromKey(key: string): string {
   const ext = key.split(".").pop()?.toLowerCase() || "";
   return ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : "image/jpeg";
@@ -79,16 +106,24 @@ function r2Client(cfg: R2Config): S3Client {
 
 /** บันทึกสลิป คืนค่าเป็น "key" (ชื่อไฟล์ล้วน) สำหรับเก็บลง DB */
 export async function saveSlip(file: File): Promise<string> {
-  const ext = ALLOWED_MIME[file.type];
-  if (!ext) {
+  if (!ALLOWED_MIME[file.type]) {
     throw new SlipValidationError("รองรับเฉพาะรูปภาพ JPG, PNG หรือ WEBP");
   }
   if (file.size > MAX_SLIP_BYTES) {
     throw new SlipValidationError("ไฟล์ใหญ่เกินไป (จำกัด 5MB)");
   }
 
-  const key = `${randomUUID()}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
+
+  // magic-byte: เนื้อไฟล์จริงต้องเป็นรูปที่อนุญาต (ไม่เชื่อ MIME/นามสกุลจาก client)
+  const ext = sniffImageExt(buffer);
+  if (!ext) {
+    throw new SlipValidationError("ไฟล์ไม่ใช่รูปภาพที่ถูกต้อง (JPG, PNG หรือ WEBP)");
+  }
+  const contentType =
+    ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : "image/jpeg";
+
+  const key = `${randomUUID()}.${ext}`;
 
   const cfg = getR2Config();
   if (cfg) {
@@ -97,7 +132,7 @@ export async function saveSlip(file: File): Promise<string> {
         Bucket: cfg.bucket,
         Key: R2_PREFIX + key,
         Body: buffer,
-        ContentType: file.type,
+        ContentType: contentType,
       }),
     );
   } else {
