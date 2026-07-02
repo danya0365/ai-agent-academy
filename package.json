@@ -31,31 +31,31 @@
     "db:seed:prod": "ENV_FILE=.env.local.production tsx db/seed/index.ts initial starter"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1070.0",
-    "@libsql/client": "^0.17.3",
-    "better-auth": "^1.6.18",
+    "@aws-sdk/client-s3": "^3.1078.0",
+    "@libsql/client": "^0.17.4",
+    "better-auth": "^1.6.23",
     "browser-image-compression": "^2.0.2",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
-    "lucide-react": "^1.20.0",
-    "next": "16.2.9",
+    "lucide-react": "^1.23.0",
+    "next": "16.2.10",
     "promptpay-qr": "^0.5.0",
     "qrcode": "^1.5.4",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
     "zustand": "^5.0.14"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^26",
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "drizzle-kit": "^0.31.10",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.9",
+    "eslint": "^10",
+    "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
     "tsx": "^4.22.4",
-    "typescript": "^5"
+    "typescript": "^6"
   }
 }
