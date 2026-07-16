@@ -95,8 +95,24 @@ function RegisterForm() {
         onClick={async () => {
           setLoading(true);
           setError(null);
-          const { error } = await signIn.social({ provider: "google", callbackURL: next });
-          if (error) {
+          try {
+            const res = await fetch(`/api/auth/sign-in/social`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                provider: "google",
+                callbackURL: next,
+                disableRedirect: true,
+              }),
+            });
+            const data = await res.json();
+            if (data.url) {
+              window.location.href = data.url;
+            } else {
+              throw new Error("no redirect URL");
+            }
+          } catch (e) {
+            console.error("Google sign-in error:", e);
             setError("ไม่สามารถเชื่อมต่อกับ Google ได้ กรุณาลองใหม่");
             setLoading(false);
           }
