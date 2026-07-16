@@ -25,6 +25,11 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
     },
   },
+  account: {
+    accountLinking: {
+      trustedProviders: ["google"],
+    },
+  },
   // จำกัด origin สำหรับ CSRF/origin check ให้เหลือโดเมนจริง
   trustedOrigins: [process.env.BETTER_AUTH_URL || "http://localhost:3000"],
   // rate limit กัน brute-force — เปิดบน production (default ของ better-auth ก็เปิดบน prod)
