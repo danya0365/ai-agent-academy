@@ -29,14 +29,15 @@ export default async function HomePage() {
         <div className="pointer-events-none absolute bottom-8 left-6 hidden h-16 w-16 rounded-full border-2 border-border bg-brand-400 sm:block" />
         <div className="relative mx-auto max-w-4xl px-4 py-16 text-center sm:px-6 sm:py-24">
           <span className="badge bg-card text-foreground">
-            <Sparkles className="size-3.5" /> เรียน AI กับผู้สอนตัวจริง
+            <Sparkles className="size-3.5" /> แพลตฟอร์มเรียน AI ออนไลน์
           </span>
           <h1 className="mx-auto mt-6 max-w-3xl text-4xl font-black leading-tight tracking-tight text-foreground sm:text-6xl">
+            <span className="text-brand-500">AI Agent Academy</span><br />
             สอนทุกอย่างเกี่ยวกับ AI
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-lg text-muted">
-            ตั้งแต่การใช้ AI เบื้องต้น ทำงานให้เร็วขึ้น ไปจนถึงเขียนซอฟต์แวร์ด้วย AI
-            เรียนออนไลน์ สมัครแล้วเริ่มได้ทันที
+            แพลตฟอร์มเรียน AI ออนไลน์ — ตั้งแต่การใช้ AI เบื้องต้น ทำงานให้เร็วขึ้น
+            ไปจนถึงเขียนซอฟต์แวร์ด้วยคู่มือ AI สมัครแล้วเริ่มได้ทันที
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
             <Link href="#courses" className="btn btn-primary">

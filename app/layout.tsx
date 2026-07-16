@@ -28,6 +28,11 @@ export const metadata: Metadata = {
     apple: [{ url: "/favicon/apple-touch-icon.png" }],
   },
   manifest: "/favicon/site.webmanifest",
+  // ยืนยันความเป็นเจ้าของโดเมนกับ Google Search Console (สำหรับ OAuth brand verification)
+  // ตั้งค่า GOOGLE_SITE_VERIFICATION = code ที่ Search Console ให้ (เว้นว่าง = ไม่ render)
+  verification: process.env.GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+    : undefined,
 };
 
 export default function RootLayout({
@@ -44,6 +49,28 @@ export default function RootLayout({
     >
       <head>
         <ThemeScript />
+<script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Course",
+              name: "AI Agent Academy",
+              description:
+                "แพลตฟอร์มเรียน AI ออนไลน์ตั้งแต่พื้นฐานจนถึงการเขียนซอฟต์แวร์ — AI Agent Academy",
+              provider: {
+                "@type": "Organization",
+                name: "AI Agent Academy",
+              },
+              offers: {
+                "@type": "CategoryCodeSet",
+                name: "AI Courses",
+              },
+              url: "https://ai-agent-academy.easy-ai.online",
+              inLanguage: "th",
+            }),
+          }}
+        />
       </head>
       <body className="flex min-h-full flex-col bg-background text-foreground">
         <ThemeProvider>
