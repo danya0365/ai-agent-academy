@@ -59,6 +59,10 @@ export default function RootLayout({
               </div>
               <div className="flex flex-col items-center gap-1 sm:items-end">
                 <span>© {new Date().getFullYear()} · สอนทุกอย่างเกี่ยวกับ AI</span>
+                <div className="flex gap-3 text-xs">
+                  <a href="/terms" className="font-bold text-brand-700 hover:underline">ข้อกำหนด</a>
+                  <a href="/privacy" className="font-bold text-brand-700 hover:underline">นโยบายความเป็นส่วนตัว</a>
+                </div>
                 <AppVersion />
               </div>
             </div>
