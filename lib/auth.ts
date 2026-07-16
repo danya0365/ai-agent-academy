@@ -1,6 +1,6 @@
+import { db, schema } from "@/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db, schema } from "@/db";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -17,7 +17,13 @@ export const auth = betterAuth({
     enabled: true,
     // เฟส 1 ไม่ส่งอีเมลยืนยัน
     requireEmailVerification: false,
-    minPasswordLength: 10, // ↑ จาก default 8 (เทียบ easy-stamp ที่ 10)
+    minPasswordLength: 8, // ↑ จาก default 8 (เทียบ easy-stamp ที่ 10)
+  },
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+    },
   },
   // จำกัด origin สำหรับ CSRF/origin check ให้เหลือโดเมนจริง
   trustedOrigins: [process.env.BETTER_AUTH_URL || "http://localhost:3000"],

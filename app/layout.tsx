@@ -13,9 +13,21 @@ const notoThai = Noto_Sans_Thai({
 });
 
 export const metadata: Metadata = {
-  title: "AI Agent Academy — สอนทุกอย่างเกี่ยวกับ AI",
+  title: {
+    template: "%s — AI Agent Academy",
+    default: "AI Agent Academy — สอนทุกอย่างเกี่ยวกับ AI",
+  },
   description:
     "คอร์สเรียน AI ตั้งแต่พื้นฐานจนถึงการเขียนซอฟต์แวร์ด้วย AI สมัครเรียนออนไลน์ได้ทันที",
+  icons: {
+    icon: [
+      { url: "/favicon/favicon.ico", sizes: "any" },
+      { url: "/favicon/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: [{ url: "/favicon/apple-touch-icon.png" }],
+  },
+  manifest: "/favicon/site.webmanifest",
 };
 
 export default function RootLayout({
