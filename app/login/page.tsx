@@ -79,7 +79,13 @@ function LoginForm() {
         type="button"
         onClick={async () => {
           setLoading(true);
-          await signIn.social({ provider: "google", callbackURL: next });
+          setError(null);
+          const { error } = await signIn.social({ provider: "google", callbackURL: next });
+          if (error) {
+            console.error("Google sign-in error:", error);
+            setError("ไม่สามารถเชื่อมต่อกับ Google ได้ กรุณาลองใหม่");
+            setLoading(false);
+          }
         }}
         disabled={loading}
         className="btn btn-secondary flex w-full items-center justify-center gap-2"
