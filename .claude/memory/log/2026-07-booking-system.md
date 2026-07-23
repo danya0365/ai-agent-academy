@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: project
   originSessionId: f985471c-e9dd-4324-ab5e-10dd72b1b811
-  modified: 2026-07-23T14:11:01.711Z
+  modified: 2026-07-23T14:25:55.456Z
 ---
 
 # ระบบจองคิว 1-on-1 (course type 'booking') — 2026-07-23
@@ -44,8 +44,8 @@ metadata:
 - tsc clean · next build ผ่าน · migration guard = ปลอดภัย (additive)
 
 ## ค้าง / ถัดไป
-- **ยังไม่ commit** (ทำบน main — ควร branch ก่อน push)
-- **ยังไม่เทส browser จริง** (จอง/reject/re-upload/confirm end-to-end)
+- **commit + push แล้ว** (`ec0f2b5` บน main — รวม booking system + course landing redesign + booking day dropdown)
+- **ยังไม่เทส browser จริง** (จอง/reject/re-upload/confirm end-to-end) — verify ด้วย curl + build เท่านั้น
 - LOW ที่รับไว้ (ยังไม่แก้): dedup enrollment ไม่ atomic (เหมือน `enroll()` เดิม) · orphan slip-file กรณี claim แพ้หลัง saveSlip (storage ไม่มี delete API) · held-lock ข้าม re-validate (เจ้าของ lock จ่ายเลยเวลาได้)
 - Admin ต้องทำหลัง deploy: ตั้งเวลาทำการ `/admin/booking-hours` + สร้างคอร์ส type "จองเวลาเอง" ใส่ duration
 
