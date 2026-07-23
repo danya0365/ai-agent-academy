@@ -65,6 +65,13 @@ export function MobileNav({ user }: { user: NavUser }) {
             >
               ของที่แนะนำ
             </Link>
+            <Link
+              href="/community"
+              onClick={close}
+              className="rounded-xl px-3 py-2 text-sm font-medium text-foreground hover:bg-muted-surface"
+            >
+              ถาม-ตอบ
+            </Link>
             {user && (
               <Link
                 href="/my-courses"

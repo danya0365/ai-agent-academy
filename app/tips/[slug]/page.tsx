@@ -7,6 +7,7 @@ import { TIP_COMPONENTS } from "@/components/tips/registry";
 import { TipBody } from "@/components/tips/tip-body";
 import { RecommendedProducts } from "@/components/shop/recommended-products";
 import { SupportDev } from "@/components/support/support-dev";
+import { TipQuestions } from "@/components/community/tip-questions";
 
 export const dynamic = "force-dynamic";
 
@@ -59,6 +60,11 @@ export default async function TipDetailPage({ params }: Props) {
       <article className="mt-8">
         {Custom ? <Custom tip={tip} /> : <TipBody tip={tip} />}
       </article>
+
+      {/* คำถาม-คำตอบเกี่ยวกับเคล็ดลับนี้ (ทำตาม tip ไม่ได้ ถามในคอมมูนิตี้) */}
+      <div className="mt-12">
+        <TipQuestions slug={slug} />
+      </div>
 
       {/* สินค้าที่เกี่ยวข้องกับเคล็ดลับนี้ (contextual + sub_id = slug) */}
       <div className="mt-12">

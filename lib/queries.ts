@@ -1,8 +1,22 @@
 import "server-only";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, lt, or, sql, type SQL } from "drizzle-orm";
 import { db } from "@/db";
-import { courses, courseSessions, enrollments, user } from "@/db/schema";
+import {
+  courses,
+  courseSessions,
+  enrollments,
+  user,
+  communityPosts,
+  communityPostLikes,
+} from "@/db/schema";
 import type { EnrollmentStatus } from "@/db/schema";
+import { getTipBySlug } from "@/lib/tips";
+import {
+  FEED_PAGE_SIZE,
+  type FeedPost,
+  type ThreadReply,
+  type FeedCursor,
+} from "@/lib/community";
 
 // สถานะที่ถือว่า "จองที่นั่งไว้" (ใช้คำนวณที่นั่งเหลือแบบ soft)
 export const SEAT_HOLDING_STATUSES = [
@@ -139,4 +153,157 @@ export async function getAdminEnrollments(status?: EnrollmentStatus) {
     ? await q.where(eq(enrollments.status, status)).orderBy(desc(enrollments.createdAt)).all()
     : await q.orderBy(desc(enrollments.createdAt)).all();
   return rows;
+}
+
+/* ────────────────────────────────────────────────────────────
+ * คอมมูนิตี้ถาม-ตอบ
+ * ──────────────────────────────────────────────────────────── */
+
+type FeedRow = {
+  post: typeof communityPosts.$inferSelect;
+  author: { id: string; name: string; image: string | null };
+  likedBy: string | null;
+};
+
+/** map แถว DB → FeedPost (serializable): resolve tipTitle ฝั่ง server, createdAt → epoch ms */
+function toFeedPost(row: FeedRow): FeedPost {
+  const tip = row.post.tipSlug ? getTipBySlug(row.post.tipSlug) : undefined;
+  return {
+    id: row.post.id,
+    body: row.post.body,
+    tipSlug: row.post.tipSlug,
+    tipTitle: tip?.title ?? null,
+    pinned: row.post.pinned,
+    likeCount: row.post.likeCount,
+    replyCount: row.post.replyCount,
+    hasAccepted: row.post.acceptedReplyId != null,
+    likedByViewer: row.likedBy != null,
+    createdAt: row.post.createdAt.getTime(),
+    author: row.author,
+  };
+}
+
+/**
+ * select ร่วม: join ผู้เขียน + leftJoin like ของ viewer (หา likedByViewer)
+ * viewer ที่เป็น null แทนด้วย "__none__" (ไม่มีใครมี id นี้ → likedBy = null เสมอ)
+ */
+function feedSelect(viewerId: string | null) {
+  return db
+    .select({
+      post: communityPosts,
+      author: { id: user.id, name: user.name, image: user.image },
+      likedBy: communityPostLikes.userId,
+    })
+    .from(communityPosts)
+    .innerJoin(user, eq(communityPosts.authorId, user.id))
+    .leftJoin(
+      communityPostLikes,
+      and(
+        eq(communityPostLikes.postId, communityPosts.id),
+        eq(communityPostLikes.userId, viewerId ?? "__none__"),
+      ),
+    );
+}
+
+/**
+ * หน้า feed: คำถาม top-level (parent_id IS NULL, ไม่รวม pinned) เรียงใหม่สุดก่อน
+ * - หน้าแรก (cursor=null, ไม่ filter tip) แถม pinned list มาด้วย
+ * - keyset pagination ด้วยคู่ (created_at, id) — กัน timestamp วินาทีชนกัน
+ */
+export async function getCommunityFeedPage(opts: {
+  viewerId?: string | null;
+  cursor?: FeedCursor | null;
+  tipSlug?: string | null;
+}): Promise<{ pinned: FeedPost[]; posts: FeedPost[]; nextCursor: FeedCursor | null }> {
+  const { viewerId = null, cursor = null, tipSlug = null } = opts;
+
+  const conditions: (SQL | undefined)[] = [
+    isNull(communityPosts.parentId),
+    eq(communityPosts.pinned, false),
+  ];
+  if (tipSlug) conditions.push(eq(communityPosts.tipSlug, tipSlug));
+  if (cursor) {
+    const cur = new Date(cursor.createdAt);
+    conditions.push(
+      or(
+        lt(communityPosts.createdAt, cur),
+        and(eq(communityPosts.createdAt, cur), lt(communityPosts.id, cursor.id)),
+      ),
+    );
+  }
+
+  const rows = await feedSelect(viewerId)
+    .where(and(...conditions))
+    .orderBy(desc(communityPosts.createdAt), desc(communityPosts.id))
+    .limit(FEED_PAGE_SIZE + 1)
+    .all();
+
+  const hasMore = rows.length > FEED_PAGE_SIZE;
+  const posts = (hasMore ? rows.slice(0, FEED_PAGE_SIZE) : rows).map(toFeedPost);
+  const last = posts[posts.length - 1];
+  const nextCursor = hasMore && last ? { createdAt: last.createdAt, id: last.id } : null;
+
+  let pinned: FeedPost[] = [];
+  if (!cursor && !tipSlug) {
+    const pinnedRows = await feedSelect(viewerId)
+      .where(and(isNull(communityPosts.parentId), eq(communityPosts.pinned, true)))
+      .orderBy(desc(communityPosts.createdAt), desc(communityPosts.id))
+      .all();
+    pinned = pinnedRows.map(toFeedPost);
+  }
+
+  return { pinned, posts, nextCursor };
+}
+
+/**
+ * thread: คำถาม + replies
+ * - ถ้า id ที่ขอเป็น reply (parentId != null) คืน parentId ให้ page redirect ไป thread แม่
+ * - replies เรียงเก่า→ใหม่ (page จะ sort accepted ขึ้นบนสุดด้วย JS อีกที)
+ */
+export async function getPostWithReplies(
+  id: string,
+  viewerId?: string | null,
+): Promise<{ post: FeedPost; parentId: string | null; replies: ThreadReply[] } | null> {
+  const viewer = viewerId ?? null;
+
+  const row = await feedSelect(viewer).where(eq(communityPosts.id, id)).get();
+  if (!row) return null;
+
+  const post = toFeedPost(row);
+  if (row.post.parentId) {
+    return { post, parentId: row.post.parentId, replies: [] };
+  }
+
+  const acceptedId = row.post.acceptedReplyId;
+  const replyRows = await feedSelect(viewer)
+    .where(eq(communityPosts.parentId, id))
+    .orderBy(asc(communityPosts.createdAt), asc(communityPosts.id))
+    .all();
+
+  const replies: ThreadReply[] = replyRows.map((r) => ({
+    ...toFeedPost(r),
+    accepted: r.post.id === acceptedId,
+  }));
+
+  return { post, parentId: null, replies };
+}
+
+/** section "คำถามเกี่ยวกับ tip นี้" บนหน้า tip — จำนวนทั้งหมด + ล่าสุด N รายการ */
+export async function getQuestionsForTip(
+  slug: string,
+  limit = 3,
+): Promise<{ count: number; questions: FeedPost[] }> {
+  const countRow = await db
+    .select({ n: sql<number>`count(*)` })
+    .from(communityPosts)
+    .where(and(eq(communityPosts.tipSlug, slug), isNull(communityPosts.parentId)))
+    .get();
+
+  const rows = await feedSelect(null)
+    .where(and(eq(communityPosts.tipSlug, slug), isNull(communityPosts.parentId)))
+    .orderBy(desc(communityPosts.createdAt), desc(communityPosts.id))
+    .limit(limit)
+    .all();
+
+  return { count: Number(countRow?.n ?? 0), questions: rows.map(toFeedPost) };
 }

@@ -4,6 +4,8 @@ import {
   integer,
   index,
   uniqueIndex,
+  primaryKey,
+  type AnySQLiteColumn,
 } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 
@@ -172,6 +174,71 @@ export const enrollments = sqliteTable(
     index("enrollments_session_status_idx").on(t.sessionId, t.status),
     // กันสลิปซ้ำ — SQLite ยอมให้ค่า null ซ้ำกันได้
     uniqueIndex("enrollments_slip_trans_ref_unique").on(t.slipTransRef),
+  ],
+);
+
+/* ────────────────────────────────────────────────────────────
+ * คอมมูนิตี้ถาม-ตอบ (Twitter/X-style)
+ * ตารางเดียว self-referencing: คำถาม = parentId null, reply ชี้หาคำถาม
+ * บังคับ thread ชั้นเดียวใน action (reply ตอบได้เฉพาะคำถามหลัก)
+ * ──────────────────────────────────────────────────────────── */
+
+export const communityPosts = sqliteTable(
+  "community_posts",
+  {
+    id: text("id").primaryKey(),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    // null = คำถาม (top-level), มีค่า = reply ของคำถามนั้น
+    parentId: text("parent_id").references(
+      (): AnySQLiteColumn => communityPosts.id,
+      { onDelete: "cascade" },
+    ),
+    body: text("body").notNull(),
+    // slug ของ tip ที่แท็ก (tips เป็น static TS data — ไม่มี FK)
+    tipSlug: text("tip_slug"),
+    pinned: integer("pinned", { mode: "boolean" }).notNull().default(false),
+    // reply ที่ถูกเลือกเป็น "คำตอบที่ใช่" (เฉพาะแถวคำถาม; ลบ reply แล้ว auto-clear)
+    acceptedReplyId: text("accepted_reply_id").references(
+      (): AnySQLiteColumn => communityPosts.id,
+      { onDelete: "set null" },
+    ),
+    // นับไว้ล่วงหน้า (denormalized) เพื่อไม่ต้อง COUNT ทุกแถวตอน render feed
+    likeCount: integer("like_count").notNull().default(0),
+    replyCount: integer("reply_count").notNull().default(0),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (t) => [
+    // feed: parent_id IS NULL (equality prefix) + เรียง created_at / thread: parent_id = X
+    index("community_posts_parent_created_idx").on(t.parentId, t.createdAt),
+    // section "คำถามเกี่ยวกับ tip นี้"
+    index("community_posts_tip_idx").on(t.tipSlug, t.createdAt),
+  ],
+);
+
+export const communityPostLikes = sqliteTable(
+  "community_post_likes",
+  {
+    postId: text("post_id")
+      .notNull()
+      .references(() => communityPosts.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (t) => [
+    // PK รวม (userId, postId): กันไลก์ซ้ำ + lookup "viewer ไลก์โพสต์ไหนบ้าง" (prefix userId)
+    // จงใจใช้ composite PK แทน uniqueIndex — migration ไม่มี CREATE UNIQUE INDEX จึงผ่าน guard
+    // (deploy prod ได้เลย ไม่ต้องตั้ง ALLOW_DESTRUCTIVE_MIGRATION)
+    primaryKey({ columns: [t.userId, t.postId] }),
+    // ช่วย cascade / lookup by post
+    index("community_post_likes_post_idx").on(t.postId),
   ],
 );
 

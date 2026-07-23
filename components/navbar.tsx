@@ -41,6 +41,12 @@ export async function Navbar() {
           >
             ของที่แนะนำ
           </Link>
+          <Link
+            href="/community"
+            className="rounded-full px-3 py-1.5 text-sm font-medium text-muted transition hover:text-foreground"
+          >
+            ถาม-ตอบ
+          </Link>
           {user && (
             <Link
               href="/my-courses"
