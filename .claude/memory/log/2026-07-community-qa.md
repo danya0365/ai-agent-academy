@@ -5,7 +5,7 @@ metadata:
   node_type: memory
   type: project
   originSessionId: f7358090-14a2-473e-9f86-7bd254279e10
-  modified: 2026-07-23T10:03:09.346Z
+  modified: 2026-07-23T10:09:01.282Z
 ---
 
 # Community ถาม-ตอบ + Shopee affiliate (2026-07-23)
@@ -32,7 +32,7 @@ metadata:
 - อ่านฟรีทุกคน โพสต์ต้อง login · ทุก ad ติดป้าย "ผู้สนับสนุน" (นโยบายไม่ล็อกเนื้อหา กัน AdSense ban)
 
 ## ค้าง / ถัดไป
-- **ยังไม่ commit** (รอพี่สั่ง) · verify แล้ว: lint 0 error, tsc clean, ทุก route 200, keyset ไม่ overlap
+- **commit + push แล้ว** (`ebb9516` บน main) · verify แล้ว: lint 0 error, tsc clean, ทุก route 200, keyset ไม่ overlap
 - ยังไม่ได้เทส authenticated mutations ผ่าน browser จริง (post/reply/like/accept/delete/pin) — logic ตรวจแล้วแต่ต้องลองมือ
 - future: report system, notification, follow/mention (ยังไม่ทำตาม MVP)
 
