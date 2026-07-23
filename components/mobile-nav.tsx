@@ -51,6 +51,20 @@ export function MobileNav({ user }: { user: NavUser }) {
             >
               คอร์สทั้งหมด
             </Link>
+            <Link
+              href="/tips"
+              onClick={close}
+              className="rounded-xl px-3 py-2 text-sm font-medium text-foreground hover:bg-muted-surface"
+            >
+              รู้ก่อนใคร
+            </Link>
+            <Link
+              href="/shop"
+              onClick={close}
+              className="rounded-xl px-3 py-2 text-sm font-medium text-foreground hover:bg-muted-surface"
+            >
+              ของที่แนะนำ
+            </Link>
             {user && (
               <Link
                 href="/my-courses"

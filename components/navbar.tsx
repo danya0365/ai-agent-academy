@@ -29,6 +29,18 @@ export async function Navbar() {
           >
             คอร์สทั้งหมด
           </Link>
+          <Link
+            href="/tips"
+            className="rounded-full px-3 py-1.5 text-sm font-medium text-muted transition hover:text-foreground"
+          >
+            รู้ก่อนใคร
+          </Link>
+          <Link
+            href="/shop"
+            className="rounded-full px-3 py-1.5 text-sm font-medium text-muted transition hover:text-foreground"
+          >
+            ของที่แนะนำ
+          </Link>
           {user && (
             <Link
               href="/my-courses"
