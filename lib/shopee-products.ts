@@ -1,5 +1,5 @@
 /**
- * สินค้าแนะนำ Shopee Affiliate — เก็บเป็น data ล้วน (typed array)
+ * สินค้าแนะนำ Shopee Affiliate — type + helper (logic)
  *
  * ระบบ:
  * - แต่ละสินค้ามี tags → เอาไปจับคู่กับ tip.productTags (โชว์สินค้าที่เกี่ยวกับเนื้อหา)
@@ -7,10 +7,12 @@
  * - featured → ใช้เป็น fallback เวลาไม่มี tag ตรง
  * - withSubId() → แนบ sub_id (เช่น slug ของหน้า) เพื่อดูใน dashboard Shopee ว่าหน้าไหนทำเงิน
  *
- * ⚠️ ตัวอย่างด้านล่างเป็น placeholder — เปลี่ยน url เป็น "ลิงก์ affiliate จริง"
- * (สร้างจาก affiliate.shopee.co.th) และใส่ imageUrl เป็นรูปสินค้าจริงของ Shopee
- * ราคา (price) เป็นออปชัน และอาจล้าสมัย — จะไม่ใส่ก็ได้
+ * 📦 ตัว data (array สินค้า) อยู่ใน shopee-products.generated.ts ซึ่งถูก "เขียนอัตโนมัติ"
+ * โดย scripts/fetch-shopee-products.ts (ดึงของขายดีจาก Shopee Affiliate Open API)
+ * อัปเดตด้วย:  npm run shopee:fetch   (ปรับหมวด/keyword ที่ scripts/shopee-buckets.ts)
+ * ห้ามเพิ่มสินค้าที่นี่ด้วยมือ — จะโดนเขียนทับตอนรัน script
  */
+import { GENERATED_PRODUCTS } from "./shopee-products.generated";
 
 export type ShopeeProduct = {
   id: string;
@@ -31,42 +33,8 @@ export type ShopeeProduct = {
   featured?: boolean;
 };
 
-export const SHOPEE_PRODUCTS: ShopeeProduct[] = [
-  {
-    id: "work-desk-stand",
-    title: "แท่นวางโน้ตบุ๊ก / จัดโต๊ะทำงาน",
-    url: "https://s.shopee.co.th/9zwMSNXwuk",
-    note: "จัดโต๊ะให้ทำงานกับ AI ได้นานขึ้นโดยไม่ปวดคอ",
-    category: "อุปกรณ์ทำงาน",
-    tags: ["ทำงาน", "ประสิทธิภาพ"],
-    featured: true,
-  },
-  {
-    id: "wireless-keyboard",
-    title: "คีย์บอร์ดไร้สาย พิมพ์เร็ว",
-    url: "https://s.shopee.co.th/9zwMSNXwuk",
-    note: "พิมพ์ prompt/พิมพ์งานได้ลื่นขึ้น",
-    category: "อุปกรณ์ทำงาน",
-    tags: ["ทำงาน", "prompt"],
-  },
-  {
-    id: "content-mic",
-    title: "ไมโครโฟนอัดคลิป คุณภาพดี",
-    url: "https://s.shopee.co.th/9zwMSNXwuk",
-    note: "เริ่มทำคอนเทนต์/สอนออนไลน์หารายได้เสริม",
-    category: "ทำคอนเทนต์",
-    tags: ["รายได้", "เครื่องมือ"],
-    featured: true,
-  },
-  {
-    id: "ring-light",
-    title: "ไฟ Ring Light สำหรับถ่ายคลิป",
-    url: "https://s.shopee.co.th/9zwMSNXwuk",
-    note: "คลิปดูโปรขึ้น เพิ่มโอกาสมีคนติดตาม",
-    category: "ทำคอนเทนต์",
-    tags: ["รายได้"],
-  },
-];
+/** สินค้าทั้งหมด (data มาจากไฟล์ generated — เขียนโดย npm run shopee:fetch) */
+export const SHOPEE_PRODUCTS: ShopeeProduct[] = GENERATED_PRODUCTS;
 
 /** สินค้าทั้งหมด */
 export function getAllProducts(): ShopeeProduct[] {
