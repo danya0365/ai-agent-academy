@@ -34,6 +34,23 @@ export type Tip = {
 
 export const TIPS: Tip[] = [
   {
+    slug: "claude-code-token-survival",
+    title: "Claude Code token หมดกลางงาน? สลับไปใช้ model อื่นด้วย 9Router",
+    summary:
+      "พอโควต้า Claude Code หมดกลางทาง ไม่ต้องหยุดรอรีเซ็ต — ต่อ 9Router แล้วให้มันสลับไปโมเดลอื่นให้อัตโนมัติ โค้ดต่อได้ทันที",
+    category: "เครื่องมือ",
+    readingTime: "5 นาที",
+    productTags: ["ทำงาน", "ประสิทธิภาพ"],
+    // เคล็ดลับนี้มี component เฉพาะ (components/tips/custom/claude-code-token-survival.tsx)
+    // sections ด้านล่างเป็น fallback สำรองไว้เผื่อถอด component ออก
+    sections: [
+      {
+        heading: "1. ติดตั้ง 9Router",
+        body: "9Router เป็น gateway ที่เชื่อม Claude Code เข้ากับ 60+ providers ผ่าน endpoint เดียว จุดเด่นคือ auto-fallback หลายชั้น พอ token/โควต้าหมดมันสลับโมเดลให้เอง\n\nติดตั้งแบบ global ครั้งเดียว: npm install -g 9router แล้วรัน 9router — dashboard จะเปิดเองที่ http://localhost:20128",
+      },
+    ],
+  },
+  {
     slug: "ai-speed-tips",
     title: "ใช้ AI ทำงานให้เร็วขึ้น 3 เท่า",
     summary:

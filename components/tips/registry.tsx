@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import type { Tip } from "@/lib/tips";
 import { AiSpeedTips } from "@/components/tips/custom/ai-speed-tips";
+import { ClaudeCodeTokenSurvival } from "@/components/tips/custom/claude-code-token-survival";
 
 /**
  * ทะเบียน component เฉพาะของแต่ละเคล็ดลับ (custom renderer)
@@ -14,4 +15,5 @@ import { AiSpeedTips } from "@/components/tips/custom/ai-speed-tips";
  */
 export const TIP_COMPONENTS: Record<string, ComponentType<{ tip: Tip }>> = {
   "ai-speed-tips": AiSpeedTips,
+  "claude-code-token-survival": ClaudeCodeTokenSurvival,
 };
