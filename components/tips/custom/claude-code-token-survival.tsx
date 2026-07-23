@@ -88,8 +88,13 @@ const STEPS: Step[] = [
     choices: [
       {
         tag: "ฟรี (แนะนำสุด)",
+        title: "OpenCode Free",
+        desc: "ใช้ได้เลย ไม่ต้อง login ไม่ต้องใส่ API key — เข้าไปดูรายชื่อ model ที่ localhost:20128/dashboard/providers/opencode แล้วคัดลอกชื่อไปใส่ตรง ๆ รุ่นแนะนำ: oc/deepseek-v4-flash-free",
+      },
+      {
+        tag: "ฟรี (อันดับ 2)",
         title: "Kiro AI",
-        desc: "ได้ Claude 4.5 + GLM-5 + MiniMax ฟรี ไม่ต้องใส่ API key — ล็อกอินด้วย Google / GitHub / AWS Builder ID เป็นตัวสำรองที่คุ้มที่สุด (โมเดล kr/claude-sonnet-4.5)",
+        desc: "ฟรีเหมือนกันแต่ต้อง login (Google / GitHub / AWS Builder ID) — แลกกับได้ Claude 4.5 + GLM-5 + MiniMax แบบไม่ต้องใส่ API key (โมเดล kr/claude-sonnet-4.5)",
       },
       {
         tag: "Subscription",
