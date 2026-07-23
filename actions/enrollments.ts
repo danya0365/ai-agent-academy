@@ -5,10 +5,12 @@ import { and, eq, ne } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { courses, courseSessions, enrollments } from "@/db/schema";
+import { courses, courseSessions, enrollments, bookings } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { saveSlip, SlipValidationError } from "@/lib/storage";
-import { getReservedSeatsBySession } from "@/lib/queries";
+import { getReservedSeatsBySession, getBookingHours } from "@/lib/queries";
+import { isValidSlot, slotEndEpoch } from "@/lib/booking";
+import { claimSlot, releaseSlot, hasSlotLock, overlapWhere } from "@/lib/booking-repo";
 import { verifySlip } from "@/lib/slip-verify";
 import { confirmEnrollment } from "@/lib/enrollment-confirm";
 import { notifyPaymentSlip } from "@/lib/line";
@@ -68,6 +70,10 @@ export async function enroll(
   if (!course || !course.isPublished) {
     return { ok: false, error: "ไม่พบคอร์สนี้" };
   }
+  // คอร์สจองคิวต้องใช้ bookSlot (เลือก slot) — กันเลี่ยงมาลงทะเบียนแบบไม่มีเวลา
+  if (course.type === "booking") {
+    return { ok: false, error: "คอร์สนี้ต้องจองเวลาเรียนจากหน้าคอร์ส" };
+  }
 
   let validSessionId: string | null = null;
 
@@ -123,6 +129,91 @@ export async function enroll(
 }
 
 /**
+ * จองคิว (คอร์ส type 'booking'): เลือก slot เวลา แล้วสร้าง enrollment + จอง lock แบบ atomic
+ * - re-validate slot ฝั่ง server (ไม่เชื่อ startEpoch จาก client)
+ * - กันจองซ้ำในคอร์สเดียวกัน
+ * - insert enrollment + booking ใน transaction เดียว: ชน PK = slot ถูกจองแล้ว → rollback
+ */
+export async function bookSlot(
+  courseId: string,
+  startEpoch: number,
+): Promise<ActionResult> {
+  const user = await requireUser();
+
+  const course = await db.select().from(courses).where(eq(courses.id, courseId)).get();
+  if (
+    !course ||
+    !course.isPublished ||
+    course.type !== "booking" ||
+    !course.sessionDurationMin
+  ) {
+    return { ok: false, error: "ไม่พบคอร์สนี้" };
+  }
+
+  const durationMin = course.sessionDurationMin;
+  const now = Date.now();
+  const hours = await getBookingHours();
+  if (!isValidSlot(hours, durationMin, startEpoch, now)) {
+    return { ok: false, error: "ช่วงเวลานี้ไม่พร้อมให้จองแล้ว กรุณาเลือกเวลาอื่น" };
+  }
+
+  // กันจองซ้ำในคอร์สเดียวกัน (ยกเว้นที่ถูก reject ไปแล้ว)
+  const existing = await db
+    .select()
+    .from(enrollments)
+    .where(
+      and(
+        eq(enrollments.userId, user.id),
+        eq(enrollments.courseId, courseId),
+        ne(enrollments.status, "rejected"),
+      ),
+    )
+    .get();
+  if (existing) {
+    redirect(`/enrollments/${existing.id}/pay`);
+  }
+
+  const id = randomUUID();
+  const startAt = new Date(startEpoch);
+  const endAt = new Date(slotEndEpoch(startEpoch, durationMin));
+
+  try {
+    await db.transaction(async (tx) => {
+      // overlap check (global): กันคาบเวลากับคิวอื่น รวมถึงข้ามคอร์ส/กรณี grid ขยับ
+      const clash = await tx
+        .select({ s: bookings.startAt })
+        .from(bookings)
+        .where(overlapWhere(startAt, endAt))
+        .get();
+      if (clash) throw new Error("SLOT_TAKEN");
+
+      await tx
+        .insert(enrollments)
+        .values({
+          id,
+          userId: user.id,
+          courseId,
+          status: "pending_payment",
+          amount: course.price,
+          bookedStartAt: startAt,
+          bookedEndAt: endAt,
+        })
+        .run();
+      // composite PK (courseId, startAt) = atomic guard ชั้นสุดท้าย → ทั้ง txn rollback ถ้าชน
+      await tx
+        .insert(bookings)
+        .values({ courseId, startAt, endAt, enrollmentId: id, userId: user.id })
+        .run();
+    });
+  } catch {
+    return { ok: false, error: "ช่วงเวลานี้เพิ่งถูกจองไปแล้ว กรุณาเลือกเวลาอื่น" };
+  }
+
+  revalidatePath("/my-courses");
+  redirect(`/enrollments/${id}/pay`);
+}
+
+/**
  * อัปโหลดสลิป (ครั้งแรก หรืออัปใหม่หลังถูก reject)
  */
 export async function uploadSlip(
@@ -149,12 +240,55 @@ export async function uploadSlip(
     return { ok: false, error: "กรุณาแนบรูปสลิป" };
   }
 
+  // คอร์สจองคิว: ต้อง claim slot กลับไหม (อัปใหม่หลัง reject = ไม่ถือ lock แล้ว; pending ยังถือ → ข้าม)
+  // ตรวจ slot ยัง valid "ก่อน" saveSlip (เป็น pure check ไม่มี side-effect) — กันไฟล์ค้างถ้า slot หมดอายุ
+  const needsClaim =
+    !!(enrollment.bookedStartAt && enrollment.bookedEndAt) &&
+    !(await hasSlotLock(enrollmentId));
+  if (needsClaim) {
+    const bkCourse = await db
+      .select()
+      .from(courses)
+      .where(eq(courses.id, enrollment.courseId))
+      .get();
+    const hours = await getBookingHours();
+    const valid = isValidSlot(
+      hours,
+      bkCourse?.sessionDurationMin ?? 0,
+      enrollment.bookedStartAt!.getTime(),
+      Date.now(),
+    );
+    if (!valid) {
+      return {
+        ok: false,
+        error: "ช่วงเวลาที่คุณจองผ่านไปแล้วหรือปิดจองแล้ว กรุณาเลือกเวลาใหม่จากหน้าคอร์ส",
+      };
+    }
+  }
+
   let key: string;
   try {
     key = await saveSlip(file);
   } catch (e) {
     if (e instanceof SlipValidationError) return { ok: false, error: e.message };
     throw e;
+  }
+
+  // claim "หลัง" saveSlip สำเร็จ — กัน lock ค้างถ้าไฟล์ไม่ผ่าน (overlap check อยู่ใน claimSlot)
+  if (needsClaim) {
+    const claimed = await claimSlot({
+      courseId: enrollment.courseId,
+      startAt: enrollment.bookedStartAt!,
+      endAt: enrollment.bookedEndAt!,
+      enrollmentId,
+      userId: user.id,
+    });
+    if (!claimed) {
+      return {
+        ok: false,
+        error: "ช่วงเวลาที่คุณจองถูกผู้อื่นจองไปแล้ว กรุณาเลือกเวลาใหม่จากหน้าคอร์ส",
+      };
+    }
   }
 
   // บันทึกสลิป + รีเซ็ตผลตรวจเดิม (กรณีอัปใหม่หลังถูก reject)
@@ -235,6 +369,11 @@ export async function uploadSlip(
     })
     .where(eq(enrollments.id, enrollmentId))
     .run();
+
+  // auto-reject คอร์สจองคิว → ปล่อย slot คืนให้คนอื่นจองได้
+  if (rejected && enrollment.bookedStartAt) {
+    await releaseSlot(enrollmentId);
+  }
 
   // แจ้งเตือน LINE OA ทุกครั้งที่มีการแจ้งโอน (no-op ถ้ายังไม่ตั้งค่า)
   await notifyPaymentSlip({

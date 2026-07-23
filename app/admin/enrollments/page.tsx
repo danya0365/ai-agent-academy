@@ -3,6 +3,7 @@ import { getAdminEnrollments } from "@/lib/queries";
 import {
   formatBaht,
   formatDateTime,
+  formatBkkDateTime,
   STATUS_LABELS,
   STATUS_COLORS,
 } from "@/lib/format";
@@ -79,6 +80,11 @@ export default async function AdminEnrollmentsPage({
                     </p>
                     {session && (
                       <p className="text-sm text-muted">รอบ: {formatDateTime(session.startAt)}</p>
+                    )}
+                    {enrollment.bookedStartAt && (
+                      <p className="text-sm text-muted">
+                        เวลาที่จอง: {formatBkkDateTime(enrollment.bookedStartAt)}
+                      </p>
                     )}
                     <p className="text-sm text-muted">
                       ยอด: {formatBaht(enrollment.amount)}

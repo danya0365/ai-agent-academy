@@ -7,6 +7,7 @@ import { generatePromptPayQR, getBankInfo } from "@/lib/promptpay";
 import {
   formatBaht,
   formatDateTime,
+  formatBkkDateTime,
   STATUS_LABELS,
   STATUS_COLORS,
 } from "@/lib/format";
@@ -49,6 +50,11 @@ export default async function PayPage({
             <p className="font-extrabold text-foreground">{course.title}</p>
             {session && (
               <p className="text-sm text-muted">รอบเรียน: {formatDateTime(session.startAt)}</p>
+            )}
+            {enrollment.bookedStartAt && (
+              <p className="text-sm text-muted">
+                เวลาที่จอง: {formatBkkDateTime(enrollment.bookedStartAt)}
+              </p>
             )}
           </div>
           <span className={`badge ${STATUS_COLORS[enrollment.status]}`}>

@@ -3,21 +3,26 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createCourse, updateCourse } from "@/actions/admin";
+import type { CourseType } from "@/db/schema";
 
 type Initial = {
   id?: string;
   title?: string;
   slug?: string;
   description?: string;
-  type?: "scheduled" | "open";
+  type?: CourseType;
   price?: number;
+  sessionDurationMin?: number | null;
   isPublished?: boolean;
 };
+
+const DURATION_OPTIONS = [30, 45, 60, 90, 120] as const;
 
 export function CourseForm({ initial }: { initial?: Initial }) {
   const router = useRouter();
   const isEdit = Boolean(initial?.id);
   const [error, setError] = useState<string | null>(null);
+  const [type, setType] = useState<CourseType>(initial?.type ?? "scheduled");
   const [pending, startTransition] = useTransition();
 
   function handleSubmit(formData: FormData) {
@@ -53,9 +58,15 @@ export function CourseForm({ initial }: { initial?: Initial }) {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Label text="ประเภท">
-          <select name="type" defaultValue={initial?.type ?? "scheduled"} className="input">
+          <select
+            name="type"
+            value={type}
+            onChange={(e) => setType(e.target.value as CourseType)}
+            className="input"
+          >
             <option value="scheduled">มีรอบเรียน</option>
             <option value="open">เรียนได้ทันที (สมัครได้ตลอด)</option>
+            <option value="booking">จองเวลาเอง (คิว 1-on-1)</option>
           </select>
         </Label>
 
@@ -70,6 +81,25 @@ export function CourseForm({ initial }: { initial?: Initial }) {
           />
         </Label>
       </div>
+
+      {type === "booking" && (
+        <Label text="ความยาวต่อครั้ง">
+          <select
+            name="sessionDurationMin"
+            defaultValue={initial?.sessionDurationMin ?? 60}
+            className="input"
+          >
+            {DURATION_OPTIONS.map((d) => (
+              <option key={d} value={d}>
+                {d} นาที
+              </option>
+            ))}
+          </select>
+          <span className="mt-1 block text-xs text-muted">
+            ระบบจะหั่น slot ให้ลูกค้าจองตามความยาวนี้ · เวลาทำการตั้งที่หน้า “เวลาทำการ”
+          </span>
+        </Label>
+      )}
 
       <label className="flex items-center gap-2">
         <input

@@ -17,6 +17,7 @@ export default async function AdminLayout({
         <AdminLink href="/admin">ภาพรวม</AdminLink>
         <AdminLink href="/admin/enrollments">ตรวจสลิป</AdminLink>
         <AdminLink href="/admin/courses">จัดการคอร์ส</AdminLink>
+        <AdminLink href="/admin/booking-hours">เวลาทำการ</AdminLink>
       </div>
       {children}
     </div>

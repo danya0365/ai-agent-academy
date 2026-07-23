@@ -1,7 +1,7 @@
 import "server-only";
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { courseSessions, enrollments } from "@/db/schema";
+import { courseSessions, enrollments, bookings } from "@/db/schema";
 
 /**
  * ยืนยันการลงทะเบียน (set confirmed) พร้อม hard seat-check ใน transaction
@@ -22,6 +22,16 @@ export async function confirmEnrollment(
       if (!e) throw new Error("ไม่พบรายการลงทะเบียน");
       if (e.status !== "slip_uploaded") {
         throw new Error("รายการนี้ไม่อยู่ในสถานะรอตรวจสอบ");
+      }
+
+      // hard check สำหรับคอร์สจองคิว — lock (bookings row) ต้องยังอยู่
+      if (e.bookedStartAt) {
+        const lock = await tx
+          .select({ courseId: bookings.courseId })
+          .from(bookings)
+          .where(eq(bookings.enrollmentId, enrollmentId))
+          .get();
+        if (!lock) throw new Error("ช่วงเวลาที่จองไม่พร้อมใช้งานแล้ว");
       }
 
       // hard seat check สำหรับคอร์สที่มีรอบเรียน

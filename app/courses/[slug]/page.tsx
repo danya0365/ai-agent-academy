@@ -1,10 +1,38 @@
+import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Calendar, Zap } from "lucide-react";
+import { ArrowLeft, FileText } from "lucide-react";
 import { getCourseBySlug } from "@/lib/queries";
-import { formatBaht, COURSE_TYPE_LABELS } from "@/lib/format";
-import { EnrollForm } from "@/components/enroll-form";
+import { getCourseContent, type ResolvedCourseContent } from "@/lib/course-content";
+import { SectionHeading } from "@/components/course/section-heading";
+import { CourseHero } from "@/components/course/course-hero";
+import { CourseMeta } from "@/components/course/course-meta";
+import { CourseOutcomes } from "@/components/course/course-outcomes";
+import { CourseCurriculum } from "@/components/course/course-curriculum";
+import { CourseAudience } from "@/components/course/course-audience";
+import { CourseIncludes } from "@/components/course/course-includes";
+import { CourseInstructor } from "@/components/course/course-instructor";
+import { CourseFaq } from "@/components/course/course-faq";
+import { CourseEnroll } from "@/components/course/course-enroll";
 
 export const dynamic = "force-dynamic";
+
+type CourseData = NonNullable<Awaited<ReturnType<typeof getCourseBySlug>>>;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const data = await getCourseBySlug(slug);
+  if (!data || !data.course.isPublished) return { title: "ไม่พบคอร์ส" };
+  const summary = data.course.description.replace(/\s+/g, " ").trim().slice(0, 155);
+  return {
+    title: `${data.course.title} — AI Agent Academy`,
+    description: summary,
+  };
+}
 
 export default async function CourseDetailPage({
   params,
@@ -15,32 +43,75 @@ export default async function CourseDetailPage({
   const data = await getCourseBySlug(slug);
   if (!data || !data.course.isPublished) notFound();
 
-  const { course, sessions } = data;
-  const scheduled = course.type === "scheduled";
+  const { course, sessions, booking } = data;
+  const content = getCourseContent(slug);
+  const isBooking = course.type === "booking";
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-      <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
-        {/* รายละเอียดคอร์ส */}
-        <div>
-          <span className="badge bg-card text-foreground">
-            {scheduled ? <Calendar className="size-3.5" /> : <Zap className="size-3.5" />}
-            {COURSE_TYPE_LABELS[course.type]}
-          </span>
-          <h1 className="mt-4 text-3xl font-black tracking-tight text-foreground sm:text-4xl">
-            {course.title}
-          </h1>
-          <p className="mt-3 text-2xl font-black text-brand-700">{formatBaht(course.price)}</p>
-          <div className="mt-6 whitespace-pre-line leading-relaxed text-muted">
-            {course.description}
-          </div>
-        </div>
+    <div className="flex flex-col gap-10">
+      <Link
+        href="/#courses"
+        className="inline-flex items-center gap-1 text-sm font-medium text-muted transition hover:text-foreground"
+      >
+        <ArrowLeft className="size-4" /> กลับไปหน้าคอร์ส
+      </Link>
 
-        {/* กล่องสมัคร */}
-        <div className="lg:sticky lg:top-20 lg:self-start">
-          <EnrollForm courseId={course.id} type={course.type} sessions={sessions} />
+      <CourseHero course={course} content={content} ctaHref="#enroll" />
+      <CourseMeta course={course} content={content} />
+
+      {isBooking ? (
+        <>
+          {/* booking: กล่องจองเต็มกว้าง (แก้ปัญหาเบียด) แล้วต่อด้วยเนื้อหา */}
+          <section id="enroll" className="scroll-mt-24">
+            <CourseEnroll course={course} sessions={sessions} booking={booking} />
+          </section>
+          <div className="mx-auto flex w-full max-w-4xl flex-col gap-12">
+            <Sections course={course} content={content} />
+          </div>
+        </>
+      ) : (
+        /* scheduled/open: เนื้อหาซ้าย + กล่องสมัคร sticky ขวา */
+        <div className="grid gap-10 lg:grid-cols-[1fr_360px]">
+          <div className="flex min-w-0 flex-col gap-12">
+            <Sections course={course} content={content} />
+          </div>
+          <aside id="enroll" className="scroll-mt-24 lg:sticky lg:top-20 lg:self-start">
+            <CourseEnroll course={course} sessions={sessions} booking={booking} />
+          </aside>
         </div>
-      </div>
+      )}
     </div>
+  );
+}
+
+/** ชุด section เนื้อหา (ใช้ซ้ำทั้ง branch booking และ scheduled/open) */
+function Sections({
+  course,
+  content,
+}: {
+  course: CourseData["course"];
+  content: ResolvedCourseContent;
+}) {
+  return (
+    <>
+      {content.outcomes && <CourseOutcomes outcomes={content.outcomes} />}
+
+      <section>
+        <SectionHeading title="รายละเอียดคอร์ส" icon={FileText} />
+        <div className="mt-4 whitespace-pre-line leading-relaxed text-muted">
+          {course.description}
+        </div>
+      </section>
+
+      {content.curriculum && <CourseCurriculum items={content.curriculum} />}
+
+      <div className="grid gap-8 md:grid-cols-2">
+        {content.forWho && <CourseAudience forWho={content.forWho} />}
+        <CourseIncludes includes={content.includes} />
+      </div>
+
+      <CourseInstructor instructor={content.instructor} />
+      <CourseFaq faq={content.faq} />
+    </>
   );
 }

@@ -1,15 +1,35 @@
 import "server-only";
-import { and, asc, desc, eq, inArray, isNull, lt, or, sql, type SQL } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gte,
+  inArray,
+  isNull,
+  lt,
+  or,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 import { db } from "@/db";
 import {
   courses,
   courseSessions,
   enrollments,
+  bookingHours,
+  bookings,
   user,
   communityPosts,
   communityPostLikes,
 } from "@/db/schema";
 import type { EnrollmentStatus } from "@/db/schema";
+import {
+  generateSlots,
+  type DaySlots,
+  type HoursRow,
+  type BusyRange,
+} from "@/lib/booking";
 import { getTipBySlug } from "@/lib/tips";
 import {
   FEED_PAGE_SIZE,
@@ -80,7 +100,35 @@ export async function getLearnerCount(): Promise<number> {
   return Number(row?.n ?? 0);
 }
 
-/** ดึงคอร์สตาม slug พร้อมรอบเรียนและที่นั่งเหลือ */
+/** เวลาทำการทั้งหมด (global) — ใช้ gen slot ของคอร์ส booking */
+export async function getBookingHours(): Promise<HoursRow[]> {
+  return db
+    .select({
+      weekday: bookingHours.weekday,
+      startMinute: bookingHours.startMinute,
+      endMinute: bookingHours.endMinute,
+    })
+    .from(bookingHours)
+    .orderBy(asc(bookingHours.weekday), asc(bookingHours.startMinute))
+    .all();
+}
+
+/**
+ * ช่วงเวลาที่ถูกจองไปแล้ว (อนาคต) — GLOBAL ทุกคอร์ส booking จงใจ
+ * เพราะเวลาทำการเป็นชุดเดียว (ครู/ร้านเดียว) → เวลาที่ถูกจองของคอร์สไหนก็ตามต้องบล็อกทุกคอร์ส
+ */
+async function getBusyRanges(now: number): Promise<BusyRange[]> {
+  const rows = await db
+    .select({ startAt: bookings.startAt, endAt: bookings.endAt })
+    .from(bookings)
+    .where(gte(bookings.endAt, new Date(now)))
+    .all();
+  return rows.map((r) => ({ startEpoch: r.startAt.getTime(), endEpoch: r.endAt.getTime() }));
+}
+
+export type CourseBookingView = { durationMin: number; days: DaySlots[] };
+
+/** ดึงคอร์สตาม slug พร้อมรอบเรียน/ที่นั่งเหลือ (scheduled) หรือ slot ว่าง (booking) */
 export async function getCourseBySlug(slug: string) {
   const course = await db.select().from(courses).where(eq(courses.slug, slug)).get();
   if (!course) return null;
@@ -103,7 +151,20 @@ export async function getCourseBySlug(slug: string) {
     seatsLeft: Math.max(0, s.capacity - (reserved.get(s.id) ?? 0)),
   }));
 
-  return { course, sessions: sessionsWithSeats };
+  let booking: CourseBookingView | null = null;
+  if (course.type === "booking" && course.sessionDurationMin) {
+    const now = Date.now();
+    const [hours, busy] = await Promise.all([
+      getBookingHours(),
+      getBusyRanges(now),
+    ]);
+    booking = {
+      durationMin: course.sessionDurationMin,
+      days: generateSlots(hours, course.sessionDurationMin, busy, now),
+    };
+  }
+
+  return { course, sessions: sessionsWithSeats, booking };
 }
 
 /** enrollment + คอร์ส + รอบเรียน (join) สำหรับหน้าจ่ายเงิน / my-courses */

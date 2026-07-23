@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { enroll } from "@/actions/enrollments";
 import { formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/cn";
+import type { CourseType } from "@/db/schema";
 
 type SessionOption = {
   id: string;
@@ -21,7 +22,7 @@ export function EnrollForm({
   sessions,
 }: {
   courseId: string;
-  type: "scheduled" | "open";
+  type: CourseType;
   sessions: SessionOption[];
 }) {
   const [selected, setSelected] = useState<string | null>(null);

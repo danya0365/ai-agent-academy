@@ -4,9 +4,11 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { courses, courseSessions, enrollments } from "@/db/schema";
+import { courses, courseSessions, enrollments, bookingHours } from "@/db/schema";
 import { requireAdmin } from "@/lib/session";
 import { confirmEnrollment } from "@/lib/enrollment-confirm";
+import { releaseSlot } from "@/lib/booking-repo";
+import { WEEKDAY_TH } from "@/lib/format";
 import type { CourseType } from "@/db/schema";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
@@ -20,6 +22,36 @@ function slugify(input: string): string {
       .replace(/^-+|-+$/g, "")
       .slice(0, 80) || randomUUID().slice(0, 8)
   );
+}
+
+type CourseFields = {
+  title: string;
+  description: string;
+  type: CourseType;
+  price: number;
+  durationMin: number | null;
+};
+
+/** อ่าน+ตรวจ field คอร์สจากฟอร์ม (ใช้ร่วมทั้ง create/update) */
+function parseCourseFields(formData: FormData): CourseFields | { error: string } {
+  const title = String(formData.get("title") || "").trim();
+  const description = String(formData.get("description") || "").trim();
+  const type = String(formData.get("type") || "") as CourseType;
+  const price = Number(formData.get("price"));
+
+  if (!title) return { error: "กรุณากรอกชื่อคอร์ส" };
+  if (type !== "scheduled" && type !== "open" && type !== "booking")
+    return { error: "กรุณาเลือกประเภทคอร์ส" };
+  if (!Number.isFinite(price) || price < 0) return { error: "ราคาไม่ถูกต้อง" };
+
+  let durationMin: number | null = null;
+  if (type === "booking") {
+    const d = Number(formData.get("sessionDurationMin"));
+    if (!Number.isFinite(d) || d < 15 || d > 480)
+      return { error: "ความยาวต่อครั้งไม่ถูกต้อง (15–480 นาที)" };
+    durationMin = Math.round(d);
+  }
+  return { title, description, type, price: Math.round(price), durationMin };
 }
 
 /* ───────────── ตรวจสลิป ───────────── */
@@ -55,6 +87,9 @@ export async function rejectEnrollment(
     .where(eq(enrollments.id, id))
     .run();
 
+  // คอร์สจองคิว → ปล่อย slot คืนให้คนอื่นจองได้ (no-op ถ้าไม่มี lock)
+  if (e.bookedStartAt) await releaseSlot(id);
+
   revalidatePath("/admin/enrollments");
   revalidatePath("/admin");
   return { ok: true };
@@ -64,18 +99,10 @@ export async function rejectEnrollment(
 
 export async function createCourse(formData: FormData): Promise<ActionResult> {
   await requireAdmin();
-  const title = String(formData.get("title") || "").trim();
-  const description = String(formData.get("description") || "").trim();
-  const type = String(formData.get("type") || "") as CourseType;
-  const price = Number(formData.get("price"));
+  const f = parseCourseFields(formData);
+  if ("error" in f) return { ok: false, error: f.error };
 
-  if (!title) return { ok: false, error: "กรุณากรอกชื่อคอร์ส" };
-  if (type !== "scheduled" && type !== "open")
-    return { ok: false, error: "กรุณาเลือกประเภทคอร์ส" };
-  if (!Number.isFinite(price) || price < 0)
-    return { ok: false, error: "ราคาไม่ถูกต้อง" };
-
-  let slug = slugify(String(formData.get("slug") || "") || title);
+  let slug = slugify(String(formData.get("slug") || "") || f.title);
   // กัน slug ซ้ำ
   const dup = await db.select().from(courses).where(eq(courses.slug, slug)).get();
   if (dup) slug = `${slug}-${randomUUID().slice(0, 4)}`;
@@ -85,10 +112,11 @@ export async function createCourse(formData: FormData): Promise<ActionResult> {
     .values({
       id: randomUUID(),
       slug,
-      title,
-      description,
-      type,
-      price: Math.round(price),
+      title: f.title,
+      description: f.description,
+      type: f.type,
+      price: f.price,
+      sessionDurationMin: f.durationMin,
       isPublished: formData.get("isPublished") === "on",
     })
     .run();
@@ -103,24 +131,17 @@ export async function updateCourse(
   formData: FormData,
 ): Promise<ActionResult> {
   await requireAdmin();
-  const title = String(formData.get("title") || "").trim();
-  const description = String(formData.get("description") || "").trim();
-  const type = String(formData.get("type") || "") as CourseType;
-  const price = Number(formData.get("price"));
-
-  if (!title) return { ok: false, error: "กรุณากรอกชื่อคอร์ส" };
-  if (type !== "scheduled" && type !== "open")
-    return { ok: false, error: "กรุณาเลือกประเภทคอร์ส" };
-  if (!Number.isFinite(price) || price < 0)
-    return { ok: false, error: "ราคาไม่ถูกต้อง" };
+  const f = parseCourseFields(formData);
+  if ("error" in f) return { ok: false, error: f.error };
 
   await db
     .update(courses)
     .set({
-      title,
-      description,
-      type,
-      price: Math.round(price),
+      title: f.title,
+      description: f.description,
+      type: f.type,
+      price: f.price,
+      sessionDurationMin: f.durationMin, // null เมื่อไม่ใช่ booking → เคลียร์ค่าเก่า
       isPublished: formData.get("isPublished") === "on",
     })
     .where(eq(courses.id, id))
@@ -238,5 +259,53 @@ export async function deleteSession(sessionId: string): Promise<ActionResult> {
 
   await db.delete(courseSessions).where(eq(courseSessions.id, sessionId)).run();
   revalidatePath(`/admin/courses/${s.courseId}/sessions`);
+  return { ok: true };
+}
+
+/* ───────────── เวลาทำการ (booking hours) ───────────── */
+
+/** "HH:mm" → นาทีจากเที่ยงคืน (รองรับ "24:00" = 1440); null ถ้ารูปแบบผิด */
+function parseHHMM(s: string): number | null {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(s.trim());
+  if (!m) return null;
+  const h = Number(m[1]);
+  const min = Number(m[2]);
+  if (h < 0 || h > 24 || min < 0 || min > 59) return null;
+  const total = h * 60 + min;
+  return total > 1440 ? null : total;
+}
+
+/**
+ * บันทึกเวลาทำการทั้งสัปดาห์ (replace-all) — ฟอร์มส่งมาทีละวัน:
+ *   d{weekday}_enabled = "on" ถ้าเปิดวันนั้น, d{weekday}_start / d{weekday}_end = "HH:mm"
+ * (v1 รองรับ 1 ช่วงต่อวัน — schema เก็บหลายช่วงได้ ต่อยอดภายหลัง)
+ */
+export async function saveBookingHours(formData: FormData): Promise<ActionResult> {
+  await requireAdmin();
+
+  const rows: {
+    id: string;
+    weekday: number;
+    startMinute: number;
+    endMinute: number;
+  }[] = [];
+
+  for (let wd = 0; wd < 7; wd++) {
+    if (formData.get(`d${wd}_enabled`) !== "on") continue;
+    const start = parseHHMM(String(formData.get(`d${wd}_start`) || ""));
+    const end = parseHHMM(String(formData.get(`d${wd}_end`) || ""));
+    if (start == null || end == null)
+      return { ok: false, error: `เวลาวัน${WEEKDAY_TH[wd]}ไม่ถูกต้อง` };
+    if (end <= start)
+      return { ok: false, error: `วัน${WEEKDAY_TH[wd]}: เวลาปิดต้องอยู่หลังเวลาเปิด` };
+    rows.push({ id: randomUUID(), weekday: wd, startMinute: start, endMinute: end });
+  }
+
+  await db.transaction(async (tx) => {
+    await tx.delete(bookingHours).run();
+    if (rows.length) await tx.insert(bookingHours).values(rows).run();
+  });
+
+  revalidatePath("/admin/booking-hours");
   return { ok: true };
 }

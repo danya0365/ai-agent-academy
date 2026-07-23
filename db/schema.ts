@@ -92,21 +92,43 @@ export const rateLimit = sqliteTable(
  * ตารางของแอป: คอร์ส / รอบเรียน / การลงทะเบียน
  * ──────────────────────────────────────────────────────────── */
 
-export type CourseType = "scheduled" | "open";
+// 'scheduled' = มีรอบเรียนตายตัว (courseSessions)
+// 'open'      = สมัครแล้วเรียนได้ทันที ไม่ต้องเลือกเวลา
+// 'booking'   = จองคิว 1-on-1 เอง ตามเวลาทำการ (bookingHours) — slot gen สด ไม่เก็บใน DB
+export type CourseType = "scheduled" | "open" | "booking";
 
 export const courses = sqliteTable("courses", {
   id: text("id").primaryKey(),
   slug: text("slug").notNull().unique(),
   title: text("title").notNull(),
   description: text("description").notNull(),
-  type: text("type").notNull().$type<CourseType>(), // 'scheduled' | 'open'
+  type: text("type").notNull().$type<CourseType>(),
   price: integer("price").notNull(), // หน่วยเป็นบาท (จำนวนเต็ม)
   coverImageUrl: text("cover_image_url"),
+  // ความยาวต่อครั้ง (นาที) — ใช้เฉพาะคอร์ส type 'booking' (null สำหรับประเภทอื่น)
+  sessionDurationMin: integer("session_duration_min"),
   isPublished: integer("is_published", { mode: "boolean" }).notNull().default(false),
   createdAt: integer("created_at", { mode: "timestamp" })
     .notNull()
     .$defaultFn(() => new Date()),
 });
+
+/**
+ * เวลาทำการของ "ร้าน" (recurring weekly) — ใช้ gen slot ว่างของคอร์ส booking
+ * scope: global (ชุดเดียวใช้ทุกคอร์ส booking) — ถ้าอยากแยกต่อคอร์สในอนาคต เพิ่ม courseId ได้
+ * "ทุกวัน 24 ชม." = 7 แถว (weekday 0–6, start 0 end 1440)
+ * "จ–ศ 9–17"     = 5 แถว (start 540 end 1020) · เช้า/บ่ายแยกช่วง = หลายแถวต่อวันได้
+ */
+export const bookingHours = sqliteTable(
+  "booking_hours",
+  {
+    id: text("id").primaryKey(),
+    weekday: integer("weekday").notNull(), // 0=อาทิตย์ .. 6=เสาร์ (อิงเวลาไทย)
+    startMinute: integer("start_minute").notNull(), // นาทีจากเที่ยงคืน (0–1440)
+    endMinute: integer("end_minute").notNull(),
+  },
+  (t) => [index("booking_hours_weekday_idx").on(t.weekday)],
+);
 
 export const courseSessions = sqliteTable(
   "course_sessions",
@@ -155,6 +177,10 @@ export const enrollments = sqliteTable(
     sessionId: text("session_id").references(() => courseSessions.id, {
       onDelete: "set null",
     }),
+    // เวลาที่จอง (คอร์ส type 'booking') — เก็บบน enrollment เพื่อคงไว้แม้ถูก reject
+    // (แหล่งความจริงของ "ลูกค้าเลือกเวลาไหน"; ตาราง bookings เป็นแค่ lock กันซ้อน)
+    bookedStartAt: integer("booked_start_at", { mode: "timestamp" }),
+    bookedEndAt: integer("booked_end_at", { mode: "timestamp" }),
     status: text("status").notNull().$type<EnrollmentStatus>(),
     amount: integer("amount").notNull(), // snapshot ราคาตอนสมัคร (บาท)
     slipPath: text("slip_path"),
@@ -174,6 +200,40 @@ export const enrollments = sqliteTable(
     index("enrollments_session_status_idx").on(t.sessionId, t.status),
     // กันสลิปซ้ำ — SQLite ยอมให้ค่า null ซ้ำกันได้
     uniqueIndex("enrollments_slip_trans_ref_unique").on(t.slipTransRef),
+  ],
+);
+
+/**
+ * slot ที่ถูกจอง (คอร์ส type 'booking') — ทำหน้าที่ "lock" กันจองซ้อนแบบ atomic
+ * PK รวม (courseId, startAt): 2 คนจิ้ม slot เดียวพร้อมกัน → คนที่ 2 ชน PK = insert ไม่ผ่าน
+ * จงใจใช้ composite PK แทน uniqueIndex — migration ไม่มี CREATE UNIQUE INDEX จึงผ่าน guard
+ * (แบบเดียวกับ community_post_likes — deploy prod ได้เลย ไม่ต้องตั้ง ALLOW_DESTRUCTIVE)
+ *
+ * lifecycle: มีแถวอยู่ตราบที่ enrollment ยัง "ถือคิว" (pending_payment/slip_uploaded/confirmed)
+ * ถูก reject → ลบแถว (ปล่อย slot) · อัปสลิปใหม่หลัง reject → claim กลับจาก enrollment.bookedStartAt
+ */
+export const bookings = sqliteTable(
+  "bookings",
+  {
+    courseId: text("course_id")
+      .notNull()
+      .references(() => courses.id, { onDelete: "cascade" }),
+    startAt: integer("start_at", { mode: "timestamp" }).notNull(),
+    endAt: integer("end_at", { mode: "timestamp" }).notNull(),
+    enrollmentId: text("enrollment_id")
+      .notNull()
+      .references(() => enrollments.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (t) => [
+    primaryKey({ columns: [t.courseId, t.startAt] }),
+    // ลบ/ค้นหา booking ตาม enrollment (ตอนปล่อย slot)
+    index("bookings_enrollment_idx").on(t.enrollmentId),
   ],
 );
 
