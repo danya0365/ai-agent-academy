@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Noto_Sans_Thai } from "next/font/google";
 import "@/public/styles/index.css";
-import { Navbar } from "@/components/navbar";
+import { AppShell } from "@/components/shell/app-shell";
+import type { ShellUser } from "@/components/shell/nav";
 import { ThemeProvider, ThemeScript } from "@/components/theme/theme-provider";
-import { AppVersion } from "@/components/app-version";
+import { getSession } from "@/lib/session";
 
 // body face — ใช้ทุกธีม (variable font → ครบทุกน้ำหนักรวม extrabold/black)
 const notoThai = Noto_Sans_Thai({
@@ -35,11 +36,22 @@ export const metadata: Metadata = {
     : undefined,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getSession();
+  const su = session?.user ?? null;
+  const user: ShellUser | null = su
+    ? {
+        name: su.name,
+        email: su.email,
+        role: su.role ?? "customer",
+        image: su.image ?? null,
+      }
+    : null;
+
   return (
     <html
       lang="th"
@@ -72,28 +84,9 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="flex min-h-full flex-col bg-background text-foreground">
+      <body className="min-h-full bg-background text-foreground">
         <ThemeProvider>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <footer className="border-t-2 border-border">
-            <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-8 text-sm text-muted sm:flex-row sm:px-6">
-              <div className="flex items-center gap-2 font-extrabold text-foreground">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg border-2 border-border bg-brand-500 text-on-brand">
-                  AI
-                </span>
-                AI Agent Academy
-              </div>
-              <div className="flex flex-col items-center gap-1 sm:items-end">
-                <span>© {new Date().getFullYear()} · สอนทุกอย่างเกี่ยวกับ AI</span>
-                <div className="flex gap-3 text-xs">
-                  <a href="/terms" className="font-bold text-brand-700 hover:underline">ข้อกำหนด</a>
-                  <a href="/privacy" className="font-bold text-brand-700 hover:underline">นโยบายความเป็นส่วนตัว</a>
-                </div>
-                <AppVersion />
-              </div>
-            </div>
-          </footer>
+          <AppShell user={user}>{children}</AppShell>
         </ThemeProvider>
       </body>
     </html>
