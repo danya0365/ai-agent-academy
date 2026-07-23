@@ -224,9 +224,9 @@ function Sidebar({ user, pathname }: { user: ShellUser | null; pathname: string 
         })}
       </nav>
 
-      {/* Theme */}
+      {/* Theme — compact (icon-only) กัน label ดัน sidebar เกิน w-72 → scroll-x */}
       <div className="mt-5 px-1">
-        <ThemeSwitcher />
+        <ThemeSwitcher compact />
       </div>
 
       {/* Footer */}
