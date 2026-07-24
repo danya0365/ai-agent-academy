@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
 import { getPublishedCourses } from "@/lib/courses";
 import { formatBaht, formatDuration, COURSE_TYPE_LABELS, courseTypeBadge } from "@/lib/format";
 
@@ -17,9 +19,10 @@ export default async function AdminCoursesPage() {
       ) : (
         <div className="space-y-3">
           {list.map((c) => (
-            <div
+            <Link
               key={c.slug}
-              className="card flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between"
+              href={`/admin/courses/${c.slug}`}
+              className="card lift group flex items-center justify-between gap-3 p-5"
             >
               <div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -34,7 +37,8 @@ export default async function AdminCoursesPage() {
                   · {formatBaht(c.price)} ·  {c.stacks.length} หัวข้อ · /{c.slug}
                 </p>
               </div>
-            </div>
+              <ArrowUpRight className="size-5 shrink-0 text-muted transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </Link>
           ))}
         </div>
       )}
