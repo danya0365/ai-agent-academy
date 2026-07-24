@@ -9,6 +9,7 @@ import { AiAgentIdentityMemory } from "@/components/tips/custom/ai-agent-identit
 import { PromptsThatWork } from "@/components/tips/custom/prompts-that-work";
 import { AiSideIncome } from "@/components/tips/custom/ai-side-income";
 import { AiProductPhotography } from "@/components/tips/custom/ai-product-photography";
+import { PromptEngineeringAdvanced } from "@/components/tips/custom/prompt-engineering-advanced";
 
 /**
  * ทะเบียน component เฉพาะของแต่ละเคล็ดลับ (custom renderer)
@@ -30,4 +31,5 @@ export const TIP_COMPONENTS: Record<string, ComponentType<{ tip: Tip }>> = {
   "prompts-that-work": PromptsThatWork,
   "ai-side-income": AiSideIncome,
   "ai-product-photography": AiProductPhotography,
+  "prompt-engineering-advanced": PromptEngineeringAdvanced,
 };
