@@ -8,6 +8,7 @@ import {
   MessagesSquare,
   BookMarked,
   ShieldCheck,
+  Palette,
   type LucideIcon,
 } from "lucide-react";
 
@@ -77,6 +78,15 @@ export const NAV_ITEMS: NavItem[] = [
     tabbar: true,
     group: "content",
     match: startsWith("/community"),
+  },
+  {
+    href: "/design-system",
+    label: "Design System",
+    short: "Design",
+    icon: Palette,
+    visibility: "always",
+    group: "content",
+    match: startsWith("/design-system"),
   },
   {
     href: "/my-courses",
