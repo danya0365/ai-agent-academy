@@ -12,6 +12,7 @@ import "server-only";
 // ── Config: ปรับเลขที่นี่จุดเดียว ─────────────────────────────
 export const BOOKING_ADVANCE_DAYS = 14; // จองล่วงหน้าได้กี่วัน (นับรวมวันนี้)
 export const BOOKING_LEAD_MINUTES = 60; // ห้ามจองภายในกี่นาทีข้างหน้า
+export const BOOKING_LEAD_TOLERANCE_MS = 120_000; // tolerance 2 นาทีใน isValidSlot — กัน slot ถูก reject เพราะเวลาผ่านไประหว่าง render → submit
 export const BKK_OFFSET_MIN = 420; // เวลาไทย = UTC+7
 
 const MS_PER_MIN = 60_000;
@@ -99,10 +100,11 @@ export function isValidSlot(
   durationMin: number,
   startEpoch: number,
   now: number,
+  toleranceMs = 0, // tolerance สำหรับ earliest bound — ป้องกัน reject ตอน submit หลัง render
 ): boolean {
   if (!durationMin || durationMin <= 0 || !Number.isFinite(startEpoch)) return false;
 
-  const earliest = now + BOOKING_LEAD_MINUTES * MS_PER_MIN;
+  const earliest = now + BOOKING_LEAD_MINUTES * MS_PER_MIN - toleranceMs;
   const maxEpoch = bkkMidnight(now) + BOOKING_ADVANCE_DAYS * MS_PER_DAY;
   if (startEpoch < earliest || startEpoch >= maxEpoch) return false;
 

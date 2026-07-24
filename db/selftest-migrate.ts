@@ -103,7 +103,6 @@ async function main() {
   const expected = [
     "__drizzle_migrations",
     "account",
-    "course_sessions",
     "courses",
     "enrollments",
     "session",

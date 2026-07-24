@@ -6,9 +6,8 @@ import type { ResolvedCourseContent } from "@/lib/course-content";
 type Course = typeof courses.$inferSelect;
 
 const TYPE_FACT = {
-  scheduled: "เลือกรอบเรียนได้",
-  open: "เรียนได้ทันทีหลังสมัคร",
-  booking: "จองเวลาเรียนเองได้",
+  self_paced: "เรียนได้ทันทีหลังสมัคร",
+  live: "จองเวลาเรียนเองได้",
 } as const;
 
 /** แถบข้อเท็จจริงย่อของคอร์ส — ราคา / รูปแบบ / ความยาว / ระดับ */
@@ -23,7 +22,7 @@ export function CourseMeta({
     <div className="flex flex-wrap gap-2.5">
       <Fact icon={Wallet}>{formatBaht(course.price)}</Fact>
       <Fact icon={BadgeCheck}>{TYPE_FACT[course.type]}</Fact>
-      {course.type === "booking" && course.sessionDurationMin && (
+      {course.type === "live" && course.sessionDurationMin && (
         <Fact icon={Clock}>ครั้งละ {formatDuration(course.sessionDurationMin)}</Fact>
       )}
       {content.level && <Fact icon={BarChart3}>ระดับ {content.level}</Fact>}

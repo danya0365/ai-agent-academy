@@ -5,8 +5,9 @@ import { eq, like, inArray } from "drizzle-orm";
 import { db } from "../index";
 import {
   courses,
-  courseSessions,
   enrollments,
+  bookings,
+  bookingHours,
   user,
   communityPosts,
   communityPostLikes,
@@ -344,14 +345,30 @@ export async function seedMock(): Promise<void> {
   const allCourses = await db.select().from(courses).all();
   const bySlug = new Map(allCourses.map((c) => [c.slug, c]));
 
-  async function firstSessionId(courseId: string): Promise<string | null> {
-    const s = await db
-      .select({ id: courseSessions.id })
-      .from(courseSessions)
-      .where(eq(courseSessions.courseId, courseId))
-      .orderBy(courseSessions.startAt)
-      .get();
-    return s?.id ?? null;
+  /** หา slot ถัดไปของวันทำงาน (booking course) สำหรับ mock booking enrollments */
+  async function getBookingEnrollmentTimes(
+    courseId: string,
+    durationMin: number,
+  ): Promise<{ startAt: Date; endAt: Date } | null> {
+    const hours = await db.select().from(bookingHours).all();
+    if (!hours.length || !durationMin) return null;
+    const bkkOffsetMs = 7 * 3600_000;
+
+    for (let d = 1; d <= 14; d++) {
+      // เที่ยงคืนของวันถัดไป (BKK)
+      const raw = Date.now() + d * 86400000;
+      const shifted = raw + bkkOffsetMs;
+      const dayStart = new Date(raw - (shifted % 86400000));
+      const weekday = new Date(raw + bkkOffsetMs).getUTCDay(); // 0=Sun..6=Sat
+
+      const h = hours.find((h) => h.weekday === weekday);
+      if (!h) continue;
+
+      const startAt = new Date(dayStart.getTime() + h.startMinute * 60000);
+      const endAt = new Date(startAt.getTime() + durationMin * 60000);
+      return { startAt, endAt };
+    }
+    return null;
   }
 
   const counts: Record<EnrollmentStatus, number> = {
@@ -367,21 +384,31 @@ export async function seedMock(): Promise<void> {
       console.log(`- [mock] ข้าม (ไม่พบคอร์ส ${spec.slug}) — รัน starter ก่อน`);
       continue;
     }
-    const sessionId =
-      course.type === "scheduled" ? await firstSessionId(course.id) : null;
+    // booking course: generate slot times
+    let bookedStartAt: Date | null = null;
+    let bookedEndAt: Date | null = null;
+    if (course.type === "live" && course.sessionDurationMin) {
+      const times = await getBookingEnrollmentTimes(course.id, course.sessionDurationMin);
+      if (times) {
+        bookedStartAt = times.startAt;
+        bookedEndAt = times.endAt;
+      }
+    }
 
     const needsSlip = spec.status !== "pending_payment";
     const slipPath = needsSlip ? await makeSlipImage(spec.slug) : null;
     const now = new Date();
     const reviewed = spec.status === "confirmed" || spec.status === "rejected";
 
+    const enrollmentId = randomUUID();
     await db
       .insert(enrollments)
       .values({
-        id: randomUUID(),
+        id: enrollmentId,
         userId: customerIds[spec.customer],
         courseId: course.id,
-        sessionId,
+        bookedStartAt,
+        bookedEndAt,
         status: spec.status,
         amount: course.price,
         slipPath,
@@ -390,6 +417,24 @@ export async function seedMock(): Promise<void> {
         rejectReason: spec.status === "rejected" ? spec.rejectReason ?? null : null,
       })
       .run();
+
+    // booking course: insert lock row (bookings)
+    if (course.type === "live" && bookedStartAt && bookedEndAt) {
+      await db
+        .insert(bookings)
+        .values({
+          courseId: course.id,
+          startAt: bookedStartAt,
+          endAt: bookedEndAt,
+          enrollmentId,
+          userId: customerIds[spec.customer],
+        })
+        .catch(() => {
+          // ถ้าชน PK (slot ซ้ำ) = อีกคนจอง slot นี้ ก็ไม่เป็นไร — mock ข้าม
+          console.log(`- [mock] booking slot ชน PK (ข้าม): ${course.slug}`);
+        });
+    }
+
     counts[spec.status]++;
   }
 

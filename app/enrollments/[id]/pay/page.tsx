@@ -6,7 +6,6 @@ import { getEnrollmentForUser } from "@/lib/queries";
 import { generatePromptPayQR, getBankInfo } from "@/lib/promptpay";
 import {
   formatBaht,
-  formatDateTime,
   formatBkkDateTime,
   STATUS_LABELS,
   STATUS_COLORS,
@@ -25,7 +24,7 @@ export default async function PayPage({
   const row = await getEnrollmentForUser(id, user.id);
   if (!row) notFound();
 
-  const { enrollment, course, session } = row;
+  const { enrollment, course } = row;
   const bank = getBankInfo();
   const qr = await generatePromptPayQR(enrollment.amount);
   const canUpload =
@@ -48,9 +47,6 @@ export default async function PayPage({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <p className="font-extrabold text-foreground">{course.title}</p>
-            {session && (
-              <p className="text-sm text-muted">รอบเรียน: {formatDateTime(session.startAt)}</p>
-            )}
             {enrollment.bookedStartAt && (
               <p className="text-sm text-muted">
                 เวลาที่จอง: {formatBkkDateTime(enrollment.bookedStartAt)}

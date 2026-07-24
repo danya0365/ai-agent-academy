@@ -6,17 +6,15 @@ import { BookingPicker } from "@/components/booking-picker";
 
 type Course = typeof courses.$inferSelect;
 
-/** เลือกกล่องสมัคร/จองตามประเภทคอร์ส — booking → BookingPicker, อื่น → EnrollForm */
+/** เลือกกล่องสมัคร/จองตามประเภทคอร์ส — live → BookingPicker, self_paced → EnrollForm */
 export function CourseEnroll({
   course,
-  sessions,
   booking,
 }: {
   course: Course;
-  sessions: ComponentProps<typeof EnrollForm>["sessions"];
   booking: CourseBookingView | null;
 }) {
-  if (course.type === "booking" && booking) {
+  if (course.type === "live" && booking) {
     return (
       <BookingPicker
         courseId={course.id}
@@ -25,5 +23,5 @@ export function CourseEnroll({
       />
     );
   }
-  return <EnrollForm courseId={course.id} type={course.type} sessions={sessions} />;
+  return <EnrollForm courseId={course.id} />;
 }

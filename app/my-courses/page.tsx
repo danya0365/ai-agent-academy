@@ -4,7 +4,6 @@ import { requireUser } from "@/lib/session";
 import { getUserEnrollments } from "@/lib/queries";
 import {
   formatBaht,
-  formatDateTime,
   formatBkkDateTime,
   STATUS_LABELS,
   STATUS_COLORS,
@@ -34,7 +33,7 @@ export default async function MyCoursesPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {rows.map(({ enrollment, course, session }) => {
+          {rows.map(({ enrollment, course }) => {
             const actionable =
               enrollment.status === "pending_payment" ||
               enrollment.status === "rejected";
@@ -45,11 +44,6 @@ export default async function MyCoursesPage() {
               >
                 <div>
                   <p className="font-extrabold text-foreground">{course.title}</p>
-                  {session && (
-                    <p className="text-sm text-muted">
-                      รอบเรียน: {formatDateTime(session.startAt)}
-                    </p>
-                  )}
                   {enrollment.bookedStartAt && (
                     <p className="text-sm text-muted">
                       เวลาที่จอง: {formatBkkDateTime(enrollment.bookedStartAt)}

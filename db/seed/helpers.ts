@@ -4,8 +4,8 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import QRCode from "qrcode";
 import { db } from "../index";
-import { courses, courseSessions, user } from "../schema";
-import type { CourseType } from "../schema";
+import { courses, user } from "../schema";
+import type { CourseType } from "../../lib/course-types";
 import { auth } from "../../lib/auth";
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR || "./uploads";
@@ -54,13 +54,6 @@ export async function ensureUser(opts: {
   return created.id;
 }
 
-export type SeedSession = {
-  startDay: number;
-  durationHours?: number;
-  capacity: number;
-  location?: string;
-};
-
 export type SeedCourse = {
   slug: string;
   title: string;
@@ -68,7 +61,8 @@ export type SeedCourse = {
   type: CourseType;
   price: number;
   isPublished: boolean;
-  sessions?: SeedSession[];
+  /** ความยาวต่อครั้ง (นาที) — ใช้เฉพาะ type booking */
+  sessionDurationMin?: number;
 };
 
 /**
@@ -91,31 +85,12 @@ export async function upsertCourse(
       description: c.description,
       type: c.type,
       price: c.price,
+      sessionDurationMin: c.sessionDurationMin ?? null,
       isPublished: c.isPublished,
     })
     .run();
 
-  for (const s of c.sessions ?? []) {
-    await addSession(courseId, s);
-  }
   return { courseId, created: true };
-}
-
-export async function addSession(courseId: string, s: SeedSession): Promise<void> {
-  const startAt = daysFromNow(s.startDay);
-  const endAt = new Date(startAt.getTime() + (s.durationHours ?? 6) * 3600 * 1000);
-  await db
-    .insert(courseSessions)
-    .values({
-      id: randomUUID(),
-      courseId,
-      startAt,
-      endAt,
-      capacity: s.capacity,
-      location: s.location ?? "ออนไลน์ผ่าน Zoom",
-      isOpen: true,
-    })
-    .run();
 }
 
 /**

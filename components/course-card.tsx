@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Calendar, Zap, ArrowRight } from "lucide-react";
+import { Clock, Zap, ArrowRight } from "lucide-react";
 import type { courses } from "@/db/schema";
 import { formatBaht, COURSE_TYPE_LABELS } from "@/lib/format";
 
@@ -14,12 +14,11 @@ function coverClass(id: string): string {
 }
 
 export function CourseCard({ course }: { course: Course }) {
-  const scheduled = course.type === "scheduled";
   return (
     <Link href={`/courses/${course.slug}`} className="card lift group flex flex-col overflow-hidden p-0">
       <div className={`relative h-24 ${coverClass(course.id)}`}>
         <span className="badge absolute left-3 top-3 bg-card text-foreground">
-          {scheduled ? <Calendar className="size-3.5" /> : <Zap className="size-3.5" />}
+          {course.type === "live" ? <Clock className="size-3.5" /> : <Zap className="size-3.5" />}
           {COURSE_TYPE_LABELS[course.type]}
         </span>
       </div>

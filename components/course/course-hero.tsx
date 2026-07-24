@@ -1,15 +1,14 @@
-import { Calendar, Zap, Clock, CheckCircle2, ArrowRight } from "lucide-react";
+import { Zap, Clock, CheckCircle2, ArrowRight } from "lucide-react";
 import type { courses } from "@/db/schema";
 import { formatBaht, COURSE_TYPE_LABELS } from "@/lib/format";
 import type { ResolvedCourseContent } from "@/lib/course-content";
 
 type Course = typeof courses.$inferSelect;
 
-const TYPE_ICON = { scheduled: Calendar, open: Zap, booking: Clock } as const;
+const TYPE_ICON = { self_paced: Zap, live: Clock } as const;
 const CTA_LABEL = {
-  scheduled: "ดูรอบเรียน",
-  open: "สมัครเรียน",
-  booking: "เลือกเวลาเรียน",
+  self_paced: "สมัครเรียน",
+  live: "เลือกเวลาเรียน",
 } as const;
 
 // สีแถบ cover แบบ deterministic จาก id (token utilities — ไม่ hardcode hex) — pattern เดียวกับ course-card

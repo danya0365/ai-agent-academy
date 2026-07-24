@@ -43,9 +43,9 @@ export default async function CourseDetailPage({
   const data = await getCourseBySlug(slug);
   if (!data || !data.course.isPublished) notFound();
 
-  const { course, sessions, booking } = data;
+  const { course, booking } = data;
   const content = getCourseContent(slug);
-  const isBooking = course.type === "booking";
+  const isLive = course.type === "live";
 
   return (
     <div className="flex flex-col gap-10">
@@ -59,24 +59,24 @@ export default async function CourseDetailPage({
       <CourseHero course={course} content={content} ctaHref="#enroll" />
       <CourseMeta course={course} content={content} />
 
-      {isBooking ? (
+      {isLive ? (
         <>
-          {/* booking: กล่องจองเต็มกว้าง (แก้ปัญหาเบียด) แล้วต่อด้วยเนื้อหา */}
+          {/* live: กล่องจองเต็มกว้าง แล้วต่อด้วยเนื้อหา */}
           <section id="enroll" className="scroll-mt-24">
-            <CourseEnroll course={course} sessions={sessions} booking={booking} />
+            <CourseEnroll course={course} booking={booking} />
           </section>
           <div className="mx-auto flex w-full max-w-4xl flex-col gap-12">
             <Sections course={course} content={content} />
           </div>
         </>
       ) : (
-        /* scheduled/open: เนื้อหาซ้าย + กล่องสมัคร sticky ขวา */
+        /* self_paced: เนื้อหาซ้าย + กล่องสมัคร sticky ขวา */
         <div className="grid gap-10 lg:grid-cols-[1fr_360px]">
           <div className="flex min-w-0 flex-col gap-12">
             <Sections course={course} content={content} />
           </div>
           <aside id="enroll" className="scroll-mt-24 lg:sticky lg:top-20 lg:self-start">
-            <CourseEnroll course={course} sessions={sessions} booking={booking} />
+            <CourseEnroll course={course} booking={booking} />
           </aside>
         </div>
       )}

@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createCourse, updateCourse } from "@/actions/admin";
-import type { CourseType } from "@/db/schema";
+import type { CourseType } from "@/lib/course-types";
 
 type Initial = {
   id?: string;
@@ -22,7 +22,7 @@ export function CourseForm({ initial }: { initial?: Initial }) {
   const router = useRouter();
   const isEdit = Boolean(initial?.id);
   const [error, setError] = useState<string | null>(null);
-  const [type, setType] = useState<CourseType>(initial?.type ?? "scheduled");
+  const [type, setType] = useState<CourseType>(initial?.type ?? "self_paced");
   const [pending, startTransition] = useTransition();
 
   function handleSubmit(formData: FormData) {
@@ -64,9 +64,8 @@ export function CourseForm({ initial }: { initial?: Initial }) {
             onChange={(e) => setType(e.target.value as CourseType)}
             className="input"
           >
-            <option value="scheduled">มีรอบเรียน</option>
-            <option value="open">เรียนได้ทันที (สมัครได้ตลอด)</option>
-            <option value="booking">จองเวลาเอง (คิว 1-on-1)</option>
+            <option value="self_paced">เรียนเอง (เอกสาร + วิดีโอ)</option>
+            <option value="live">สอนสดตัวต่อตัว</option>
           </select>
         </Label>
 
@@ -82,7 +81,7 @@ export function CourseForm({ initial }: { initial?: Initial }) {
         </Label>
       </div>
 
-      {type === "booking" && (
+      {type === "live" && (
         <Label text="ความยาวต่อครั้ง">
           <select
             name="sessionDurationMin"

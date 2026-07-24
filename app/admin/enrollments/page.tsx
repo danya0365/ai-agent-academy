@@ -2,11 +2,11 @@ import Link from "next/link";
 import { getAdminEnrollments } from "@/lib/queries";
 import {
   formatBaht,
-  formatDateTime,
   formatBkkDateTime,
   STATUS_LABELS,
   STATUS_COLORS,
 } from "@/lib/format";
+import { COURSE_TYPE_LABELS, courseTypeBadge } from "@/lib/course-types";
 import { EnrollmentReview } from "@/components/enrollment-review";
 import { cn } from "@/lib/cn";
 import type { EnrollmentStatus } from "@/db/schema";
@@ -66,7 +66,7 @@ export default async function AdminEnrollmentsPage({
         <p className="card-flat p-8 text-center text-muted">ไม่มีรายการในสถานะนี้</p>
       ) : (
         <div className="space-y-3">
-          {rows.map(({ enrollment, course, session, customer }) => {
+          {rows.map(({ enrollment, course, customer }) => {
             const v = enrollment.slipVerifyStatus
               ? VERIFY[enrollment.slipVerifyStatus]
               : null;
@@ -78,18 +78,20 @@ export default async function AdminEnrollmentsPage({
                     <p className="text-sm text-muted">
                       {customer.name} · {customer.email}
                     </p>
-                    {session && (
-                      <p className="text-sm text-muted">รอบ: {formatDateTime(session.startAt)}</p>
-                    )}
-                    {enrollment.bookedStartAt && (
-                      <p className="text-sm text-muted">
-                        เวลาที่จอง: {formatBkkDateTime(enrollment.bookedStartAt)}
-                      </p>
-                    )}
+                    <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
+                      <span className={`badge ${courseTypeBadge(course.type)}`}>
+                        {COURSE_TYPE_LABELS[course.type]}
+                      </span>
+                      {course.type === "live" && enrollment.bookedStartAt ? (
+                        <span>เวลาที่จอง: {formatBkkDateTime(enrollment.bookedStartAt)}</span>
+                      ) : course.type === "self_paced" ? (
+                        <span className="text-muted">เรียนได้ทันที ไม่มีเวลาจอง</span>
+                      ) : null}
+                    </div>
                     <p className="text-sm text-muted">
                       ยอด: {formatBaht(enrollment.amount)}
                       {enrollment.slipUploadedAt && (
-                        <> · ส่งสลิป {formatDateTime(enrollment.slipUploadedAt)}</>
+                        <> · ส่งสลิป {formatBkkDateTime(enrollment.slipUploadedAt)}</>
                       )}
                     </p>
                     {enrollment.rejectReason && (

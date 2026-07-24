@@ -1,4 +1,4 @@
-import type { EnrollmentStatus, CourseType } from "@/db/schema";
+import type { EnrollmentStatus } from "@/db/schema";
 
 const dateFmt = new Intl.DateTimeFormat("th-TH", {
   dateStyle: "long",
@@ -89,8 +89,4 @@ export const STATUS_COLORS: Record<EnrollmentStatus, string> = {
   rejected: "bg-error-surface text-error",
 };
 
-export const COURSE_TYPE_LABELS: Record<CourseType, string> = {
-  scheduled: "มีรอบเรียน",
-  open: "เรียนได้ทันที",
-  booking: "จองเวลาเอง",
-};
+export { COURSE_TYPE_LABELS, courseTypeBadge } from "./course-types";

@@ -4,12 +4,12 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { courses, courseSessions, enrollments, bookingHours } from "@/db/schema";
+import { courses, enrollments, bookingHours } from "@/db/schema";
 import { requireAdmin } from "@/lib/session";
 import { confirmEnrollment } from "@/lib/enrollment-confirm";
 import { releaseSlot } from "@/lib/booking-repo";
 import { WEEKDAY_TH } from "@/lib/format";
-import type { CourseType } from "@/db/schema";
+import type { CourseType } from "@/lib/course-types";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
 
@@ -40,12 +40,12 @@ function parseCourseFields(formData: FormData): CourseFields | { error: string }
   const price = Number(formData.get("price"));
 
   if (!title) return { error: "กรุณากรอกชื่อคอร์ส" };
-  if (type !== "scheduled" && type !== "open" && type !== "booking")
+  if (type !== "self_paced" && type !== "live")
     return { error: "กรุณาเลือกประเภทคอร์ส" };
   if (!Number.isFinite(price) || price < 0) return { error: "ราคาไม่ถูกต้อง" };
 
   let durationMin: number | null = null;
-  if (type === "booking") {
+  if (type === "live") {
     const d = Number(formData.get("sessionDurationMin"));
     if (!Number.isFinite(d) || d < 15 || d > 480)
       return { error: "ความยาวต่อครั้งไม่ถูกต้อง (15–480 นาที)" };
@@ -164,101 +164,6 @@ export async function togglePublish(id: string): Promise<ActionResult> {
     .run();
   revalidatePath("/admin/courses");
   revalidatePath("/");
-  return { ok: true };
-}
-
-/* ───────────── รอบเรียน ───────────── */
-
-export async function createSession(
-  courseId: string,
-  formData: FormData,
-): Promise<ActionResult> {
-  await requireAdmin();
-  const startStr = String(formData.get("startAt") || "");
-  const endStr = String(formData.get("endAt") || "");
-  const capacity = Number(formData.get("capacity"));
-  const location = String(formData.get("location") || "").trim() || null;
-
-  const startAt = new Date(startStr);
-  const endAt = new Date(endStr);
-  if (isNaN(startAt.getTime()) || isNaN(endAt.getTime()))
-    return { ok: false, error: "กรุณาระบุวัน-เวลาให้ถูกต้อง" };
-  if (endAt <= startAt)
-    return { ok: false, error: "เวลาสิ้นสุดต้องอยู่หลังเวลาเริ่ม" };
-  if (!Number.isFinite(capacity) || capacity < 1)
-    return { ok: false, error: "จำนวนที่นั่งไม่ถูกต้อง" };
-
-  await db
-    .insert(courseSessions)
-    .values({
-      id: randomUUID(),
-      courseId,
-      startAt,
-      endAt,
-      capacity: Math.round(capacity),
-      location,
-      isOpen: true,
-    })
-    .run();
-
-  revalidatePath(`/admin/courses/${courseId}/sessions`);
-  return { ok: true };
-}
-
-export async function updateSession(
-  sessionId: string,
-  formData: FormData,
-): Promise<ActionResult> {
-  await requireAdmin();
-  const s = await db
-    .select()
-    .from(courseSessions)
-    .where(eq(courseSessions.id, sessionId))
-    .get();
-  if (!s) return { ok: false, error: "ไม่พบรอบเรียน" };
-
-  const startAt = new Date(String(formData.get("startAt") || ""));
-  const endAt = new Date(String(formData.get("endAt") || ""));
-  const capacity = Number(formData.get("capacity"));
-  const location = String(formData.get("location") || "").trim() || null;
-  const isOpen = formData.get("isOpen") === "on";
-
-  if (isNaN(startAt.getTime()) || isNaN(endAt.getTime()))
-    return { ok: false, error: "กรุณาระบุวัน-เวลาให้ถูกต้อง" };
-  if (endAt <= startAt) return { ok: false, error: "เวลาสิ้นสุดต้องอยู่หลังเวลาเริ่ม" };
-  if (!Number.isFinite(capacity) || capacity < 1)
-    return { ok: false, error: "จำนวนที่นั่งไม่ถูกต้อง" };
-
-  await db
-    .update(courseSessions)
-    .set({ startAt, endAt, capacity: Math.round(capacity), location, isOpen })
-    .where(eq(courseSessions.id, sessionId))
-    .run();
-
-  revalidatePath(`/admin/courses/${s.courseId}/sessions`);
-  return { ok: true };
-}
-
-export async function deleteSession(sessionId: string): Promise<ActionResult> {
-  await requireAdmin();
-  const s = await db
-    .select()
-    .from(courseSessions)
-    .where(eq(courseSessions.id, sessionId))
-    .get();
-  if (!s) return { ok: false, error: "ไม่พบรอบเรียน" };
-
-  // กันลบรอบที่มีคนสมัครอยู่
-  const used = await db
-    .select()
-    .from(enrollments)
-    .where(eq(enrollments.sessionId, sessionId))
-    .get();
-  if (used)
-    return { ok: false, error: "ลบไม่ได้ เพราะมีผู้สมัครในรอบนี้แล้ว (ปิดรับสมัครแทนได้)" };
-
-  await db.delete(courseSessions).where(eq(courseSessions.id, sessionId)).run();
-  revalidatePath(`/admin/courses/${s.courseId}/sessions`);
   return { ok: true };
 }
 

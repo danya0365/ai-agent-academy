@@ -92,10 +92,8 @@ export const rateLimit = sqliteTable(
  * ตารางของแอป: คอร์ส / รอบเรียน / การลงทะเบียน
  * ──────────────────────────────────────────────────────────── */
 
-// 'scheduled' = มีรอบเรียนตายตัว (courseSessions)
-// 'open'      = สมัครแล้วเรียนได้ทันที ไม่ต้องเลือกเวลา
-// 'booking'   = จองคิว 1-on-1 เอง ตามเวลาทำการ (bookingHours) — slot gen สด ไม่เก็บใน DB
-export type CourseType = "scheduled" | "open" | "booking";
+// CourseType  defined in lib/course-types (single source of truth)
+import type { CourseType } from "@/lib/course-types";
 
 export const courses = sqliteTable("courses", {
   id: text("id").primaryKey(),
@@ -130,25 +128,6 @@ export const bookingHours = sqliteTable(
   (t) => [index("booking_hours_weekday_idx").on(t.weekday)],
 );
 
-export const courseSessions = sqliteTable(
-  "course_sessions",
-  {
-    id: text("id").primaryKey(),
-    courseId: text("course_id")
-      .notNull()
-      .references(() => courses.id, { onDelete: "cascade" }),
-    startAt: integer("start_at", { mode: "timestamp" }).notNull(),
-    endAt: integer("end_at", { mode: "timestamp" }).notNull(),
-    capacity: integer("capacity").notNull(),
-    location: text("location"),
-    isOpen: integer("is_open", { mode: "boolean" }).notNull().default(true),
-    createdAt: integer("created_at", { mode: "timestamp" })
-      .notNull()
-      .$defaultFn(() => new Date()),
-  },
-  (t) => [index("course_sessions_course_idx").on(t.courseId)],
-);
-
 // สถานะการลงทะเบียน:
 //  pending_payment → slip_uploaded → confirmed
 //                                  ↘ rejected → (อัปสลิปใหม่) → slip_uploaded
@@ -173,10 +152,6 @@ export const enrollments = sqliteTable(
     courseId: text("course_id")
       .notNull()
       .references(() => courses.id, { onDelete: "cascade" }),
-    // null สำหรับคอร์สแบบ open
-    sessionId: text("session_id").references(() => courseSessions.id, {
-      onDelete: "set null",
-    }),
     // เวลาที่จอง (คอร์ส type 'booking') — เก็บบน enrollment เพื่อคงไว้แม้ถูก reject
     // (แหล่งความจริงของ "ลูกค้าเลือกเวลาไหน"; ตาราง bookings เป็นแค่ lock กันซ้อน)
     bookedStartAt: integer("booked_start_at", { mode: "timestamp" }),
@@ -197,7 +172,6 @@ export const enrollments = sqliteTable(
   },
   (t) => [
     index("enrollments_user_course_idx").on(t.userId, t.courseId),
-    index("enrollments_session_status_idx").on(t.sessionId, t.status),
     // กันสลิปซ้ำ — SQLite ยอมให้ค่า null ซ้ำกันได้
     uniqueIndex("enrollments_slip_trans_ref_unique").on(t.slipTransRef),
   ],

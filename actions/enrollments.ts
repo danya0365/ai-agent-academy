@@ -5,11 +5,11 @@ import { and, eq, ne } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { courses, courseSessions, enrollments, bookings } from "@/db/schema";
+import { courses, enrollments, bookings } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { saveSlip, SlipValidationError } from "@/lib/storage";
-import { getReservedSeatsBySession, getBookingHours } from "@/lib/queries";
-import { isValidSlot, slotEndEpoch } from "@/lib/booking";
+import { getBookingHours } from "@/lib/queries";
+import { isValidSlot, slotEndEpoch, BOOKING_LEAD_TOLERANCE_MS } from "@/lib/booking";
 import { claimSlot, releaseSlot, hasSlotLock, overlapWhere } from "@/lib/booking-repo";
 import { verifySlip } from "@/lib/slip-verify";
 import { confirmEnrollment } from "@/lib/enrollment-confirm";
@@ -62,7 +62,6 @@ async function claimTransRef(enrollmentId: string, transRef: string): Promise<bo
  */
 export async function enroll(
   courseId: string,
-  sessionId?: string | null,
 ): Promise<ActionResult> {
   const user = await requireUser();
 
@@ -71,28 +70,8 @@ export async function enroll(
     return { ok: false, error: "ไม่พบคอร์สนี้" };
   }
   // คอร์สจองคิวต้องใช้ bookSlot (เลือก slot) — กันเลี่ยงมาลงทะเบียนแบบไม่มีเวลา
-  if (course.type === "booking") {
+  if (course.type === "live") {
     return { ok: false, error: "คอร์สนี้ต้องจองเวลาเรียนจากหน้าคอร์ส" };
-  }
-
-  let validSessionId: string | null = null;
-
-  if (course.type === "scheduled") {
-    if (!sessionId) return { ok: false, error: "กรุณาเลือกรอบเรียน" };
-    const session = await db
-      .select()
-      .from(courseSessions)
-      .where(eq(courseSessions.id, sessionId))
-      .get();
-    if (!session || session.courseId !== courseId || !session.isOpen) {
-      return { ok: false, error: "รอบเรียนนี้ไม่เปิดรับสมัครแล้ว" };
-    }
-    // soft seat check
-    const reserved = await getReservedSeatsBySession([sessionId]);
-    if ((reserved.get(sessionId) ?? 0) >= session.capacity) {
-      return { ok: false, error: "รอบนี้ที่นั่งเต็มแล้ว" };
-    }
-    validSessionId = sessionId;
   }
 
   // กันสมัครซ้ำในคอร์สเดียวกัน (ยกเว้นที่ถูก reject ไปแล้ว)
@@ -118,7 +97,6 @@ export async function enroll(
       id,
       userId: user.id,
       courseId,
-      sessionId: validSessionId,
       status: "pending_payment",
       amount: course.price,
     })
@@ -144,7 +122,7 @@ export async function bookSlot(
   if (
     !course ||
     !course.isPublished ||
-    course.type !== "booking" ||
+    course.type !== "live" ||
     !course.sessionDurationMin
   ) {
     return { ok: false, error: "ไม่พบคอร์สนี้" };
@@ -153,7 +131,7 @@ export async function bookSlot(
   const durationMin = course.sessionDurationMin;
   const now = Date.now();
   const hours = await getBookingHours();
-  if (!isValidSlot(hours, durationMin, startEpoch, now)) {
+  if (!isValidSlot(hours, durationMin, startEpoch, now, BOOKING_LEAD_TOLERANCE_MS)) {
     return { ok: false, error: "ช่วงเวลานี้ไม่พร้อมให้จองแล้ว กรุณาเลือกเวลาอื่น" };
   }
 

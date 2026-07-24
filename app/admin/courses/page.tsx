@@ -3,7 +3,8 @@ import { desc } from "drizzle-orm";
 import { Plus } from "lucide-react";
 import { db } from "@/db";
 import { courses } from "@/db/schema";
-import { formatBaht, COURSE_TYPE_LABELS } from "@/lib/format";
+import { formatBaht } from "@/lib/format";
+import { COURSE_TYPE_LABELS, courseTypeBadge } from "@/lib/course-types";
 import { PublishToggle } from "@/components/publish-toggle";
 
 export const dynamic = "force-dynamic";
@@ -34,19 +35,17 @@ export default async function AdminCoursesPage() {
                   <p className="font-extrabold text-foreground">{c.title}</p>
                   <PublishToggle courseId={c.id} isPublished={c.isPublished} />
                 </div>
-                <p className="mt-1 text-sm text-muted">
-                  {COURSE_TYPE_LABELS[c.type]} · {formatBaht(c.price)} · /{c.slug}
+                <p className="mt-1 flex flex-wrap items-center gap-2 text-sm text-muted">
+                  <span className={`badge ${courseTypeBadge(c.type)}`}>
+                    {COURSE_TYPE_LABELS[c.type]}
+                  </span>
+                  {c.type === "live" && c.sessionDurationMin && (
+                    <span>ครั้งละ {c.sessionDurationMin} นาที</span>
+                  )}
+                  · {formatBaht(c.price)} · /{c.slug}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2 text-sm">
-                {c.type === "scheduled" && (
-                  <Link
-                    href={`/admin/courses/${c.id}/sessions`}
-                    className="btn btn-secondary text-sm"
-                  >
-                    จัดการรอบเรียน
-                  </Link>
-                )}
                 <Link href={`/admin/courses/${c.id}/edit`} className="btn btn-secondary text-sm">
                   แก้ไข
                 </Link>
