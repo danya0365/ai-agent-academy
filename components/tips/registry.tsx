@@ -7,6 +7,7 @@ import { ClaudeCodeEffortSecret } from "@/components/tips/custom/claude-code-eff
 import { DesignSystemUiConsistency } from "@/components/tips/custom/design-system-ui-consistency";
 import { AiAgentIdentityMemory } from "@/components/tips/custom/ai-agent-identity-memory";
 import { PromptsThatWork } from "@/components/tips/custom/prompts-that-work";
+import { AiSideIncome } from "@/components/tips/custom/ai-side-income";
 
 /**
  * ทะเบียน component เฉพาะของแต่ละเคล็ดลับ (custom renderer)
@@ -26,4 +27,5 @@ export const TIP_COMPONENTS: Record<string, ComponentType<{ tip: Tip }>> = {
   "design-system-ui-consistency": DesignSystemUiConsistency,
   "ai-agent-identity-memory": AiAgentIdentityMemory,
   "prompts-that-work": PromptsThatWork,
+  "ai-side-income": AiSideIncome,
 };
