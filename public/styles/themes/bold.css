@@ -1,38 +1,38 @@
 /* ============================================
-   Template: bold (DEFAULT) — Bold Edutech
-   ครีม/ขาว ตัวอักษรเข้ม · brand=indigo · accent=amber
-   โครงสร้าง neo-brutalist: ขอบเข้ม (--border) ใช้เป็นสีเงา offset ด้วย
+   Template: bold (DEFAULT) — Sunny Orange
+   brand=amber · accent=rose · alt=indigo (แต่อันนี้ไม่ต้อง merge อะไร)
+   ครีมอุ่น + ส้มสด neo-brutalist
    ============================================ */
 
 :root,
 [data-theme="bold"] {
-  /* Brand — indigo (500 = สีปุ่ม primary, เข้มพอให้ตัวอักษรขาวอ่านออก) */
-  --brand-50: #eef2ff;
-  --brand-100: #e0e7ff;
-  --brand-200: #c7d2fe;
-  --brand-300: #a5b4fc;
-  --brand-400: #818cf8;
-  --brand-500: #4f46e5;
-  --brand-600: #4338ca;
-  --brand-700: #3730a3;
-  --brand-800: #312e81;
-  --brand-900: #1e1b4b;
+  /* Brand — orange (500 = สีปุ่ม primary, เข้มพอให้ตัวอักษรขาวอ่านออก) */
+  --brand-50: #fff7ed;
+  --brand-100: #ffedd5;
+  --brand-200: #fed7aa;
+  --brand-300: #fdba74;
+  --brand-400: #fb923c;
+  --brand-500: #f97316;
+  --brand-600: #ea580c;
+  --brand-700: #c2410c;
+  --brand-800: #9a3412;
+  --brand-900: #7c2d12;
 
-  /* Accent — amber */
-  --accent-100: #fef3c7;
-  --accent-400: #fbbf24;
-  --accent-500: #f59e0b;
-  --accent-600: #d97706;
+  /* Accent — rose/pink (ตัดกับส้ม) */
+  --accent-100: #ffe4e6;
+  --accent-400: #fb7185;
+  --accent-500: #f43f5e;
+  --accent-600: #e11d48;
 
   /* Surface / semantic */
-  --background: #fffdf5;
-  --foreground: #15161c;
+  --background: #fefce8;
+  --foreground: #1c1917;
   --card: #ffffff;
-  --card-foreground: #15161c;
-  --muted: #6b7280;
-  --muted-surface: #f4f1e9;
-  --border: #15161c;
-  --ring: #818cf8;
+  --card-foreground: #1c1917;
+  --muted: #78716c;
+  --muted-surface: #fff7ed;
+  --border: #f97316;
+  --ring: #fb923c;
   --on-brand: #ffffff;
 
   /* Status */
@@ -50,26 +50,29 @@
 
 [data-theme="bold"].dark,
 .dark[data-theme="bold"] {
-  /* 50–300 = พื้น/ขอบเข้ม, 500/600 = ยังอิ่ม (ปุ่ม primary คงไว้ on-brand=#fff),
-     700–900 = สีอ่อน/ข้อความ */
-  --brand-50: #1e1b3a;
-  --brand-100: #272358;
-  --brand-200: #312c6b;
-  --brand-300: #3b357f;
-  --brand-500: #6366f1;
-  --brand-600: #4f46e5;
-  --brand-700: #a5b4fc;
-  --brand-800: #c7d2fe;
-  --brand-900: #e0e7ff;
+  --brand-50: #1f1406;
+  --brand-100: #2b1d0c;
+  --brand-200: #3b2812;
+  --brand-300: #4c3318;
+  --brand-500: #f97316;
+  --brand-600: #ea580c;
+  --brand-700: #fdba74;
+  --brand-800: #fed7aa;
+  --brand-900: #ffedd5;
 
-  --background: #0b1020;
-  --foreground: #f8fafc;
-  --card: #141a2e;
-  --card-foreground: #f8fafc;
-  --muted: #94a3b8;
-  --muted-surface: #141a2e;
-  --border: #2f3855;
-  --ring: #818cf8;
+  --accent-100: #1c1017;
+  --accent-400: #e11d48;
+  --accent-500: #f43f5e;
+  --accent-600: #fb7185;
+
+  --background: #1a1208;
+  --foreground: #fefce8;
+  --card: #2b1d0c;
+  --card-foreground: #fefce8;
+  --muted: #a8a29e;
+  --muted-surface: #2b1d0c;
+  --border: #9a3412;
+  --ring: #fb923c;
 
   --success-surface: #14532d;
   --warning-surface: #451a03;
