@@ -90,7 +90,7 @@ export default function DesignSystemPage() {
 
         <div className="mt-5 grid gap-4 sm:grid-cols-3">
           {[
-            { id: "bold", label: "Bold (default)", icon: Zap, desc: "Indigo + Amber, ครีมขาว, เอกลักษณ์ neo-brutalist เต็ม", bg: "#fffdf5", fg: "#15161c", brand: "#4f46e5" },
+            { id: "bold", label: "Bold (default)", icon: Zap, desc: "Orange + Rose, ส้มสด neo-brutalist", bg: "#fefce8", fg: "#1c1917", brand: "#f97316" },
             { id: "ocean", label: "Ocean", icon: Waves, desc: "Cyan + Emerald, ฟ้าเขียวเย็นสบาย", bg: "#f3fbfd", fg: "#0c1a1f", brand: "#0891b2" },
             { id: "grape", label: "Grape", icon: Grape, desc: "Violet + Fuchsia, ม่วงหรู", bg: "#faf6ff", fg: "#1b1530", brand: "#7c3aed" },
           ].map((t) => {
