@@ -5,6 +5,7 @@ import { ArrowLeft, Clock, Lightbulb } from "lucide-react";
 import { getTipBySlug } from "@/lib/tips";
 import { TIP_COMPONENTS } from "@/components/tips/registry";
 import { TipBody } from "@/components/tips/tip-body";
+import { TipSocialCopy } from "@/components/tips/tip-social-copy";
 import { RecommendedProducts } from "@/components/shop/recommended-products";
 import { SupportDev } from "@/components/support/support-dev";
 import { TipQuestions } from "@/components/community/tip-questions";
@@ -60,6 +61,13 @@ export default async function TipDetailPage({ params }: Props) {
       <article className="mt-8">
         {Custom ? <Custom tip={tip} /> : <TipBody tip={tip} />}
       </article>
+
+      {/* copy ข้อความไปแปะ Social (post ไม่มีลิงก์ + comment มีลิงก์) */}
+      {tip.social && (
+        <div className="mt-10">
+          <TipSocialCopy social={tip.social} />
+        </div>
+      )}
 
       {/* คำถาม-คำตอบเกี่ยวกับเคล็ดลับนี้ (ทำตาม tip ไม่ได้ ถามในคอมมูนิตี้) */}
       <div className="mt-12">
