@@ -12,6 +12,7 @@ import {
   STATUS_LABELS,
   STATUS_COLORS,
 } from "@/lib/format";
+import { NoteSection } from "@/components/note-section";
 
 export const dynamic = "force-dynamic";
 
@@ -63,6 +64,11 @@ export default async function MyCourseDetailPage({
                     <span className={`badge mt-2 ${STATUS_COLORS[e.status]}`}>
                       {STATUS_LABELS[e.status]}
                     </span>
+                    <NoteSection
+                      enrollmentId={e.id}
+                      initialNote={e.note ?? null}
+                      stacks={course.stacks}
+                    />
                   </div>
                 ))}
               </div>
@@ -81,24 +87,31 @@ export default async function MyCourseDetailPage({
               <h2 className="mb-3 text-lg font-black text-foreground">
                 เรียนไปแล้ว {past.length} ครั้ง
               </h2>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {past.map((e) => (
-                  <div key={e.id} className="card-flat flex items-center justify-between gap-3 p-3">
-                    <div className="flex items-center gap-3">
-                      <CheckCircle2 className="size-4 shrink-0 text-success" />
-                      <div>
-                        <p className="text-sm font-bold text-foreground">
-                          {e.bookedStartAt ? formatBkkDateTime(e.bookedStartAt) : "(ไม่มีเวลา)"}
-                        </p>
-                        {e.bookedEndAt && (
-                          <p className="text-xs text-muted">
-                            ถึง {formatBkkDay(e.bookedEndAt)}{" "}
-                            {e.bookedEndAt.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}
+                  <div key={e.id} className="card-flat p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle2 className="size-4 shrink-0 text-success" />
+                        <div>
+                          <p className="text-sm font-bold text-foreground">
+                            {e.bookedStartAt ? formatBkkDateTime(e.bookedStartAt) : "(ไม่มีเวลา)"}
                           </p>
-                        )}
+                          {e.bookedEndAt && (
+                            <p className="text-xs text-muted">
+                              ถึง {formatBkkDay(e.bookedEndAt)}{" "}
+                              {e.bookedEndAt.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}
+                            </p>
+                          )}
+                        </div>
                       </div>
+                      <span className="text-xs font-medium text-muted">{formatBaht(e.amount)}</span>
                     </div>
-                    <span className="text-xs font-medium text-muted">{formatBaht(e.amount)}</span>
+                    <NoteSection
+                      enrollmentId={e.id}
+                      initialNote={e.note ?? null}
+                      stacks={course.stacks}
+                    />
                   </div>
                 ))}
               </div>
@@ -113,20 +126,27 @@ export default async function MyCourseDetailPage({
               </h2>
               <div className="space-y-2">
                 {pending.map((e) => (
-                  <div key={e.id} className="card-flat flex items-center justify-between gap-3 p-3">
-                    <div>
-                      {e.bookedStartAt && (
-                        <p className="text-sm font-bold text-foreground">
-                          {formatBkkDateTime(e.bookedStartAt)}
-                        </p>
-                      )}
-                      <span className={`badge mt-1 ${STATUS_COLORS[e.status]}`}>
-                        {STATUS_LABELS[e.status]}
-                      </span>
+                  <div key={e.id} className="card-flat p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        {e.bookedStartAt && (
+                          <p className="text-sm font-bold text-foreground">
+                            {formatBkkDateTime(e.bookedStartAt)}
+                          </p>
+                        )}
+                        <span className={`badge mt-1 ${STATUS_COLORS[e.status]}`}>
+                          {STATUS_LABELS[e.status]}
+                        </span>
+                      </div>
+                      <Link href={`/enrollments/${e.id}/pay`} className="btn btn-primary text-sm">
+                        ชำระเงิน
+                      </Link>
                     </div>
-                    <Link href={`/enrollments/${e.id}/pay`} className="btn btn-primary text-sm">
-                      ชำระเงิน
-                    </Link>
+                    <NoteSection
+                      enrollmentId={e.id}
+                      initialNote={e.note ?? null}
+                      stacks={course.stacks}
+                    />
                   </div>
                 ))}
               </div>
@@ -157,6 +177,11 @@ export default async function MyCourseDetailPage({
                         แนบสลิปใหม่
                       </Link>
                     </div>
+                    <NoteSection
+                      enrollmentId={e.id}
+                      initialNote={e.note ?? null}
+                      stacks={course.stacks}
+                    />
                   </div>
                 ))}
               </div>

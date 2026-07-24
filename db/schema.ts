@@ -150,6 +150,8 @@ export const enrollments = sqliteTable(
     slipTransRef: text("slip_trans_ref"), // เลขอ้างอิงรายการจากสลิป (กันสลิปซ้ำ)
     slipVerifyStatus: text("slip_verify_status").$type<SlipVerifyStatus>(),
     verifyNote: text("verify_note"), // เหตุผล/รายละเอียดให้แอดมินเห็น
+    // บันทึกส่วนตัวของลูกค้า — จดว่าครั้งนี้เรียนหัวข้อ/stack ไหนไปบ้าง
+    note: text("note"),
     createdAt: integer("created_at", { mode: "timestamp" })
       .notNull()
       .$defaultFn(() => new Date()),
