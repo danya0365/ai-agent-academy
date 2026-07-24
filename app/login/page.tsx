@@ -144,9 +144,26 @@ function GoogleIcon() {
   );
 }
 
+function LoginSkeleton() {
+  return (
+    <div className="mx-auto max-w-md px-4 py-12 sm:px-6">
+      <div className="mb-6 h-9 w-32 animate-pulse rounded bg-muted-surface" />
+      <div className="card space-y-4 p-6">
+        {[1, 2].map((i) => (
+          <div key={i}>
+            <div className="mb-1.5 h-4 w-16 animate-pulse rounded bg-muted-surface" />
+            <div className="h-10 w-full animate-pulse rounded bg-muted-surface" />
+          </div>
+        ))}
+        <div className="h-10 w-full animate-pulse rounded-full bg-muted-surface" />
+      </div>
+    </div>
+  );
+}
+
 export default function LoginPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<LoginSkeleton />}>
       <LoginForm />
     </Suspense>
   );
