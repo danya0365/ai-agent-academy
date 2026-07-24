@@ -29,6 +29,7 @@ export const auth = betterAuth({
     accountLinking: {
       enabled: true,
       trustedProviders: ["google"],
+      requireLocalEmailVerified: false,
     },
   },
   // จำกัด origin สำหรับ CSRF/origin check ให้เหลือโดเมนจริง

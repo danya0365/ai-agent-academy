@@ -10,10 +10,17 @@ function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") || "/my-courses";
+  const errorParam = params.get("error");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    errorParam === "account_not_linked"
+      ? "อีเมลนี้มีผู้ใช้งานแล้ว แต่ยังไม่ได้เชื่อมต่อกับบัญชี Google กรุณาเข้าสู่ระบบด้วยอีเมลและรหัสผ่านก่อน แล้วไปที่ตั้งค่าบัญชีเพื่อเชื่อมต่อ"
+      : errorParam === "email_doesn_match"
+        ? "อีเมลของบัญชี Google ไม่ตรงกับอีเมลที่มีในระบบ"
+        : null,
+  );
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
