@@ -4,8 +4,7 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import QRCode from "qrcode";
 import { db } from "../index";
-import { courses, user } from "../schema";
-import type { CourseType } from "../../lib/course-types";
+import { user } from "../schema";
 import { auth } from "../../lib/auth";
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR || "./uploads";
@@ -52,45 +51,6 @@ export async function ensureUser(opts: {
     await db.update(user).set({ role }).where(eq(user.id, created.id)).run();
   }
   return created.id;
-}
-
-export type SeedCourse = {
-  slug: string;
-  title: string;
-  description: string;
-  type: CourseType;
-  price: number;
-  isPublished: boolean;
-  /** ความยาวต่อครั้ง (นาที) — ใช้เฉพาะ type booking */
-  sessionDurationMin?: number;
-};
-
-/**
- * insert คอร์สถ้ายังไม่มี slug นี้ (skip ถ้ามีแล้ว เพื่อไม่ทับค่าที่เจ้าของแก้เอง)
- * คืน courseId (ของใหม่หรือที่มีอยู่) และว่า created ไหม
- */
-export async function upsertCourse(
-  c: SeedCourse,
-): Promise<{ courseId: string; created: boolean }> {
-  const existing = await db.select().from(courses).where(eq(courses.slug, c.slug)).get();
-  if (existing) return { courseId: existing.id, created: false };
-
-  const courseId = randomUUID();
-  await db
-    .insert(courses)
-    .values({
-      id: courseId,
-      slug: c.slug,
-      title: c.title,
-      description: c.description,
-      type: c.type,
-      price: c.price,
-      sessionDurationMin: c.sessionDurationMin ?? null,
-      isPublished: c.isPublished,
-    })
-    .run();
-
-  return { courseId, created: true };
 }
 
 /**

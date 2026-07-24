@@ -13,7 +13,6 @@ import {
 } from "drizzle-orm";
 import { db } from "@/db";
 import {
-  courses,
   enrollments,
   bookingHours,
   bookings,
@@ -29,17 +28,13 @@ import {
   type BusyRange,
 } from "@/lib/booking";
 import { getTipBySlug } from "@/lib/tips";
+import { getCourseBySlug, type Course } from "@/lib/courses";
 import {
   FEED_PAGE_SIZE,
   type FeedPost,
   type ThreadReply,
   type FeedCursor,
 } from "@/lib/community";
-
-/** ดึงคอร์สที่เผยแพร่แล้วทั้งหมด สำหรับแคตตาล็อก */
-export async function getPublishedCourses() {
-  return db.select().from(courses).where(eq(courses.isPublished, true)).all();
-}
 
 /** จำนวนผู้เรียนจริง = distinct user ที่มี enrollment ยืนยันแล้ว (สำหรับสถิติหน้าแรก) */
 export async function getLearnerCount(): Promise<number> {
@@ -51,7 +46,7 @@ export async function getLearnerCount(): Promise<number> {
   return Number(row?.n ?? 0);
 }
 
-/** เวลาทำการทั้งหมด (global) — ใช้ gen slot ของคอร์ส booking */
+/** เวลาทำการทั้งหมด (global) — ใช้ gen slot */
 export async function getBookingHours(): Promise<HoursRow[]> {
   return db
     .select({
@@ -65,8 +60,7 @@ export async function getBookingHours(): Promise<HoursRow[]> {
 }
 
 /**
- * ช่วงเวลาที่ถูกจองไปแล้ว (อนาคต) — GLOBAL ทุกคอร์ส booking จงใจ
- * เพราะเวลาทำการเป็นชุดเดียว (ครู/ร้านเดียว) → เวลาที่ถูกจองของคอร์สไหนก็ตามต้องบล็อกทุกคอร์ส
+ * ช่วงเวลาที่ถูกจองไปแล้ว (อนาคต) — GLOBAL ทุกคอร์ส
  */
 async function getBusyRanges(now: number): Promise<BusyRange[]> {
   const rows = await db
@@ -80,12 +74,12 @@ async function getBusyRanges(now: number): Promise<BusyRange[]> {
 export type CourseBookingView = { durationMin: number; days: DaySlots[] };
 
 /** ดึงคอร์สตาม slug พร้อม slot ว่างสำหรับ booking */
-export async function getCourseBySlug(slug: string) {
-  const course = await db.select().from(courses).where(eq(courses.slug, slug)).get();
+export async function getCourseBySlugWithBooking(slug: string) {
+  const course = getCourseBySlug(slug);
   if (!course) return null;
 
   let booking: CourseBookingView | null = null;
-  if (course.type === "live" && course.sessionDurationMin) {
+  if (course.sessionDurationMin) {
     const now = Date.now();
     const [hours, busy] = await Promise.all([
       getBookingHours(),
@@ -100,53 +94,93 @@ export async function getCourseBySlug(slug: string) {
   return { course, booking };
 }
 
-/** enrollment + คอร์ส (join) สำหรับหน้าจ่ายเงิน / my-courses */
-function enrollmentSelect() {
-  return db
-    .select({
-      enrollment: enrollments,
-      course: courses,
-    })
-    .from(enrollments)
-    .innerJoin(courses, eq(enrollments.courseId, courses.id));
-}
+/* ──────────── Enrollment queries (no courses JOIN — courseSlug resolved from static data) ──────────── */
 
-/** ดึง enrollment เดียว เฉพาะของ user ที่ระบุ (กันแอบดูของคนอื่น) */
-export async function getEnrollmentForUser(enrollmentId: string, userId: string) {
-  const row = await enrollmentSelect()
+type EnrollmentCourse = {
+  enrollment: typeof enrollments.$inferSelect;
+  course: Course | undefined;
+};
+
+/** ดึง enrollment เดียว เฉพาะของ user ที่ระบุ */
+export async function getEnrollmentForUser(
+  enrollmentId: string,
+  userId: string,
+): Promise<EnrollmentCourse | null> {
+  const enrollment = await db
+    .select()
+    .from(enrollments)
     .where(and(eq(enrollments.id, enrollmentId), eq(enrollments.userId, userId)))
     .get();
-  return row ?? null;
+  if (!enrollment) return null;
+  return { enrollment, course: getCourseBySlug(enrollment.courseSlug) };
 }
 
 /** ประวัติการลงทะเบียนทั้งหมดของ user */
 export async function getUserEnrollments(userId: string) {
-  return enrollmentSelect()
+  const rows = await db
+    .select()
+    .from(enrollments)
     .where(eq(enrollments.userId, userId))
     .orderBy(desc(enrollments.createdAt))
     .all();
+  return rows.map((enrollment) => ({
+    enrollment,
+    course: getCourseBySlug(enrollment.courseSlug),
+  }));
 }
 
-/** รายการลงทะเบียนสำหรับแอดมิน (join ผู้ใช้ + คอร์ส) กรองตามสถานะได้ */
+/** ประวัติ enrollment ทั้งหมดของ user สำหรับคอร์สที่ระบุ (by slug) */
+export async function getUserCourseEnrollments(userId: string, courseSlug: string) {
+  const rows = await db
+    .select()
+    .from(enrollments)
+    .where(
+      and(
+        eq(enrollments.userId, userId),
+        eq(enrollments.courseSlug, courseSlug),
+      ),
+    )
+    .orderBy(desc(enrollments.bookedStartAt))
+    .all();
+
+  const now = new Date();
+  const past = rows.filter(
+    (e) => e.bookedStartAt && e.bookedStartAt < now && e.status === "confirmed",
+  );
+  const upcoming = rows.filter(
+    (e) => e.bookedStartAt && e.bookedStartAt >= now && e.status === "confirmed",
+  );
+  const pending = rows.filter(
+    (e) => e.status === "pending_payment" || e.status === "slip_uploaded",
+  );
+  const rejected = rows.filter((e) => e.status === "rejected");
+
+  return { past, upcoming, pending, rejected, all: rows };
+}
+
+/** รายการลงทะเบียนสำหรับแอดมิน */
 export async function getAdminEnrollments(status?: EnrollmentStatus) {
-  const q = db
+  const base = db
     .select({
       enrollment: enrollments,
-      course: courses,
       customer: { name: user.name, email: user.email },
     })
     .from(enrollments)
-    .innerJoin(courses, eq(enrollments.courseId, courses.id))
     .innerJoin(user, eq(enrollments.userId, user.id));
 
   const rows = status
-    ? await q.where(eq(enrollments.status, status)).orderBy(desc(enrollments.createdAt)).all()
-    : await q.orderBy(desc(enrollments.createdAt)).all();
-  return rows;
+    ? await base.where(eq(enrollments.status, status)).orderBy(desc(enrollments.createdAt)).all()
+    : await base.orderBy(desc(enrollments.createdAt)).all();
+
+  return rows.map((r) => ({
+    enrollment: r.enrollment,
+    course: getCourseBySlug(r.enrollment.courseSlug),
+    customer: r.customer,
+  }));
 }
 
 /* ────────────────────────────────────────────────────────────
- * คอมมูนิตี้ถาม-ตอบ
+ * คอมมูนิตี้ถาม-ตอบ (unchanged)
  * ──────────────────────────────────────────────────────────── */
 
 type FeedRow = {
@@ -155,7 +189,6 @@ type FeedRow = {
   likedBy: string | null;
 };
 
-/** map แถว DB → FeedPost (serializable): resolve tipTitle ฝั่ง server, createdAt → epoch ms */
 function toFeedPost(row: FeedRow): FeedPost {
   const tip = row.post.tipSlug ? getTipBySlug(row.post.tipSlug) : undefined;
   return {
@@ -173,10 +206,6 @@ function toFeedPost(row: FeedRow): FeedPost {
   };
 }
 
-/**
- * select ร่วม: join ผู้เขียน + leftJoin like ของ viewer (หา likedByViewer)
- * viewer ที่เป็น null แทนด้วย "__none__" (ไม่มีใครมี id นี้ → likedBy = null เสมอ)
- */
 function feedSelect(viewerId: string | null) {
   return db
     .select({
@@ -195,11 +224,6 @@ function feedSelect(viewerId: string | null) {
     );
 }
 
-/**
- * หน้า feed: คำถาม top-level (parent_id IS NULL, ไม่รวม pinned) เรียงใหม่สุดก่อน
- * - หน้าแรก (cursor=null, ไม่ filter tip) แถม pinned list มาด้วย
- * - keyset pagination ด้วยคู่ (created_at, id) — กัน timestamp วินาทีชนกัน
- */
 export async function getCommunityFeedPage(opts: {
   viewerId?: string | null;
   cursor?: FeedCursor | null;
@@ -245,11 +269,6 @@ export async function getCommunityFeedPage(opts: {
   return { pinned, posts, nextCursor };
 }
 
-/**
- * thread: คำถาม + replies
- * - ถ้า id ที่ขอเป็น reply (parentId != null) คืน parentId ให้ page redirect ไป thread แม่
- * - replies เรียงเก่า→ใหม่ (page จะ sort accepted ขึ้นบนสุดด้วย JS อีกที)
- */
 export async function getPostWithReplies(
   id: string,
   viewerId?: string | null,
@@ -278,7 +297,6 @@ export async function getPostWithReplies(
   return { post, parentId: null, replies };
 }
 
-/** section "คำถามเกี่ยวกับ tip นี้" บนหน้า tip — จำนวนทั้งหมด + ล่าสุด N รายการ */
 export async function getQuestionsForTip(
   slug: string,
   limit = 3,

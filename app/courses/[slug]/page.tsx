@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, FileText } from "lucide-react";
-import { getCourseBySlug } from "@/lib/queries";
-import { getCourseContent, type ResolvedCourseContent } from "@/lib/course-content";
+import { ArrowLeft, FileText, Layers } from "lucide-react";
+import { getCourseBySlug, getCourseContent, type ResolvedCourseContent } from "@/lib/courses";
+import { getCourseBySlugWithBooking } from "@/lib/queries";
 import { SectionHeading } from "@/components/course/section-heading";
+import { formatDuration } from "@/lib/format";
 import { CourseHero } from "@/components/course/course-hero";
 import { CourseMeta } from "@/components/course/course-meta";
 import { CourseOutcomes } from "@/components/course/course-outcomes";
@@ -14,10 +15,9 @@ import { CourseIncludes } from "@/components/course/course-includes";
 import { CourseInstructor } from "@/components/course/course-instructor";
 import { CourseFaq } from "@/components/course/course-faq";
 import { CourseEnroll } from "@/components/course/course-enroll";
+import type { Course } from "@/lib/courses";
 
 export const dynamic = "force-dynamic";
-
-type CourseData = NonNullable<Awaited<ReturnType<typeof getCourseBySlug>>>;
 
 export async function generateMetadata({
   params,
@@ -25,11 +25,11 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const data = await getCourseBySlug(slug);
-  if (!data || !data.course.isPublished) return { title: "ไม่พบคอร์ส" };
-  const summary = data.course.description.replace(/\s+/g, " ").trim().slice(0, 155);
+  const course = getCourseBySlug(slug);
+  if (!course || !course.isPublished) return { title: "ไม่พบคอร์ส" };
+  const summary = course.description.replace(/\s+/g, " ").trim().slice(0, 155);
   return {
-    title: `${data.course.title} — AI Agent Academy`,
+    title: `${course.title} — AI Agent Academy`,
     description: summary,
   };
 }
@@ -40,12 +40,11 @@ export default async function CourseDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const data = await getCourseBySlug(slug);
+  const data = await getCourseBySlugWithBooking(slug);
   if (!data || !data.course.isPublished) notFound();
 
   const { course, booking } = data;
   const content = getCourseContent(slug);
-  const isLive = course.type === "live";
 
   return (
     <div className="flex flex-col gap-10">
@@ -59,37 +58,47 @@ export default async function CourseDetailPage({
       <CourseHero course={course} content={content} ctaHref="#enroll" />
       <CourseMeta course={course} content={content} />
 
-      {isLive ? (
-        <>
-          {/* live: กล่องจองเต็มกว้าง แล้วต่อด้วยเนื้อหา */}
-          <section id="enroll" className="scroll-mt-24">
-            <CourseEnroll course={course} booking={booking} />
-          </section>
-          <div className="mx-auto flex w-full max-w-4xl flex-col gap-12">
-            <Sections course={course} content={content} />
-          </div>
-        </>
-      ) : (
-        /* self_paced: เนื้อหาซ้าย + กล่องสมัคร sticky ขวา */
-        <div className="grid gap-10 lg:grid-cols-[1fr_360px]">
-          <div className="flex min-w-0 flex-col gap-12">
-            <Sections course={course} content={content} />
-          </div>
-          <aside id="enroll" className="scroll-mt-24 lg:sticky lg:top-20 lg:self-start">
-            <CourseEnroll course={course} booking={booking} />
-          </aside>
-        </div>
-      )}
+      {/* กล่องจองเวลา */}
+      <section id="enroll" className="scroll-mt-24">
+        <CourseEnroll course={course} booking={booking} />
+      </section>
+
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-12">
+        <Sections course={course} content={content} />
+
+        {/* Stacks — หัวข้อย่อยให้เลือกเรียน */}
+        <StackSection course={course} />
+      </div>
     </div>
   );
 }
 
-/** ชุด section เนื้อหา (ใช้ซ้ำทั้ง branch booking และ scheduled/open) */
+/** Stacks section — list all topics student can pick per session */
+function StackSection({ course }: { course: Course }) {
+  return (
+    <section>
+      <SectionHeading title={`${course.stacks.length} หัวข้อให้เลือกเรียน`} icon={Layers} />
+      <p className="mt-2 text-sm text-muted">
+        1 enrollment = {formatDuration(course.sessionDurationMin)} เลือกเรียน 1 หัวข้อ ถ้าอยากเรียนหัวข้ออื่น จองรอบใหม่ จ่ายใหม่
+      </p>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {course.stacks.map((s, i) => (
+          <div key={i} className="card-flat p-4">
+            <h3 className="font-extrabold text-foreground">{s.title}</h3>
+            {s.desc && <p className="mt-1 text-sm text-muted">{s.desc}</p>}
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** ชุด section เนื้อหา */
 function Sections({
   course,
   content,
 }: {
-  course: CourseData["course"];
+  course: Course;
   content: ResolvedCourseContent;
 }) {
   return (

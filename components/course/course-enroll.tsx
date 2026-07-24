@@ -1,12 +1,8 @@
-import type { ComponentProps } from "react";
-import type { courses } from "@/db/schema";
+import type { Course } from "@/lib/courses";
 import type { CourseBookingView } from "@/lib/queries";
-import { EnrollForm } from "@/components/enroll-form";
 import { BookingPicker } from "@/components/booking-picker";
 
-type Course = typeof courses.$inferSelect;
-
-/** เลือกกล่องสมัคร/จองตามประเภทคอร์ส — live → BookingPicker, self_paced → EnrollForm */
+/** กล่องจองเวลาเรียน (ทุกคอร์สเป็นการจองสด 1:1) */
 export function CourseEnroll({
   course,
   booking,
@@ -14,14 +10,21 @@ export function CourseEnroll({
   course: Course;
   booking: CourseBookingView | null;
 }) {
-  if (course.type === "live" && booking) {
+  if (!booking) {
     return (
-      <BookingPicker
-        courseId={course.id}
-        durationMin={booking.durationMin}
-        days={booking.days}
-      />
+      <div className="card p-5">
+        <h3 className="mb-2 font-extrabold text-foreground">จองเวลาเรียน</h3>
+        <p className="text-sm text-muted">
+          ยังไม่มีเวลาว่างให้จองในตอนนี้ กรุณากลับมาใหม่ภายหลัง
+        </p>
+      </div>
     );
   }
-  return <EnrollForm courseId={course.id} />;
+  return (
+    <BookingPicker
+      courseSlug={course.slug}
+      durationMin={booking.durationMin}
+      days={booking.days}
+    />
+  );
 }

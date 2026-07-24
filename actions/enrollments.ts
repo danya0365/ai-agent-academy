@@ -5,10 +5,11 @@ import { and, eq, ne } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { courses, enrollments, bookings } from "@/db/schema";
+import { enrollments, bookings } from "@/db/schema";
 import { requireUser } from "@/lib/session";
 import { saveSlip, SlipValidationError } from "@/lib/storage";
-import { getBookingHours } from "@/lib/queries";
+import { getBookingHours, getCourseBySlugWithBooking } from "@/lib/queries";
+import { getCourseBySlug } from "@/lib/courses";
 import { isValidSlot, slotEndEpoch, BOOKING_LEAD_TOLERANCE_MS } from "@/lib/booking";
 import { claimSlot, releaseSlot, hasSlotLock, overlapWhere } from "@/lib/booking-repo";
 import { verifySlip } from "@/lib/slip-verify";
@@ -61,15 +62,15 @@ async function claimTransRef(enrollmentId: string, transRef: string): Promise<bo
  * - soft seat check
  */
 export async function enroll(
-  courseId: string,
+  courseSlug: string,
 ): Promise<ActionResult> {
   const user = await requireUser();
 
-  const course = await db.select().from(courses).where(eq(courses.id, courseId)).get();
+  const course = getCourseBySlug(courseSlug);
   if (!course || !course.isPublished) {
     return { ok: false, error: "ไม่พบคอร์สนี้" };
   }
-  // คอร์สจองคิวต้องใช้ bookSlot (เลือก slot) — กันเลี่ยงมาลงทะเบียนแบบไม่มีเวลา
+  // คอร์สสดต้องใช้ bookSlot (เลือก slot) — กันเลี่ยงมาลงทะเบียนแบบไม่มีเวลา
   if (course.type === "live") {
     return { ok: false, error: "คอร์สนี้ต้องจองเวลาเรียนจากหน้าคอร์ส" };
   }
@@ -81,7 +82,7 @@ export async function enroll(
     .where(
       and(
         eq(enrollments.userId, user.id),
-        eq(enrollments.courseId, courseId),
+        eq(enrollments.courseSlug, courseSlug),
         ne(enrollments.status, "rejected"),
       ),
     )
@@ -96,7 +97,8 @@ export async function enroll(
     .values({
       id,
       userId: user.id,
-      courseId,
+      courseSlug,
+      courseTitle: course.title,
       status: "pending_payment",
       amount: course.price,
     })
@@ -113,12 +115,12 @@ export async function enroll(
  * - insert enrollment + booking ใน transaction เดียว: ชน PK = slot ถูกจองแล้ว → rollback
  */
 export async function bookSlot(
-  courseId: string,
+  courseSlug: string,
   startEpoch: number,
 ): Promise<ActionResult> {
   const user = await requireUser();
 
-  const course = await db.select().from(courses).where(eq(courses.id, courseId)).get();
+  const course = getCourseBySlug(courseSlug);
   if (
     !course ||
     !course.isPublished ||
@@ -135,29 +137,13 @@ export async function bookSlot(
     return { ok: false, error: "ช่วงเวลานี้ไม่พร้อมให้จองแล้ว กรุณาเลือกเวลาอื่น" };
   }
 
-  // กันจองซ้ำในคอร์สเดียวกัน (ยกเว้นที่ถูก reject ไปแล้ว)
-  const existing = await db
-    .select()
-    .from(enrollments)
-    .where(
-      and(
-        eq(enrollments.userId, user.id),
-        eq(enrollments.courseId, courseId),
-        ne(enrollments.status, "rejected"),
-      ),
-    )
-    .get();
-  if (existing) {
-    redirect(`/enrollments/${existing.id}/pay`);
-  }
-
   const id = randomUUID();
   const startAt = new Date(startEpoch);
   const endAt = new Date(slotEndEpoch(startEpoch, durationMin));
 
   try {
     await db.transaction(async (tx) => {
-      // overlap check (global): กันคาบเวลากับคิวอื่น รวมถึงข้ามคอร์ส/กรณี grid ขยับ
+      // overlap check (global): กันคาบเวลากับคิวอื่น
       const clash = await tx
         .select({ s: bookings.startAt })
         .from(bookings)
@@ -170,17 +156,18 @@ export async function bookSlot(
         .values({
           id,
           userId: user.id,
-          courseId,
+          courseSlug,
+          courseTitle: course.title,
           status: "pending_payment",
           amount: course.price,
           bookedStartAt: startAt,
           bookedEndAt: endAt,
         })
         .run();
-      // composite PK (courseId, startAt) = atomic guard ชั้นสุดท้าย → ทั้ง txn rollback ถ้าชน
+      // composite PK (courseSlug, startAt) = atomic guard ชั้นสุดท้าย → ทั้ง txn rollback ถ้าชน
       await tx
         .insert(bookings)
-        .values({ courseId, startAt, endAt, enrollmentId: id, userId: user.id })
+        .values({ courseSlug, startAt, endAt, enrollmentId: id, userId: user.id })
         .run();
     });
   } catch {
@@ -224,11 +211,7 @@ export async function uploadSlip(
     !!(enrollment.bookedStartAt && enrollment.bookedEndAt) &&
     !(await hasSlotLock(enrollmentId));
   if (needsClaim) {
-    const bkCourse = await db
-      .select()
-      .from(courses)
-      .where(eq(courses.id, enrollment.courseId))
-      .get();
+    const bkCourse = getCourseBySlug(enrollment.courseSlug);
     const hours = await getBookingHours();
     const valid = isValidSlot(
       hours,
@@ -255,7 +238,7 @@ export async function uploadSlip(
   // claim "หลัง" saveSlip สำเร็จ — กัน lock ค้างถ้าไฟล์ไม่ผ่าน (overlap check อยู่ใน claimSlot)
   if (needsClaim) {
     const claimed = await claimSlot({
-      courseId: enrollment.courseId,
+      courseSlug: enrollment.courseSlug,
       startAt: enrollment.bookedStartAt!,
       endAt: enrollment.bookedEndAt!,
       enrollmentId,
@@ -286,11 +269,7 @@ export async function uploadSlip(
     .run();
 
   // ── ตรวจสลิปอัตโนมัติ + auto-approve ─────────────────────────────
-  const course = await db
-    .select()
-    .from(courses)
-    .where(eq(courses.id, enrollment.courseId))
-    .get();
+  const course = getCourseBySlug(enrollment.courseSlug);
 
   let verifyStatus: SlipVerifyStatus;
   let verifyNote: string;

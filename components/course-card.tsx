@@ -1,24 +1,22 @@
 import Link from "next/link";
-import { Clock, Zap, ArrowRight } from "lucide-react";
-import type { courses } from "@/db/schema";
+import { Clock, ArrowRight } from "lucide-react";
 import { formatBaht, COURSE_TYPE_LABELS } from "@/lib/format";
+import type { Course } from "@/lib/courses";
 
-type Course = typeof courses.$inferSelect;
-
-// สีแถบ cover แบบ deterministic จาก id (ใช้ token utilities — ไม่ hardcode hex)
+// สีแถบ cover แบบ deterministic จาก slug
 const COVERS = ["bg-brand-500", "bg-accent-500", "bg-brand-700"];
-function coverClass(id: string): string {
+function coverClass(slug: string): string {
   let sum = 0;
-  for (let i = 0; i < id.length; i++) sum += id.charCodeAt(i);
+  for (let i = 0; i < slug.length; i++) sum += slug.charCodeAt(i);
   return COVERS[sum % COVERS.length];
 }
 
 export function CourseCard({ course }: { course: Course }) {
   return (
     <Link href={`/courses/${course.slug}`} className="card lift group flex flex-col overflow-hidden p-0">
-      <div className={`relative h-24 ${coverClass(course.id)}`}>
+      <div className={`relative h-24 ${coverClass(course.slug)}`}>
         <span className="badge absolute left-3 top-3 bg-card text-foreground">
-          {course.type === "live" ? <Clock className="size-3.5" /> : <Zap className="size-3.5" />}
+          <Clock className="size-3.5" />
           {COURSE_TYPE_LABELS[course.type]}
         </span>
       </div>

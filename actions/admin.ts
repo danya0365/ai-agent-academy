@@ -4,55 +4,13 @@ import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
-import { courses, enrollments, bookingHours } from "@/db/schema";
+import { enrollments, bookingHours } from "@/db/schema";
 import { requireAdmin } from "@/lib/session";
 import { confirmEnrollment } from "@/lib/enrollment-confirm";
 import { releaseSlot } from "@/lib/booking-repo";
 import { WEEKDAY_TH } from "@/lib/format";
-import type { CourseType } from "@/lib/course-types";
 
 type ActionResult = { ok: true } | { ok: false; error: string };
-
-function slugify(input: string): string {
-  return (
-    input
-      .trim()
-      .toLowerCase()
-      .replace(/[^\p{L}\p{N}]+/gu, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 80) || randomUUID().slice(0, 8)
-  );
-}
-
-type CourseFields = {
-  title: string;
-  description: string;
-  type: CourseType;
-  price: number;
-  durationMin: number | null;
-};
-
-/** อ่าน+ตรวจ field คอร์สจากฟอร์ม (ใช้ร่วมทั้ง create/update) */
-function parseCourseFields(formData: FormData): CourseFields | { error: string } {
-  const title = String(formData.get("title") || "").trim();
-  const description = String(formData.get("description") || "").trim();
-  const type = String(formData.get("type") || "") as CourseType;
-  const price = Number(formData.get("price"));
-
-  if (!title) return { error: "กรุณากรอกชื่อคอร์ส" };
-  if (type !== "self_paced" && type !== "live")
-    return { error: "กรุณาเลือกประเภทคอร์ส" };
-  if (!Number.isFinite(price) || price < 0) return { error: "ราคาไม่ถูกต้อง" };
-
-  let durationMin: number | null = null;
-  if (type === "live") {
-    const d = Number(formData.get("sessionDurationMin"));
-    if (!Number.isFinite(d) || d < 15 || d > 480)
-      return { error: "ความยาวต่อครั้งไม่ถูกต้อง (15–480 นาที)" };
-    durationMin = Math.round(d);
-  }
-  return { title, description, type, price: Math.round(price), durationMin };
-}
 
 /* ───────────── ตรวจสลิป ───────────── */
 
@@ -92,78 +50,6 @@ export async function rejectEnrollment(
 
   revalidatePath("/admin/enrollments");
   revalidatePath("/admin");
-  return { ok: true };
-}
-
-/* ───────────── คอร์ส ───────────── */
-
-export async function createCourse(formData: FormData): Promise<ActionResult> {
-  await requireAdmin();
-  const f = parseCourseFields(formData);
-  if ("error" in f) return { ok: false, error: f.error };
-
-  let slug = slugify(String(formData.get("slug") || "") || f.title);
-  // กัน slug ซ้ำ
-  const dup = await db.select().from(courses).where(eq(courses.slug, slug)).get();
-  if (dup) slug = `${slug}-${randomUUID().slice(0, 4)}`;
-
-  await db
-    .insert(courses)
-    .values({
-      id: randomUUID(),
-      slug,
-      title: f.title,
-      description: f.description,
-      type: f.type,
-      price: f.price,
-      sessionDurationMin: f.durationMin,
-      isPublished: formData.get("isPublished") === "on",
-    })
-    .run();
-
-  revalidatePath("/admin/courses");
-  revalidatePath("/");
-  return { ok: true };
-}
-
-export async function updateCourse(
-  id: string,
-  formData: FormData,
-): Promise<ActionResult> {
-  await requireAdmin();
-  const f = parseCourseFields(formData);
-  if ("error" in f) return { ok: false, error: f.error };
-
-  await db
-    .update(courses)
-    .set({
-      title: f.title,
-      description: f.description,
-      type: f.type,
-      price: f.price,
-      sessionDurationMin: f.durationMin, // null เมื่อไม่ใช่ booking → เคลียร์ค่าเก่า
-      isPublished: formData.get("isPublished") === "on",
-    })
-    .where(eq(courses.id, id))
-    .run();
-
-  revalidatePath("/admin/courses");
-  revalidatePath("/");
-  revalidatePath(`/courses`);
-  return { ok: true };
-}
-
-export async function togglePublish(id: string): Promise<ActionResult> {
-  await requireAdmin();
-  const c = await db.select().from(courses).where(eq(courses.id, id)).get();
-  if (!c) return { ok: false, error: "ไม่พบคอร์ส" };
-  await db
-    .update(courses)
-    .set({ isPublished: !c.isPublished })
-    .where(eq(courses.id, id))
-    .run();
-  revalidatePath("/admin/courses");
-  revalidatePath("/");
   return { ok: true };
 }
 

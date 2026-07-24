@@ -1,6 +1,6 @@
 import { HelpCircle, ChevronDown } from "lucide-react";
 import { SectionHeading } from "@/components/course/section-heading";
-import type { FaqItem } from "@/lib/course-content";
+import type { FaqItem } from "@/lib/courses";
 
 /** คำถามที่พบบ่อย — native <details> accordion (server, zero-JS, theme-safe) */
 export function CourseFaq({ faq }: { faq: FaqItem[] }) {

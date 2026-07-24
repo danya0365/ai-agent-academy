@@ -4,7 +4,6 @@ import { randomUUID } from "node:crypto";
 import { eq, like, inArray } from "drizzle-orm";
 import { db } from "../index";
 import {
-  courses,
   enrollments,
   bookings,
   bookingHours,
@@ -14,6 +13,7 @@ import {
 } from "../schema";
 import type { EnrollmentStatus } from "../schema";
 import { ensureUser, makeSlipImage } from "./helpers";
+import { getCourseBySlug, COURSES } from "../../lib/courses";
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR || "./uploads";
 const MOCK_EMAIL_PREFIX = "mock.";
@@ -29,35 +29,57 @@ const MOCK_CUSTOMERS = [
   { email: "mock.ploy@example.com", name: "พลอย เพชรงาม" },
 ];
 
-// (ดัชนีลูกค้า, slug คอร์ส, สถานะ) — ครอบคลุมทุกสถานะ
-const ENROLLMENT_SPECS: {
+// User 0 (สมชาย) จอง build-web-with-ai หลายครั้ง — จำลอง history + upcoming
+function buildMultiEnrollments(): {
   customer: number;
   slug: string;
   status: EnrollmentStatus;
+  daysAgo: number; // จำนวนวันที่แล้ว (0=วันนี้, ลบ=อนาคต)
+  hour: number;
   rejectReason?: string;
-}[] = [
-  { customer: 0, slug: "ai-literacy", status: "slip_uploaded" },
-  { customer: 1, slug: "ai-literacy", status: "confirmed" },
-  { customer: 2, slug: "prompt-engineering", status: "slip_uploaded" },
-  { customer: 3, slug: "ai-for-office", status: "confirmed" },
-  { customer: 4, slug: "ai-content-marketing", status: "pending_payment" },
-  { customer: 5, slug: "ai-coding-assistant", status: "slip_uploaded" },
-  { customer: 6, slug: "vibe-coding", status: "confirmed" },
-  { customer: 7, slug: "vibe-coding", status: "pending_payment" },
-  {
-    customer: 0,
-    slug: "ai-for-office",
-    status: "rejected",
-    rejectReason: "ยอดเงินในสลิปไม่ตรงกับค่าคอร์ส กรุณาโอนใหม่และแนบสลิปอีกครั้ง",
-  },
-  {
-    customer: 2,
-    slug: "ai-coding-assistant",
-    status: "rejected",
+}[] {
+  const out: ReturnType<typeof buildMultiEnrollments> = [];
+  const web = "build-web-with-ai";
+  const saas = "build-saas-with-ai";
+
+  // สมชาย — เรียน web ไปแล้ว 5 ครั้ง (confirmed, past)
+  for (let i = 6; i >= 2; i--) {
+    out.push({ customer: 0, slug: web, status: "confirmed", daysAgo: i, hour: 9 });
+  }
+  // สมชาย — upcoming 2 ครั้ง (confirmed, อนาคต)
+  out.push({ customer: 0, slug: web, status: "confirmed", daysAgo: -1, hour: 9 });
+  out.push({ customer: 0, slug: web, status: "confirmed", daysAgo: -3, hour: 13 });
+  // สมชาย — 1 rejected
+  out.push({
+    customer: 0, slug: web, status: "rejected", daysAgo: 3, hour: 13,
     rejectReason: "สลิปไม่ชัด อ่านยอด/เวลาไม่ได้ กรุณาแนบรูปที่ชัดเจนกว่านี้",
-  },
-  { customer: 4, slug: "prompt-engineering", status: "slip_uploaded" },
-];
+  });
+  // สมชาย — 1 pending_payment (upcoming)
+  out.push({ customer: 0, slug: saas, status: "pending_payment", daysAgo: -2, hour: 10 });
+
+  // user 1 (สุดา) — web 3 ครั้ง
+  for (let i = 4; i >= 1; i--) out.push({ customer: 1, slug: web, status: "confirmed", daysAgo: i, hour: 10 });
+  out.push({ customer: 1, slug: saas, status: "slip_uploaded", daysAgo: -1, hour: 14 });
+
+  // user 2 — 2d game 2 ครั้ง
+  out.push({ customer: 2, slug: "build-2d-game-with-ai", status: "confirmed", daysAgo: 3, hour: 9 });
+  out.push({ customer: 2, slug: "build-2d-game-with-ai", status: "confirmed", daysAgo: 1, hour: 14 });
+
+  // user 3 — mobile app 1
+  out.push({ customer: 3, slug: "build-mobile-app-with-ai", status: "confirmed", daysAgo: 2, hour: 11 });
+
+  // user 4 — pending
+  out.push({ customer: 4, slug: "build-mobile-app-with-ai", status: "pending_payment", daysAgo: -1, hour: 9 });
+
+  // user 5 — multiplayer game
+  out.push({ customer: 5, slug: "build-multiplayer-game-with-ai", status: "confirmed", daysAgo: 4, hour: 13 });
+
+  // user 6 — 3d game
+  out.push({ customer: 6, slug: "build-3d-game-with-ai", status: "confirmed", daysAgo: 5, hour: 9 });
+  out.push({ customer: 6, slug: "build-3d-game-with-ai", status: "pending_payment", daysAgo: 0, hour: 11 });
+
+  return out;
+}
 
 /** ลบ mock เดิม (user + enrollment cascade + ไฟล์สลิป) ให้รันซ้ำได้สะอาด */
 async function clearExistingMock(): Promise<void> {
@@ -341,9 +363,8 @@ export async function seedMock(): Promise<void> {
     customerIds.push(id);
   }
 
-  // map slug → course + รอบแรก (ถ้ามี)
-  const allCourses = await db.select().from(courses).all();
-  const bySlug = new Map(allCourses.map((c) => [c.slug, c]));
+  // map slug → course (static data)
+  const bySlug = new Map(COURSES.map((c) => [c.slug, c]));
 
   /** หา slot ถัดไปของวันทำงาน (booking course) สำหรับ mock booking enrollments */
   async function getBookingEnrollmentTimes(
@@ -371,6 +392,9 @@ export async function seedMock(): Promise<void> {
     return null;
   }
 
+  const specs = buildMultiEnrollments();
+
+  const bkkOffsetMs = 7 * 3600_000;
   const counts: Record<EnrollmentStatus, number> = {
     pending_payment: 0,
     slip_uploaded: 0,
@@ -378,26 +402,28 @@ export async function seedMock(): Promise<void> {
     rejected: 0,
   };
 
-  for (const spec of ENROLLMENT_SPECS) {
+  const now = new Date();
+
+  for (const spec of specs) {
     const course = bySlug.get(spec.slug);
     if (!course) {
-      console.log(`- [mock] ข้าม (ไม่พบคอร์ส ${spec.slug}) — รัน starter ก่อน`);
+      console.log(`- [mock] ข้าม (ไม่พบคอร์ส ${spec.slug})`);
       continue;
     }
-    // booking course: generate slot times
-    let bookedStartAt: Date | null = null;
-    let bookedEndAt: Date | null = null;
-    if (course.type === "live" && course.sessionDurationMin) {
-      const times = await getBookingEnrollmentTimes(course.id, course.sessionDurationMin);
-      if (times) {
-        bookedStartAt = times.startAt;
-        bookedEndAt = times.endAt;
-      }
-    }
+
+    // คำนวณเวลา — daysAgo (ลบ = อนาคต, 0 = วันนี้, บวก = อดีต)
+    const dayOffset = spec.daysAgo; // daysAgo=ลบ → อนาคต (บวกวัน)
+    const rawDay = Date.now() + dayOffset * 86400000;
+    const shifted = rawDay + bkkOffsetMs;
+    const dayStart = new Date(rawDay - (shifted % 86400000));
+    const startAt = new Date(dayStart.getTime() + spec.hour * 3600000);
+    const endAt = new Date(startAt.getTime() + (course.sessionDurationMin || 120) * 60000);
+
+    const bookedStartAt = startAt;
+    const bookedEndAt = endAt;
 
     const needsSlip = spec.status !== "pending_payment";
     const slipPath = needsSlip ? await makeSlipImage(spec.slug) : null;
-    const now = new Date();
     const reviewed = spec.status === "confirmed" || spec.status === "rejected";
 
     const enrollmentId = randomUUID();
@@ -406,7 +432,8 @@ export async function seedMock(): Promise<void> {
       .values({
         id: enrollmentId,
         userId: customerIds[spec.customer],
-        courseId: course.id,
+        courseSlug: course.slug,
+        courseTitle: course.title,
         bookedStartAt,
         bookedEndAt,
         status: spec.status,
@@ -423,14 +450,13 @@ export async function seedMock(): Promise<void> {
       await db
         .insert(bookings)
         .values({
-          courseId: course.id,
+          courseSlug: course.slug,
           startAt: bookedStartAt,
           endAt: bookedEndAt,
           enrollmentId,
           userId: customerIds[spec.customer],
         })
         .catch(() => {
-          // ถ้าชน PK (slot ซ้ำ) = อีกคนจอง slot นี้ ก็ไม่เป็นไร — mock ข้าม
           console.log(`- [mock] booking slot ชน PK (ข้าม): ${course.slug}`);
         });
     }

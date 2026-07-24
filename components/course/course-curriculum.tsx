@@ -1,6 +1,6 @@
 import { ListChecks } from "lucide-react";
 import { SectionHeading } from "@/components/course/section-heading";
-import type { CurriculumItem } from "@/lib/course-content";
+import type { CurriculumItem } from "@/lib/courses";
 
 /** หลักสูตร — numbered step cards (โครงเดียวกับ tips/custom/ai-speed-tips) */
 export function CourseCurriculum({ items }: { items: CurriculumItem[] }) {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Sparkles, Zap, RefreshCw, ArrowRight } from "lucide-react";
-import { getPublishedCourses, getLearnerCount } from "@/lib/queries";
+import { getPublishedCourses } from "@/lib/courses";
+import { getLearnerCount } from "@/lib/queries";
 import { CourseCard } from "@/components/course-card";
 
 export const dynamic = "force-dynamic";
@@ -88,7 +89,7 @@ export default async function HomePage() {
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {courses.map((c) => (
-              <CourseCard key={c.id} course={c} />
+              <CourseCard key={c.slug} course={c} />
             ))}
           </div>
         )}

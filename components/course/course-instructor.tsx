@@ -1,7 +1,7 @@
 import { UserRound } from "lucide-react";
 import { Avatar } from "@/components/avatar";
 import { SectionHeading } from "@/components/course/section-heading";
-import type { Instructor } from "@/lib/course-content";
+import type { Instructor } from "@/lib/courses";
 
 /** ผู้สอน */
 export function CourseInstructor({ instructor }: { instructor: Instructor }) {

@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1781661742979,
-      "tag": "0000_familiar_doctor_doom",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1782393127064,
-      "tag": "0001_nifty_starhawk",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1784800888755,
-      "tag": "0002_adorable_stature",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1784809105328,
-      "tag": "0003_dashing_mandrill",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1784840000000,
-      "tag": "0004_affiliate_clicks",
+      "when": 1784898979388,
+      "tag": "0000_unique_pete_wisdom",
       "breakpoints": true
     }
   ]

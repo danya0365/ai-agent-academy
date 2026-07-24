@@ -12,11 +12,11 @@ type DaySlots = { dayEpoch: number; slots: Slot[] };
 const freeCount = (d: DaySlots) => d.slots.filter((s) => !s.taken).length;
 
 export function BookingPicker({
-  courseId,
+  courseSlug,
   durationMin,
   days,
 }: {
-  courseId: string;
+  courseSlug: string;
   durationMin: number;
   days: DaySlots[];
 }) {
@@ -42,7 +42,7 @@ export function BookingPicker({
     if (selected == null) return;
     setError(null);
     startTransition(async () => {
-      const res = await bookSlot(courseId, selected);
+      const res = await bookSlot(courseSlug, selected);
       // สำเร็จ = redirect (ไม่ return) · ถ้ากลับมาแสดงว่ามี error
       if (res && !res.ok) setError(res.error);
     });

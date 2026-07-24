@@ -8,8 +8,7 @@ import { bookings } from "@/db/schema";
  * แยกจาก lib/booking.ts (pure logic) เพราะแตะ DB
  *
  * กันจองซ้อนด้วย 2 ชั้น: (1) overlap check ในทรานแซกชัน — ครอบคลุมกรณี grid ขยับ/ข้ามคอร์ส
- * (2) composite PK (courseId, startAt) — atomic guard ชั้นสุดท้าย. เวลาทำการเป็น global
- * (ครูคนเดียว) → overlap check จงใจไม่กรอง courseId เพื่อบล็อกข้ามคอร์สด้วย
+ * (2) composite PK (courseSlug, startAt) — atomic guard ชั้นสุดท้าย.
  */
 
 /** เงื่อนไข "มี booking คาบเวลากับ [startAt, endAt)" — global ทุกคอร์ส */
@@ -22,7 +21,7 @@ export function overlapWhere(startAt: Date, endAt: Date) {
  * คืน false ถ้าคาบเวลากับคิวอื่น / ชน PK (ช่วงเวลานี้ถูกจองไปแล้ว)
  */
 export async function claimSlot(args: {
-  courseId: string;
+  courseSlug: string;
   startAt: Date;
   endAt: Date;
   enrollmentId: string;
@@ -52,7 +51,7 @@ export async function releaseSlot(enrollmentId: string): Promise<void> {
 /** enrollment นี้ยังถือ lock อยู่ไหม */
 export async function hasSlotLock(enrollmentId: string): Promise<boolean> {
   const row = await db
-    .select({ courseId: bookings.courseId })
+    .select({ courseSlug: bookings.courseSlug })
     .from(bookings)
     .where(eq(bookings.enrollmentId, enrollmentId))
     .get();

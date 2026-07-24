@@ -89,27 +89,11 @@ export const rateLimit = sqliteTable(
 );
 
 /* ────────────────────────────────────────────────────────────
- * ตารางของแอป: คอร์ส / รอบเรียน / การลงทะเบียน
+ * ตารางของแอป: การลงทะเบียน / รอบเรียน
+ *
+ * หมายเหตุ: courses เป็น static data ใน lib/courses.ts แล้ว
+ * — enrollments/bookings เก็บ courseSlug + courseTitle (denormalized) แทน FK
  * ──────────────────────────────────────────────────────────── */
-
-// CourseType  defined in lib/course-types (single source of truth)
-import type { CourseType } from "@/lib/course-types";
-
-export const courses = sqliteTable("courses", {
-  id: text("id").primaryKey(),
-  slug: text("slug").notNull().unique(),
-  title: text("title").notNull(),
-  description: text("description").notNull(),
-  type: text("type").notNull().$type<CourseType>(),
-  price: integer("price").notNull(), // หน่วยเป็นบาท (จำนวนเต็ม)
-  coverImageUrl: text("cover_image_url"),
-  // ความยาวต่อครั้ง (นาที) — ใช้เฉพาะคอร์ส type 'booking' (null สำหรับประเภทอื่น)
-  sessionDurationMin: integer("session_duration_min"),
-  isPublished: integer("is_published", { mode: "boolean" }).notNull().default(false),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .$defaultFn(() => new Date()),
-});
 
 /**
  * เวลาทำการของ "ร้าน" (recurring weekly) — ใช้ gen slot ว่างของคอร์ส booking
@@ -149,10 +133,10 @@ export const enrollments = sqliteTable(
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    courseId: text("course_id")
-      .notNull()
-      .references(() => courses.id, { onDelete: "cascade" }),
-    // เวลาที่จอง (คอร์ส type 'booking') — เก็บบน enrollment เพื่อคงไว้แม้ถูก reject
+    courseSlug: text("course_slug").notNull(),
+    // denormalized สำหรับ display — protect เก่าเมื่อ rename slug
+    courseTitle: text("course_title").notNull(),
+    // เวลาที่จอง (คอร์ส type booking) — เก็บบน enrollment เพื่อคงไว้แม้ถูก reject
     // (แหล่งความจริงของ "ลูกค้าเลือกเวลาไหน"; ตาราง bookings เป็นแค่ lock กันซ้อน)
     bookedStartAt: integer("booked_start_at", { mode: "timestamp" }),
     bookedEndAt: integer("booked_end_at", { mode: "timestamp" }),
@@ -171,7 +155,7 @@ export const enrollments = sqliteTable(
       .$defaultFn(() => new Date()),
   },
   (t) => [
-    index("enrollments_user_course_idx").on(t.userId, t.courseId),
+    index("enrollments_user_course_idx").on(t.userId, t.courseSlug),
     // กันสลิปซ้ำ — SQLite ยอมให้ค่า null ซ้ำกันได้
     uniqueIndex("enrollments_slip_trans_ref_unique").on(t.slipTransRef),
   ],
@@ -189,9 +173,7 @@ export const enrollments = sqliteTable(
 export const bookings = sqliteTable(
   "bookings",
   {
-    courseId: text("course_id")
-      .notNull()
-      .references(() => courses.id, { onDelete: "cascade" }),
+    courseSlug: text("course_slug").notNull(),
     startAt: integer("start_at", { mode: "timestamp" }).notNull(),
     endAt: integer("end_at", { mode: "timestamp" }).notNull(),
     enrollmentId: text("enrollment_id")
@@ -205,7 +187,7 @@ export const bookings = sqliteTable(
       .$defaultFn(() => new Date()),
   },
   (t) => [
-    primaryKey({ columns: [t.courseId, t.startAt] }),
+    primaryKey({ columns: [t.courseSlug, t.startAt] }),
     // ลบ/ค้นหา booking ตาม enrollment (ตอนปล่อย slot)
     index("bookings_enrollment_idx").on(t.enrollmentId),
   ],

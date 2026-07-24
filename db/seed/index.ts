@@ -1,19 +1,18 @@
 import "../../lib/env";
 import { seedInitial } from "./initial";
-import { seedStarter } from "./starter";
 import { seedMock } from "./mock";
 import { isRemoteDb } from "./helpers";
 
-type Tier = "initial" | "starter" | "mock";
-const VALID: Tier[] = ["initial", "starter", "mock"];
+type Tier = "initial" | "mock";
+const VALID: Tier[] = ["initial", "mock"];
 
 function parseTiers(argv: string[]): Tier[] {
   const args = argv.slice(2);
-  if (args.length === 0) return ["initial", "starter"]; // default ปลอดภัยสำหรับ production
-  if (args.includes("all")) return ["initial", "starter", "mock"];
+  if (args.length === 0) return ["initial"]; // default ปลอดภัยสำหรับ production
+  if (args.includes("all")) return ["initial", "mock"];
   const tiers = args.filter((a): a is Tier => VALID.includes(a as Tier));
   if (tiers.length === 0) {
-    throw new Error(`tier ไม่ถูกต้อง: ${args.join(", ")} (ใช้ได้: initial, starter, mock, all)`);
+    throw new Error(`tier ไม่ถูกต้อง: ${args.join(", ")} (ใช้ได้: initial, mock, all)`);
   }
   return tiers;
 }
@@ -37,7 +36,6 @@ async function main() {
   console.log(`เริ่ม seed: ${tiers.join(" → ")}`);
   for (const t of tiers) {
     if (t === "initial") await seedInitial();
-    else if (t === "starter") await seedStarter();
     else if (t === "mock") await seedMock();
   }
   console.log("เสร็จสิ้น ✅");

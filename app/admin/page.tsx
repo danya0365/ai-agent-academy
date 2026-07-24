@@ -2,7 +2,8 @@ import Link from "next/link";
 import { sql, eq } from "drizzle-orm";
 import { Clock, Wallet, BadgeCheck, Users, BookOpen, ArrowRight } from "lucide-react";
 import { db } from "@/db";
-import { courses, enrollments } from "@/db/schema";
+import { enrollments } from "@/db/schema";
+import { getPublishedCourses } from "@/lib/courses";
 import { formatBaht } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -25,8 +26,7 @@ export default async function AdminDashboard() {
     .get();
   const revenue = Number(revenueRow?.total ?? 0);
 
-  const courseRow = await db.select({ n: sql<number>`count(*)` }).from(courses).get();
-  const courseCount = Number(courseRow?.n ?? 0);
+  const courseCount = getPublishedCourses().length;
 
   return (
     <div>

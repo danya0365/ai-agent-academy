@@ -67,6 +67,7 @@ export default async function AdminEnrollmentsPage({
       ) : (
         <div className="space-y-3">
           {rows.map(({ enrollment, course, customer }) => {
+            const courseTitle = course?.title ?? enrollment.courseTitle;
             const v = enrollment.slipVerifyStatus
               ? VERIFY[enrollment.slipVerifyStatus]
               : null;
@@ -74,18 +75,16 @@ export default async function AdminEnrollmentsPage({
               <div key={enrollment.id} className="card p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="font-extrabold text-foreground">{course.title}</p>
+                    <p className="font-extrabold text-foreground">{courseTitle}</p>
                     <p className="text-sm text-muted">
                       {customer.name} · {customer.email}
                     </p>
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-sm">
-                      <span className={`badge ${courseTypeBadge(course.type)}`}>
-                        {COURSE_TYPE_LABELS[course.type]}
+                      <span className={`badge ${courseTypeBadge(course?.type ?? "live")}`}>
+                        {COURSE_TYPE_LABELS[course?.type ?? "live"]}
                       </span>
-                      {course.type === "live" && enrollment.bookedStartAt ? (
+                      {course?.type === "live" && enrollment.bookedStartAt ? (
                         <span>เวลาที่จอง: {formatBkkDateTime(enrollment.bookedStartAt)}</span>
-                      ) : course.type === "self_paced" ? (
-                        <span className="text-muted">เรียนได้ทันที ไม่มีเวลาจอง</span>
                       ) : null}
                     </div>
                     <p className="text-sm text-muted">

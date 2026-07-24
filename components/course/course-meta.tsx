@@ -1,9 +1,6 @@
 import { Wallet, Clock, BadgeCheck, BarChart3, type LucideIcon } from "lucide-react";
-import type { courses } from "@/db/schema";
 import { formatBaht, formatDuration } from "@/lib/format";
-import type { ResolvedCourseContent } from "@/lib/course-content";
-
-type Course = typeof courses.$inferSelect;
+import type { Course, ResolvedCourseContent } from "@/lib/courses";
 
 const TYPE_FACT = {
   self_paced: "เรียนได้ทันทีหลังสมัคร",

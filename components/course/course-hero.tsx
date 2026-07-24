@@ -1,9 +1,6 @@
 import { Zap, Clock, CheckCircle2, ArrowRight } from "lucide-react";
-import type { courses } from "@/db/schema";
 import { formatBaht, COURSE_TYPE_LABELS } from "@/lib/format";
-import type { ResolvedCourseContent } from "@/lib/course-content";
-
-type Course = typeof courses.$inferSelect;
+import type { Course, ResolvedCourseContent } from "@/lib/courses";
 
 const TYPE_ICON = { self_paced: Zap, live: Clock } as const;
 const CTA_LABEL = {
@@ -11,11 +8,11 @@ const CTA_LABEL = {
   live: "เลือกเวลาเรียน",
 } as const;
 
-// สีแถบ cover แบบ deterministic จาก id (token utilities — ไม่ hardcode hex) — pattern เดียวกับ course-card
+// สีแถบ cover แบบ deterministic จาก slug
 const COVERS = ["bg-brand-500", "bg-accent-500", "bg-brand-700"];
-function coverClass(id: string): string {
+function coverClass(slug: string): string {
   let sum = 0;
-  for (let i = 0; i < id.length; i++) sum += id.charCodeAt(i);
+  for (let i = 0; i < slug.length; i++) sum += slug.charCodeAt(i);
   return COVERS[sum % COVERS.length];
 }
 
@@ -63,7 +60,7 @@ export function CourseHero({
       <div className="hidden lg:block">
         <div className="card overflow-hidden p-0">
           <div
-            className={`flex h-36 items-center justify-center ${coverClass(course.id)}`}
+            className={`flex h-36 items-center justify-center ${coverClass(course.slug)}`}
           >
             <TypeIcon className="size-16 text-on-brand" />
           </div>

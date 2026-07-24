@@ -3,14 +3,14 @@
 import { useState, useTransition } from "react";
 import { enroll } from "@/actions/enrollments";
 
-export function EnrollForm({ courseId }: { courseId: string }) {
+export function EnrollForm({ courseSlug }: { courseSlug: string }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function handleEnroll() {
     setError(null);
     startTransition(async () => {
-      const res = await enroll(courseId);
+      const res = await enroll(courseSlug);
       if (res && !res.ok) setError(res.error);
     });
   }

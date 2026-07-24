@@ -25,6 +25,7 @@ export default async function PayPage({
   if (!row) notFound();
 
   const { enrollment, course } = row;
+  const courseTitle = course?.title ?? enrollment.courseTitle;
   const bank = getBankInfo();
   const qr = await generatePromptPayQR(enrollment.amount);
   const canUpload =
@@ -46,7 +47,7 @@ export default async function PayPage({
       <div className="card mt-4 p-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="font-extrabold text-foreground">{course.title}</p>
+            <p className="font-extrabold text-foreground">{courseTitle}</p>
             {enrollment.bookedStartAt && (
               <p className="text-sm text-muted">
                 เวลาที่จอง: {formatBkkDateTime(enrollment.bookedStartAt)}

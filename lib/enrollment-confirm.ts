@@ -27,7 +27,7 @@ export async function confirmEnrollment(
       // hard check สำหรับคอร์สจองคิว — lock (bookings row) ต้องยังอยู่
       if (e.bookedStartAt) {
         const lock = await tx
-          .select({ courseId: bookings.courseId })
+          .select({ courseSlug: bookings.courseSlug })
           .from(bookings)
           .where(eq(bookings.enrollmentId, enrollmentId))
           .get();
