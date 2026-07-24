@@ -25,8 +25,6 @@ export function PromptPaySection({ initialQR, promptPayId }: Props) {
   const [qr, setQr] = useState<string | null>(initialQR);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [downloading, setDownloading] = useState(false);
-
   const generateQR = useCallback(async (amt?: number) => {
     setLoading(true);
     try {
@@ -59,21 +57,6 @@ export function PromptPaySection({ initialQR, promptPayId }: Props) {
     setMode(val);
     setShowCustomInput(false);
     generateQR(val);
-  };
-
-  const downloadQR = async () => {
-    if (!qr) return;
-    setDownloading(true);
-    try {
-      const link = document.createElement("a");
-      link.href = qr;
-      link.download = `promptpay${typeof mode === "number" ? `-${mode}` : ""}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } finally {
-      setDownloading(false);
-    }
   };
 
   const copyId = async () => {
@@ -185,15 +168,14 @@ export function PromptPaySection({ initialQR, promptPayId }: Props) {
 
       {/* ── Download ── */}
       {qr && (
-        <button
-          type="button"
-          onClick={downloadQR}
-          disabled={downloading}
+        <a
+          href={qr}
+          download={`promptpay${typeof mode === "number" ? `-${mode}` : ""}.png`}
           className="btn btn-sm btn-secondary mt-2 gap-1.5"
         >
           <Download className="size-3.5" />
-          {downloading ? "กำลังดาวน์โหลด..." : "ดาวน์โหลด QR"}
-        </button>
+          ดาวน์โหลด QR
+        </a>
       )}
 
       {/* ── Copy PromptPay ID ── */}
