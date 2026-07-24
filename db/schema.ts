@@ -276,5 +276,30 @@ export const communityPostLikes = sqliteTable(
   ],
 );
 
+/* ────────────────────────────────────────────────────────────
+ * Shopee Affiliate Click Tracking
+ * ──────────────────────────────────────────────────────────── */
+
+export const affiliateClicks = sqliteTable(
+  "affiliate_clicks",
+  {
+    id: text("id").primaryKey(),
+    /** product.id (เช่น "shopee-12345") */
+    productId: text("product_id").notNull(),
+    /** ชื่อสินค้า (denormalized — dashboard ไม่ต้อง JOIN) */
+    productTitle: text("product_title").notNull(),
+    /** ที่มาของ click เช่น "shop", "community-feed", tip slug */
+    subId: text("sub_id"),
+    clickedAt: integer("clicked_at", { mode: "timestamp" })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("affiliate_clicks_product_idx").on(t.productId),
+    index("affiliate_clicks_sub_id_idx").on(t.subId),
+    index("affiliate_clicks_clicked_at_idx").on(t.clickedAt),
+  ],
+);
+
 // re-export sql เผื่อใช้ที่อื่น
 export { sql };

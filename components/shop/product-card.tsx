@@ -1,9 +1,9 @@
 import { ShoppingBag, ExternalLink } from "lucide-react";
-import { withSubId, type ShopeeProduct } from "@/lib/shopee-products";
+import { type ShopeeProduct } from "@/lib/shopee-products";
 import { formatBaht } from "@/lib/format";
 
 /**
- * การ์ดสินค้า Shopee — ลิงก์ affiliate (แนบ sub_id ถ้ามี)
+ * การ์ดสินค้า Shopee — ลิงก์ผ่าน /api/shopee/click (track click → 302 ไป Shopee)
  * ไม่มี imageUrl → โชว์ placeholder ไม่ให้รูปแตก
  */
 export function ProductCard({
@@ -13,7 +13,13 @@ export function ProductCard({
   product: ShopeeProduct;
   subId?: string;
 }) {
-  const href = withSubId(product.url, subId);
+  const params = new URLSearchParams({
+    productId: product.id,
+    productTitle: product.title,
+    url: product.url,
+    ...(subId ? { subId } : {}),
+  });
+  const href = `/api/shopee/click?${params}`;
 
   return (
     <a
