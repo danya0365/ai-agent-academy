@@ -46,6 +46,40 @@ export type Tip = {
 
 export const TIPS: Tip[] = [
   {
+    slug: "design-system-ui-consistency",
+    title: "Design System ทำให้ AI เขียน UI กลมกลืนทั้งโปรเจค",
+    summary:
+      "AI เขียน UI ให้แต่สีเพี้ยน ขนาดไม่ตรง บอกกี่รอบก็ลืม — ถ้ามี Design System (CSS variables + component classes) AI จะ generate UI ที่ match ดีไซน์โปรเจคโดยอัตโนมัติ ไม่ต้อง prompt ซ้ำ!",
+    category: "เทคนิค",
+    readingTime: "6 นาที",
+    createdAt: "2026-07-24",
+    productTags: ["ทำงาน", "ประสิทธิภาพ"],
+    social: {
+      post:
+        "Design System ทำให้ AI เขียน UI กลมกลืนทั้งโปรเจค\n\nเคยไหม — ให้ AI เขียน UI แล้วมันใช้สีบ้าๆ ขนาดเพี้ยน ดูไม่เข้ากับโปรเจค?\n\nบอกกี่รอบก็ลืม ต้อง prompt ซ้ำทุกครั้ง\n\nความลับ: Design System ที่ดี = CSS variables + component classes\n\n• สี ขนาด ระยะ เก็บไว้ที่ CSS variables\n• Component class (.btn, .card, .badge) ใช้ var() ล้วน\n• AI แค่ใช้ Utility class → สวยเป๊ะ\n• Theme = แค่เปลี่ยนไฟล์ CSS → UI เปลี่ยนตามอัตโนมัติ\n\nข้อดี:\n• ไม่ต้องบอก AI ทุกครั้งว่าสีอะไร\n• เปลี่ยนธีมได้ไม่ต้องแก้ component\n• UI กลมกลืนทั้งโปรเจค\n\nวิธีเริ่ม: แค่ 3 ตัวแปร — --brand-500, --background, --foreground\nค่อยขยับไป 10+ ตัวแปร + component classes\n\nDesign System = ภาษากลางระหว่างคนกับ AI",
+      comment:
+        "Design System ทำให้ AI เขียน UI กลมกลืนทั้งโปรเจค — CSS variables + component classes = ภาษากลางระหว่างคนกับ AI\n{{LINK}}",
+    },
+    sections: [
+      {
+        heading: "1. ปัญหา: AI เขียน UI มาแต่สีเพี้ยน",
+        body: "AI ไม่รู้ว่าโปรเจคเราใช้สีอะไร ขนาดเท่าไหร่ padding เท่าไหร่ ถ้าไม่บอกทุกครั้งใน prompt มันก็มั่วไปเรื่อย — แต่ถ้ามี Design System ให้ AI อ่าน แค่บอก 'ใช้ class ของ DS' ปัญหานี้หายไป",
+      },
+      {
+        heading: "2. CSS Variables = ภาษาเดียวของสีและขนาด",
+        body: "กำหนด --brand-500, --background, --border ไว้ที่ CSS variables ไฟล์เดียว แล้ว AI ใช้ bg-brand-500, text-muted, border-border ได้ทันที — เปลี่ยนค่าที่ var ทั้งโปรเจคเปลี่ยนตาม",
+      },
+      {
+        heading: "3. Component Classes = สำเร็จรูปให้ AI หยิบใช้",
+        body: ".btn .card .badge .input — component classes ที่ใช้ var() ล้วน AI ไม่ต้องคิด styling แค่เลือก class ที่เหมาะกับ context แค่นั้นก็สวยเป๊ะ",
+      },
+      {
+        heading: "4. Theme System = สลับธีมได้ไม่ต้องแก้ component",
+        body: "CSS ไฟล์แยกตามธีม (bold.css, ocean.css, grape.css) — Theme ใหม่ = แค่เพิ่ม CSS variables ชุดใหม่ แล้วเปลี่ยน data-theme attribute  component ทำงานเหมือนเดิม",
+      },
+    ],
+  },
+  {
     slug: "claude-code-effort-secret",
     title: "ตั้ง Effort ใน Claude Code ยังไงให้คุ้มทุก Token",
     summary:
