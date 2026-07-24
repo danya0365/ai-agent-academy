@@ -49,7 +49,7 @@ export const TIPS: Tip[] = [
     slug: "claude-code-effort-secret",
     title: "ตั้ง Effort ใน Claude Code ยังไงให้คุ้มทุก Token",
     summary:
-      "ถ้าใช้ Claude Fable ตั้ง high ก็พอ — ไม่ต้องไปถึง max เพราะมันไม่เดา แต่ถ้าใช้ Deepseek ตอน quota ต้องตั้ง ultracode + xhigh + workflow ไม่งั้นมันจะมโน!",
+      "ถ้าใช้ Claude Fable ตั้ง high ก็พอ — ไม่ต้องไปถึง max เพราะมันไม่เดา แต่ถ้าใช้ Deepseek ตอนที่สลับไป Free model ต้องตั้ง ultracode + xhigh + workflow ไม่งั้นมันจะมโน!",
     category: "เพิ่มประสิทธิภาพ",
     readingTime: "3 นาที",
     createdAt: "2026-07-24",
