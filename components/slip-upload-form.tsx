@@ -71,7 +71,7 @@ export function SlipUploadForm({ enrollmentId }: { enrollmentId: string }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
       <label className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed border-border bg-muted-surface px-4 py-6 text-center transition hover:bg-card">
-        <Upload className="size-6 text-brand-700" />
+        <Upload className="size-6 text-accent-500" />
         <span className="text-sm font-bold text-foreground">แนบรูปสลิปการโอนเงิน</span>
         <span className="text-xs text-muted">รองรับ JPG, PNG, WEBP</span>
         <input

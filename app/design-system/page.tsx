@@ -90,7 +90,7 @@ export default function DesignSystemPage() {
 
         <div className="mt-5 grid gap-4 sm:grid-cols-3">
           {[
-            { id: "bold", label: "Bold (default)", icon: Zap, desc: "Indigo + Amber, ครีมขาว, เอกลักษณ์ neo-brutalist เต็ม", bg: "#fffdf5", fg: "#15161c", brand: "#4f46e5" },
+            { id: "bold", label: "Bold (default)", icon: Zap, desc: "3-color palette — Rose + Amber + Teal, neo-brutalist สีสัน", bg: "#fffaf5", fg: "#1c1917", brand: "#e11d48" },
             { id: "ocean", label: "Ocean", icon: Waves, desc: "Cyan + Emerald, ฟ้าเขียวเย็นสบาย", bg: "#f3fbfd", fg: "#0c1a1f", brand: "#0891b2" },
             { id: "grape", label: "Grape", icon: Grape, desc: "Violet + Fuchsia, ม่วงหรู", bg: "#faf6ff", fg: "#1b1530", brand: "#7c3aed" },
           ].map((t) => {
@@ -172,22 +172,38 @@ export default function DesignSystemPage() {
       {/* ─── Brand Ramp ─── */}
       <section className="mt-14">
         <h2 className="text-2xl font-black tracking-tight text-foreground">
-          Brand Ramp
+          Color Ramps
         </h2>
         <p className="mt-2 text-sm text-muted">
-          50→900 ใช้ใน UI ตามระดับความเด่น 500 = primary button
+          Bold theme มี 3 ramps — brand (rose), accent (amber), alt (teal)
+          ใช้ผสมกันให้หน้าดูหลากหลาย ไม่ซ้ำสีเดียว
         </p>
-        <div className="mt-4 flex flex-wrap gap-1">
-          {[50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map((s) => (
-            <div
-              key={s}
-              className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-border text-[10px] font-bold"
-              style={{ background: `var(--brand-${s})`, color: s >= 500 ? "var(--on-brand)" : "var(--foreground)" }}
-              title={`brand-${s}`}
-            >
-              {s}
+
+        <div className="mt-5 space-y-4">
+          <div>
+            <p className="mb-2 text-xs font-bold text-muted">brand-* (primary)</p>
+            <div className="flex flex-wrap gap-1">
+              {[50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map((s) => (
+                <div key={s} className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-border text-[10px] font-bold" style={{ background: `var(--brand-${s})`, color: s >= 500 ? "var(--on-brand)" : "var(--foreground)" }} title={`brand-${s}`}>{s}</div>
+              ))}
             </div>
-          ))}
+          </div>
+          <div>
+            <p className="mb-2 text-xs font-bold text-muted">accent-* (secondary)</p>
+            <div className="flex flex-wrap gap-1">
+              {[100, 400, 500, 600].map((s) => (
+                <div key={s} className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-border text-[10px] font-bold" style={{ background: `var(--accent-${s})`, color: s >= 500 ? "var(--foreground)" : "var(--foreground)" }} title={`accent-${s}`}>{s}</div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="mb-2 text-xs font-bold text-muted">alt-* (third color, bold only)</p>
+            <div className="flex flex-wrap gap-1">
+              {[50, 100, 200, 300, 400, 500, 600, 700, 800, 900].map((s) => (
+                <div key={s} className="flex h-10 w-10 items-center justify-center rounded-lg border-2 border-border text-[10px] font-bold" style={{ background: `var(--alt-${s})`, color: s >= 500 ? "var(--on-brand)" : "var(--foreground)" }} title={`alt-${s}`}>{s}</div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
@@ -440,7 +456,7 @@ export default function DesignSystemPage() {
         </p>
         <div className="mt-4 max-w-sm">
           <div className="card lift group flex flex-col overflow-hidden p-0">
-            <div className="h-24 bg-brand-500" />
+            <div className="h-24 bg-brand-500 sm:bg-gradient-to-r sm:from-brand-500 sm:via-accent-500 sm:to-alt-500" />
             <span className="badge absolute ml-3 mt-3 bg-card text-foreground">
               <Zap className="size-3.5" /> เคล็ดลับเด็ด
             </span>
@@ -501,6 +517,7 @@ component layer (.btn, .card, .badge, .input) ใช้ var() ล้วน
             "text-muted", "bg-muted-surface",
             "border-border", "bg-brand-500", "text-on-brand",
             "bg-accent-500", "text-brand-700",
+            "bg-alt-500", "text-alt-600",
             "card", "card-flat", "btn btn-primary", "btn btn-secondary",
             "btn btn-accent", "btn btn-ghost", "btn-sm", "badge", "input",
           ].map((cls) => (

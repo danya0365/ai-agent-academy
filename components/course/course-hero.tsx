@@ -12,7 +12,7 @@ const CTA_LABEL = {
 } as const;
 
 // สีแถบ cover แบบ deterministic จาก id (token utilities — ไม่ hardcode hex) — pattern เดียวกับ course-card
-const COVERS = ["bg-brand-500", "bg-accent-500", "bg-brand-700"];
+const COVERS = ["bg-brand-500", "bg-accent-500", "bg-alt-500"];
 function coverClass(id: string): string {
   let sum = 0;
   for (let i = 0; i < id.length; i++) sum += id.charCodeAt(i);

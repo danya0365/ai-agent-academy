@@ -69,7 +69,7 @@ export default async function PayPage({
 
       {enrollment.status === "slip_uploaded" && (
         <div className="card mt-4 flex items-start gap-2 p-5">
-          <Clock className="mt-0.5 size-5 shrink-0 text-brand-700" />
+          <Clock className="mt-0.5 size-5 shrink-0 text-alt-600" />
           <span className="text-muted">ได้รับสลิปแล้ว กำลังรอแอดมินตรวจสอบ จะแจ้งผลให้ทราบเร็ว ๆ นี้</span>
         </div>
       )}

@@ -148,7 +148,7 @@ function DayDropdown({
         className="flex w-full items-center justify-between gap-2 rounded-xl border-2 border-border bg-card px-4 py-3 text-left font-bold text-foreground transition hover:bg-muted-surface"
       >
         <span className="flex min-w-0 items-center gap-2">
-          <CalendarDays className="size-4 shrink-0 text-brand-700" />
+          <CalendarDays className="size-4 shrink-0 text-alt-600" />
           <span className="truncate">{formatBkkDay(current.dayEpoch)}</span>
         </span>
         <span className="flex shrink-0 items-center gap-2">
