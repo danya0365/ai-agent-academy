@@ -42,10 +42,15 @@ export default async function TipDetailPage({ params }: Props) {
       </Link>
 
       <header className="mt-3">
-        <span className="badge bg-card text-foreground">
-          <Lightbulb className="size-3.5" />
-          {tip.category}
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="badge bg-card text-foreground">
+            <Lightbulb className="size-3.5" />
+            {tip.category}
+          </span>
+          {tip.social && (
+            <TipSocialCopy social={tip.social} slug={slug} />
+          )}
+        </div>
         <h1 className="mt-4 text-3xl font-black tracking-tight text-foreground sm:text-4xl">
           {tip.title}
         </h1>
@@ -61,13 +66,6 @@ export default async function TipDetailPage({ params }: Props) {
       <article className="mt-8">
         {Custom ? <Custom tip={tip} /> : <TipBody tip={tip} />}
       </article>
-
-      {/* copy ข้อความไปแปะ Social (post ไม่มีลิงก์ + comment มีลิงก์) */}
-      {tip.social && (
-        <div className="mt-10">
-          <TipSocialCopy social={tip.social} slug={slug} />
-        </div>
-      )}
 
       {/* คำถาม-คำตอบเกี่ยวกับเคล็ดลับนี้ (ทำตาม tip ไม่ได้ ถามในคอมมูนิตี้) */}
       <div className="mt-12">
