@@ -4,6 +4,7 @@ import "@/public/styles/index.css";
 import { AppShell } from "@/components/shell/app-shell";
 import type { ShellUser } from "@/components/shell/nav";
 import { ThemeProvider, ThemeScript } from "@/components/theme/theme-provider";
+import { InAppBanner } from "@/components/in-app-banner";
 import { getSession } from "@/lib/session";
 import { OAuthErrorHandler } from "@/components/oauth-error-handler";
 import { Toaster } from "sonner";
@@ -89,6 +90,7 @@ export default async function RootLayout({
       <body className="min-h-full bg-background text-foreground">
         <ThemeProvider>
           <OAuthErrorHandler />
+          <InAppBanner />
           <Toaster richColors closeButton position="top-center" />
           <AppShell user={user}>{children}</AppShell>
         </ThemeProvider>
