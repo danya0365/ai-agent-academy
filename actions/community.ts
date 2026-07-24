@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import { communityPosts, communityPostLikes } from "@/db/schema";
 import { requireUser, getSession } from "@/lib/session";
+import { rateLimit } from "@/lib/rate-limit";
 import { getTipBySlug } from "@/lib/tips";
 import { getCommunityFeedPage } from "@/lib/queries";
 import { POST_BODY_MAX, type FeedCursor, type FeedPost } from "@/lib/community";
@@ -33,6 +34,11 @@ export async function createPost(input: {
   tipSlug?: string | null;
 }): Promise<ActionResult> {
   const user = await requireUser("/community");
+  const rl = await rateLimit("create-post", {
+    windowMs: 60_000, max: 3, message: "ตั้งคำถามได้สูงสุด 3 ครั้งต่อนาที",
+  });
+  if (!rl.ok) return rl;
+
   const v = validateBody(input.body);
   if (!v.ok) return v;
 
@@ -63,6 +69,11 @@ export async function createReply(
   body: string,
 ): Promise<ActionResult> {
   const user = await requireUser(`/community/${postId}`);
+  const rl = await rateLimit("create-reply", {
+    windowMs: 60_000, max: 5, message: "ตอบคำถามได้สูงสุด 5 ครั้งต่อนาที",
+  });
+  if (!rl.ok) return rl;
+
   const v = validateBody(body);
   if (!v.ok) return v;
 
@@ -105,6 +116,10 @@ export async function toggleLike(
   postId: string,
 ): Promise<{ ok: true; liked: boolean; likeCount: number } | { ok: false; error: string }> {
   const user = await requireUser();
+  const rl = await rateLimit("toggle-like", {
+    windowMs: 60_000, max: 30, message: "ไลก์บ่อยไป รอสักครู่",
+  });
+  if (!rl.ok) return rl;
 
   const post = await db
     .select({ id: communityPosts.id })
@@ -171,6 +186,10 @@ export async function acceptReply(
   replyId: string,
 ): Promise<ActionResult> {
   const user = await requireUser();
+  const rl = await rateLimit("accept-reply", {
+    windowMs: 60_000, max: 10, message: "ดำเนินการบ่อยไป รอสักครู่",
+  });
+  if (!rl.ok) return rl;
 
   const question = await db
     .select()
@@ -215,6 +234,11 @@ export async function deletePost(postId: string): Promise<ActionResult> {
     .where(eq(communityPosts.id, postId))
     .get();
   if (!post) return { ok: false, error: "ไม่พบโพสต์นี้" };
+  // deletePost — check rate limit after post exists to avoid leaking info
+  const rl = await rateLimit("delete-post", {
+    windowMs: 60_000, max: 5, message: "ลบบ่อยไป รอสักครู่",
+  });
+  if (!rl.ok) return rl;
   if (user.id !== post.authorId && user.role !== "admin") {
     return { ok: false, error: "ลบได้เฉพาะโพสต์ของตัวเองหรือแอดมิน" };
   }
