@@ -2,10 +2,8 @@ import Link from "next/link";
 import { Heart, ShoppingBag, MessageCircle } from "lucide-react";
 import { generatePromptPayQR, getBankInfo } from "@/lib/promptpay";
 import { AdsenseUnit } from "@/components/support/adsense-unit";
-import {
-  EncourageButton,
-  CopyButton,
-} from "@/components/support/support-actions";
+import { EncourageButton } from "@/components/support/support-actions";
+import { PromptPaySection } from "@/components/support/promptpay-section";
 
 /**
  * กล่อง "ให้กำลังใจ dev" — ใช้ซ้ำได้ทั้งหน้ารวมและหน้า detail
@@ -36,28 +34,9 @@ export async function SupportDev() {
       </div>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        {/* 1) พร้อมเพย์ */}
+        {/* 1) พร้อมเพย์ — เลือกยอด + ดาวน์โหลด QR ได้ */}
         {qr && (
-          <div className="card-flat flex flex-col items-center p-5">
-            <p className="mb-2 text-sm font-bold text-foreground">
-              โอนให้กำลังใจผ่านพร้อมเพย์
-            </p>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={qr}
-              alt="PromptPay QR สำหรับให้กำลังใจ"
-              className="w-40 rounded-xl border-2 border-border"
-            />
-            <p className="mt-2 text-xs text-muted">สแกนแล้วกรอกยอดได้ตามใจ</p>
-            {promptPayId && (
-              <div className="mt-2 flex items-center gap-2">
-                <span className="font-mono text-sm text-foreground">
-                  {promptPayId}
-                </span>
-                <CopyButton value={promptPayId} label="คัดลอกเบอร์" />
-              </div>
-            )}
-          </div>
+          <PromptPaySection initialQR={qr} promptPayId={promptPayId} />
         )}
 
         {/* ช่องทางลิงก์ (ของที่แนะนำ / LINE) */}
