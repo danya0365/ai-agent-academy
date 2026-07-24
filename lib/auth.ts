@@ -34,6 +34,9 @@ export const auth = betterAuth({
   },
   // จำกัด origin สำหรับ CSRF/origin check ให้เหลือโดเมนจริง
   trustedOrigins: [process.env.BETTER_AUTH_URL || "http://localhost:3000"],
+  onAPIError: {
+    errorURL: "/login",
+  },
   // rate limit กัน brute-force — เปิดบน production (default ของ better-auth ก็เปิดบน prod)
   // built-in special rules: /sign-in, /sign-up, /change-password = 3 ครั้ง/10 วิ;
   // request-password-reset/forget-password = 3 ครั้ง/60 วิ

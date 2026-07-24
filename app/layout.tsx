@@ -5,6 +5,8 @@ import { AppShell } from "@/components/shell/app-shell";
 import type { ShellUser } from "@/components/shell/nav";
 import { ThemeProvider, ThemeScript } from "@/components/theme/theme-provider";
 import { getSession } from "@/lib/session";
+import { OAuthErrorHandler } from "@/components/oauth-error-handler";
+import { Toaster } from "sonner";
 
 // body face — ใช้ทุกธีม (variable font → ครบทุกน้ำหนักรวม extrabold/black)
 const notoThai = Noto_Sans_Thai({
@@ -86,6 +88,8 @@ export default async function RootLayout({
       </head>
       <body className="min-h-full bg-background text-foreground">
         <ThemeProvider>
+          <OAuthErrorHandler />
+          <Toaster richColors closeButton position="top-center" />
           <AppShell user={user}>{children}</AppShell>
         </ThemeProvider>
       </body>
