@@ -8,6 +8,7 @@ import { DesignSystemUiConsistency } from "@/components/tips/custom/design-syste
 import { AiAgentIdentityMemory } from "@/components/tips/custom/ai-agent-identity-memory";
 import { PromptsThatWork } from "@/components/tips/custom/prompts-that-work";
 import { AiSideIncome } from "@/components/tips/custom/ai-side-income";
+import { AiProductPhotography } from "@/components/tips/custom/ai-product-photography";
 
 /**
  * ทะเบียน component เฉพาะของแต่ละเคล็ดลับ (custom renderer)
@@ -28,4 +29,5 @@ export const TIP_COMPONENTS: Record<string, ComponentType<{ tip: Tip }>> = {
   "ai-agent-identity-memory": AiAgentIdentityMemory,
   "prompts-that-work": PromptsThatWork,
   "ai-side-income": AiSideIncome,
+  "ai-product-photography": AiProductPhotography,
 };

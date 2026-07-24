@@ -292,6 +292,70 @@ export const TIPS: Tip[] = [
       },
     ],
   },
+  {
+    slug: "ai-product-photography",
+    title: "ใช้ AI สร้างรูปขายของออนไลน์ — ไม่ต้องจ้างช่างภาพ",
+    summary:
+      "จ้างช่างภาพทีละ 500-2000 บาท? ลองใช้ AI สร้างรูปสินค้าพื้นหลังขาว Lifestyle shot และ Banner โฆษณา — ฟรี! เริ่มได้เลยวันนี้ ไม่ต้องมีทักษะก็ทำได้",
+    category: "เครื่องมือ",
+    readingTime: "8 นาที",
+    createdAt: "2026-07-24",
+    productTags: ["รายได้", "เครื่องมือ"],
+    social: {
+      post: `ใช้ AI สร้างรูปขายของออนไลน์ ไม่ต้องจ้างช่างภาพ!
+
+เคยไหม? สินค้าดี แต่รูปถ่ายเองดูไม่มืออาชีพ
+จ้างช่างภาพทีละ 500-2,000 บาท — แพง!
+ถ่ายเองก็ไม่สวย ขายไม่ได้
+
+4 เทคนิคที่ใช้ AI แก้ปัญหานี้:
+
+📸 1. รูปพื้นหลังขาว — ฟรี!
+ใช้ Bing Image Creator หรือ Leonardo AI
+prompt: "product photography white background studio lighting"
+ได้รูปสไตล์ร้านค้าชั้นนำ แบบไม่ต้องจ้าง
+
+🎨 2. เปลี่ยนพื้นหลัง — remove.bg
+อัพรูป → AI ลบพื้นหลังให้ 3 วิ
+เปลี่ยน BG เป็นสีขาว/เกรเดียนต์/ลาย
+หรือจะใส่พื้นหลังร้านค้าเก๋ๆ
+
+🕺 3. Lifestyle shot — ให้ model สวมสินค้า
+ส่งรูปสินค้า + รูปคน → AI ใส่ให้
+เห็นภาพชัดว่าสวมใส่แล้วเป็นยังไง
+ลูกค้าตัดสินใจซื้อง่ายขึ้น
+
+📢 4. สร้าง Banner โฆษณา
+ใช้ Canva AI หรือ Adobe Firefly
+ใส่ข้อความ + CTA + โลโก้ร้าน
+พร้อมลง Facebook/Shopee ทันที
+
+ข้อดี: ฟรี! ไม่ต้องช่างภาพ ไม่ต้องสตูดิโอ
+แค่มีรูปสินค้าตั้งแต่ 1 รูป ก็เริ่มสร้างได้เลย
+
+เริ่มวันนี้ สินค้าดี + รูปสวย = ขายคล่องขึ้นแน่นอน!`,
+      comment:
+        "4 เทคนิคใช้ AI สร้างรูปขายของออนไลน์ — ฟรี! ไม่ต้องจ้างช่างภาพ เริ่มได้เลยวันนี้\n{{LINK}}",
+    },
+    sections: [
+      {
+        heading: "📸 1. รูปพื้นหลังขาว — ใช้ AI สร้างตั้งแต่ต้น",
+        body: 'ร้านค้าออนไลน์ชั้นนำใช้รูปพื้นหลังขาวเพราะสินค้าชัด ตัดภาพง่าย ดู professional\n\nAI tools ฟรีที่ใช้ได้:\n• **Bing Image Creator** (free, ใช้ Microsoft Account) — สร้างรูปจาก prompt\n• **Leonardo AI** (free 150 token/วัน) — ปรับรายละเอียดได้เยอะ\n• **Ideogram** (free) — เก่งเรื่องตัวอักษร + ข้อความในรูป\n\nตัวอย่าง prompt (คัดลอกไปใช้ได้):\n"product photography of [สินค้า] on white background, studio lighting, soft shadows, high angle, 4k product shot, minimalist"\n\nเคล็ดลับ: ใส่คําว่า "product photography" "white background" "studio lighting" prompt ผลลัพธ์จะตรงกว่ามาก',
+      },
+      {
+        heading: "🎨 2. เปลี่ยน/ลบพื้นหลัง — แก้จากรูปที่ถ่ายเอง",
+        body: 'ถ่ายรูปสินค้าด้วยมือถือ แล้วใช้ AI ลบพื้นหลัง — ได้รูปพื้นหลังขาวโดยไม่ต้องจัดสตูดิโอ\n\nTools ฟรี:\n• **remove.bg** (free 50 ครั้ง/เดือน) — ดีที่สุด ละเอียดสุด\n• **Adobe Express BG remover** (free)\n• **Canva BG remover** (free version)\n\nวิธีใช้: อัพรูป → AI ลบ BG อัตโนมัติ → เลือกพื้นหลังใหม่\n(สีขาว / เกรเดียนต์ / BG ร้านค้า / BG ฤดูกาล)\n\nPro tip: ถ่ายรูปสินค้าบนพื้นสีเรียบ (ขาว/เทา) ก่อน — AI จะลบพื้นหลังได้เนียนกว่า',
+      },
+      {
+        heading: "🕺 3. สร้าง Lifestyle Shot — ให้เห็นว่าสวมใส่แล้วเป็นไง",
+        body: 'ลูกค้าซื้อง่ายขึ้นเมื่อเห็นสินค้าถูกใช้จริง — โดยไม่ต้องจ้างนายแบบ\n\nวิธี:\n• ถ่ายรูปสินค้าบนพื้นเรียบ\n• หารูปคน (ฟรีจาก Unsplash/Pexels)\n• ใช้ **Clipdrop** หรือ **Photoshop AI (Firefly)** รวมรูป\n\nหรือใช้ AI สร้างตั้งแต่ต้น:\n"a woman wearing [สินค้า] in a coffee shop, candid shot, natural lighting, lifestyle photography, authentic"\n\nตัวอย่าง: ขายเสื้อ — "a man wearing a casual white t-shirt in a park, golden hour, natural lighting"\n→ AI สร้างรูปคนใส่เสื้อตัวนั้นให้คุณดู\n\nสําคัญ: รูป Lifestyle ทําให้ Conversion สูงขึ้น 30-50% เทียบกับรูปพื้นหลังขาวเฉยๆ',
+      },
+      {
+        heading: "📢 4. สร้าง Banner + ปกไลฟ์ — ขายของครบชุด",
+        body: 'โปรโมทสินค้าต้องการมากกว่ารูปเดี่ยว — ต้องมี Banner สวยๆ ไว้ลง Facebook/Shopee/TikTok\n\nTools ฟรี:\n• **Canva AI** — มี Magic Design, Magic Eraser, BG remover\n• **Adobe Firefly** — สร้างรูปจาก prompt + ใส่ข้อความ\n• **Microsoft Designer** — คล้าย Canva แต่งาน AI เจ๋ง\n\nสิ่งที่ควรมีใน Banner:\n✓ รูปสินค้าชัด\n✓ ข้อความโปรโมท\n✓ ราคา / ส่วนลด\n✓ CTA (สั่งซื้อเลย / สอบถาม)\n✓ โลโก้ร้านค้า\n\nขนาดมาตรฐาน: Facebook Post 1080×1080, Shopee Banner 1600×600, IG Story 1080×1920',
+      },
+    ],
+  },
 ];
 
 /** คืนเคล็ดลับทั้งหมด (เรียงตาม createdAt desc — ใหม่สุดขึ้นก่อน) */
