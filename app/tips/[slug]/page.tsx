@@ -65,7 +65,7 @@ export default async function TipDetailPage({ params }: Props) {
       {/* copy ข้อความไปแปะ Social (post ไม่มีลิงก์ + comment มีลิงก์) */}
       {tip.social && (
         <div className="mt-10">
-          <TipSocialCopy social={tip.social} />
+          <TipSocialCopy social={tip.social} slug={slug} />
         </div>
       )}
 

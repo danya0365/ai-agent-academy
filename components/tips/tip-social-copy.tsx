@@ -1,28 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Copy, Check, ChevronDown, ChevronUp } from "lucide-react";
 import type { TipSocial } from "@/lib/tips";
 
+/** แทนที่ {{LINK}} ด้วย URL เต็มตาม origin ที่เรียกใช้อยู่ */
+function resolveLink(text: string, slug: string) {
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const link = `${origin}/tips/${slug}`;
+  return text.replace(/\{\{LINK\}\}/g, link);
+}
+
 /**
  * 2 ปุ่ม copy ข้อความไป Social — แบ่งเป็น โพสต์หลัก (ไม่มีลิงก์) + คอมเมนต์ (มีลิงก์)
- * แสดง preview + copy button ในตัวเดียว ปิด/เปิด preview ได้
+ * ลิงก์ใช้ origin ปัจจุบันแบบ dynamic ป้องกัน hardcode
  */
-export function TipSocialCopy({ social }: { social: TipSocial }) {
+export function TipSocialCopy({
+  social,
+  slug,
+}: {
+  social: TipSocial;
+  slug: string;
+}) {
   const [showPostPreview, setShowPostPreview] = useState(false);
   const [showCommentPreview, setShowCommentPreview] = useState(false);
   const [copiedPost, setCopiedPost] = useState(false);
   const [copiedComment, setCopiedComment] = useState(false);
 
-  const copy = async (text: string, setCopied: (v: boolean) => void) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // silent
-    }
-  };
+  const copy = useCallback(
+    async (text: string, setCopied: (v: boolean) => void) => {
+      const resolved = resolveLink(text, slug);
+      try {
+        await navigator.clipboard.writeText(resolved);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch {
+        // silent
+      }
+    },
+    [slug],
+  );
+
+  const commentPreview = resolveLink(social.comment, slug);
 
   return (
     <div className="card-flat bg-muted-surface p-4 sm:p-5">
@@ -46,7 +65,7 @@ export function TipSocialCopy({ social }: { social: TipSocial }) {
         <CopyCard
           label="คอมเมนต์ (มีลิงก์)"
           hint="วางใต้โพสต์ตัวเอง — ลิงก์มาเว็บเรา"
-          text={social.comment}
+          text={commentPreview}
           copied={copiedComment}
           showPreview={showCommentPreview}
           togglePreview={() => setShowCommentPreview((v) => !v)}
