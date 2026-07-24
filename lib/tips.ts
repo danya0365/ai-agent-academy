@@ -46,6 +46,36 @@ export type Tip = {
 
 export const TIPS: Tip[] = [
   {
+    slug: "ai-agent-identity-memory",
+    title: "สร้างตัวตนให้ AI ก่อนเริ่มโปรเจค — แล้วมันจะจำทุกอย่าง",
+    summary:
+      "AI ไม่จำโปรเจค ต้องอธิบายซ้ำทุก session? ลองสร้าง AGENTS.md + Memory System ก่อนเริ่ม — แค่ 5 นาที AI จะมีตัวตน รู้บทบาท จำ context ได้เอง ไม่ต้องเสียเวลาพิมพ์ซ้ำ!",
+    category: "เทคนิค",
+    readingTime: "6 นาที",
+    createdAt: "2026-07-24",
+    productTags: ["ทำงาน", "ประสิทธิภาพ"],
+    social: {
+      post:
+        "สร้างตัวตนให้ AI ก่อนเริ่มโปรเจค — แล้วมันจะจำทุกอย่าง\n\nเคยไหม? เปิดโปรเจคใหม่ session ใหม่ AI ไม่จำอะไรเลย\n\n• ต้องบอกประวัติโปรเจคซ้ำทุกครั้ง\n• AI ไม่รู้ว่าตัวเองเป็นใคร ควรตอบยังไง\n• เสียเวลากับ prompt ซ้ำๆ วันละหลายรอบ\n\nวิธีแก้ง่ายมาก:\n\nStep 1: สร้าง AGENTS.md — บอก AI ว่ามันเป็นใคร\n• กำหนดชื่อบทบาท (Nova / Phoenix / อะไรก็ได้)\n• กำหนดบุคลิก ภาษาที่ใช้\n• กฎเหล็กของโปรเจค\n• CLAUDE.md = @AGENTS.md บรรทัดเดียว\n\nStep 2: สร้าง Memory System\n• เปิด autoMemoryDirectory\n• MEMORY.md index ไว้เปิดทุก session\n• เรื่องสำคัญเก็บเป็น topic files\n• AI เปิดอ่านเฉพาะอันที่เกี่ยวข้อง\n\nStep 3: เพิ่ม Toolkit (Optional)\n• permissions allowlist\n• slash commands\n• hooks auto-format\n\nข้อดี:\n• ไม่ต้องเล่าประวัติโปรเจคซ้ำอีก\n• AI รู้บทบาท ตอบตรง context\n• clone เครื่องใหม่ → ทุกอย่างพร้อม\n\nเริ่มแค่ 2 ไฟล์ก็เวิร์กแล้ว — AGENTS.md + memory 1 เรื่อง",
+      comment:
+        "สร้างตัวตนให้ AI + Memory System ก่อนเริ่มโปรเจค — แค่ 5 นาที AI จะจำทุกอย่าง ไม่ต้องอธิบายซ้ำ\n{{LINK}}",
+    },
+    sections: [
+      {
+        heading: "1. ปัญหา: AI ไม่จำโปรเจค",
+        body: "เปิด session ใหม่ทุกครั้ง AI จะลืมทุกอย่าง — ต้องบอกว่าโปรเจคนี้คืออะไร ใช้ tech stack อะไร โครงสร้างยังไง เสียเวลาและน่าเบื่อ",
+      },
+      {
+        heading: "2. ทางออก: AGENTS.md + CLAUDE.md",
+        body: "AGENTS.md = ตัวตนของ AI — กำหนดชื่อ บุคลิก กฎ บทบาท (ตัวอย่าง Nova หรือ Phoenix) จากนั้น CLAUDE.md = @AGENTS.md แค่บรรทัดเดียว AI จะมีตัวตนตลอดทุก session",
+      },
+      {
+        heading: "3. ต่อยอด: Memory System",
+        body: "ตั้ง autoMemoryDirectory → สร้าง MEMORY.md index + topic files → AI จำ context ได้เอง เปิดอ่านเฉพาะเรื่องที่เกี่ยวข้อง — commit เข้า git พกพาข้ามเครื่องได้",
+      },
+    ],
+  },
+  {
     slug: "design-system-ui-consistency",
     title: "Design System ทำให้ AI เขียน UI กลมกลืนทั้งโปรเจค",
     summary:

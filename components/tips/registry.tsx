@@ -5,6 +5,7 @@ import { ClaudeCodeTokenSurvival } from "@/components/tips/custom/claude-code-to
 import { ClaudeCodeQuotaStrategy } from "@/components/tips/custom/claude-code-quota-strategy";
 import { ClaudeCodeEffortSecret } from "@/components/tips/custom/claude-code-effort-secret";
 import { DesignSystemUiConsistency } from "@/components/tips/custom/design-system-ui-consistency";
+import { AiAgentIdentityMemory } from "@/components/tips/custom/ai-agent-identity-memory";
 
 /**
  * ทะเบียน component เฉพาะของแต่ละเคล็ดลับ (custom renderer)
@@ -22,4 +23,5 @@ export const TIP_COMPONENTS: Record<string, ComponentType<{ tip: Tip }>> = {
   "claude-code-quota-strategy": ClaudeCodeQuotaStrategy,
   "claude-code-effort-secret": ClaudeCodeEffortSecret,
   "design-system-ui-consistency": DesignSystemUiConsistency,
+  "ai-agent-identity-memory": AiAgentIdentityMemory,
 };
