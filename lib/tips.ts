@@ -1,5 +1,5 @@
 /**
- * เนื้อหาเมนู "รู้ก่อนใคร" — เก็บเป็น data ล้วน (ไม่มี JSX)
+ * เนื้อหาเมนู "ไขความลับ" — เก็บเป็น data ล้วน (ไม่มี JSX)
  *
  * - title/summary/category = metadata ใช้ในการ์ด + SEO + fallback
  * - sections หรือ content = เนื้อหาสำหรับ fallback renderer (components/tips/tip-body.tsx)

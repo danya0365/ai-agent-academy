@@ -2,13 +2,13 @@
 // (desktop sidebar + mobile bottom tabbar + account sheet)
 // แทน link ที่เคย hardcode ซ้ำใน navbar.tsx + mobile-nav.tsx
 import {
+  BookMarked,
   GraduationCap,
   Lightbulb,
-  ShoppingBag,
   MessagesSquare,
-  BookMarked,
-  ShieldCheck,
   Palette,
+  ShieldCheck,
+  ShoppingBag,
   type LucideIcon,
 } from "lucide-react";
 
@@ -52,8 +52,8 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     href: "/tips",
-    label: "รู้ก่อนใคร",
-    short: "รู้ก่อน",
+    label: "ไขความลับ",
+    short: "ความลับ",
     icon: Lightbulb,
     visibility: "always",
     tabbar: true,

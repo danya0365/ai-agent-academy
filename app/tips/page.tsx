@@ -8,7 +8,7 @@ import { SupportDev } from "@/components/support/support-dev";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "รู้ก่อนใคร — เคล็ดลับที่ dev ใช้จริง",
+  title: "ไขความลับ — เคล็ดลับที่ dev ใช้จริง",
   description:
     "รวมเคล็ดลับใช้ AI ทำงานให้เร็วขึ้น เขียน prompt ให้แม่น เครื่องมือฟรี และไอเดียหารายได้ อ่านฟรีทั้งหมด",
 };
@@ -21,7 +21,7 @@ export default function TipsPage() {
       {/* Hero */}
       <div className="max-w-2xl">
         <span className="badge bg-card text-foreground">
-          <Sparkles className="size-3.5" /> รู้ก่อนใคร
+          <Sparkles className="size-3.5" /> ไขความลับ
         </span>
         <h1 className="mt-4 text-3xl font-black tracking-tight text-foreground sm:text-4xl">
           เคล็ดลับที่ dev ใช้จริง

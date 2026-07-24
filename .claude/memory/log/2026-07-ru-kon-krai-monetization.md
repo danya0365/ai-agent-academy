@@ -1,6 +1,6 @@
 ---
 name: ru-kon-krai-monetization
-description: เมนูรู้ก่อนใคร (/tips) + ร้าน /shop — เนื้อหาฟรี + กล่องสนับสนุน + ระบบ Shopee affiliate (ไม่ล็อกเนื้อหา) อ่านเมื่อแตะ tips/shop/monetization
+description: เมนูไขความลับ (/tips) + ร้าน /shop — เนื้อหาฟรี + กล่องสนับสนุน + ระบบ Shopee affiliate (ไม่ล็อกเนื้อหา) อ่านเมื่อแตะ tips/shop/monetization
 metadata: 
   node_type: memory
   type: log
@@ -11,9 +11,9 @@ metadata:
   modified: 2026-07-23T08:36:23.612Z
 ---
 
-# เมนู "รู้ก่อนใคร" (/tips) + ร้าน /shop + กล่องสนับสนุน dev (2026-07-23)
+# เมนู "ไขความลับ" (/tips) + ร้าน /shop + กล่องสนับสนุน dev (2026-07-23)
 
-Dev มีเป้าหมายหารายได้ค่าเทอมลูก จึงเพิ่มเมนู "รู้ก่อนใคร" (`/tips`) — รวมเคล็ดลับ AI ฟรี
+Dev มีเป้าหมายหารายได้ค่าเทอมลูก จึงเพิ่มเมนู "ไขความลับ" (`/tips`) — รวมเคล็ดลับ AI ฟรี
 ท้ายหน้ามีกล่อง `SupportDev` รวม 4 ช่องทาง: PromptPay QR (open QR ผ่าน `lib/promptpay.ts`),
 Shopee affiliate, Google AdSense (แสดงผล), ปุ่ม LINE OA — ทุกช่องซ่อนอัตโนมัติถ้าไม่ตั้ง env.
 

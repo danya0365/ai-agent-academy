@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const tip = getTipBySlug(slug);
   if (!tip) return { title: "ไม่พบเคล็ดลับ" };
   return {
-    title: `${tip.title} — รู้ก่อนใคร`,
+    title: `${tip.title} — ไขความลับ`,
     description: tip.summary,
   };
 }
@@ -38,7 +38,7 @@ export default async function TipDetailPage({ params }: Props) {
         href="/tips"
         className="inline-flex items-center gap-1 text-sm font-medium text-muted transition hover:text-foreground"
       >
-        <ArrowLeft className="size-4" /> กลับไปรู้ก่อนใคร
+        <ArrowLeft className="size-4" /> กลับไปไขความลับ
       </Link>
 
       <header className="mt-3">

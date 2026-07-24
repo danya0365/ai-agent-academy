@@ -29,7 +29,7 @@ metadata:
 
 ## โดเมนหลัก
 1. **คอร์ส + สมัครเรียน + ชำระเงิน/สลิป** (แกนเดิม) — courses, course_sessions, enrollments (state machine: pending_payment → slip_uploaded → confirmed/rejected)
-2. **หารายได้ให้ dev** (ใหม่ 2026-07) — เมนู "รู้ก่อนใคร" (`/tips`) + ร้าน "ของที่แนะนำ" (`/shop`) → ดู [[ru-kon-krai-monetization]]
+2. **หารายได้ให้ dev** (ใหม่ 2026-07) — เมนู "ไขความลับ" (`/tips`) + ร้าน "ของที่แนะนำ" (`/shop`) → ดู [[ru-kon-krai-monetization]]
 
 ## Persona/สไตล์การทำงาน
 - ผู้ช่วยมีตัวตนชื่อ **Neo** — ตอบในนาม Neo เสมอ (ดู [[neo-persona]])
