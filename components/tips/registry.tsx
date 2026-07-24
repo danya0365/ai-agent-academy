@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import type { Tip } from "@/lib/tips";
 import { AiSpeedTips } from "@/components/tips/custom/ai-speed-tips";
 import { ClaudeCodeTokenSurvival } from "@/components/tips/custom/claude-code-token-survival";
+import { ClaudeCodeQuotaStrategy } from "@/components/tips/custom/claude-code-quota-strategy";
 
 /**
  * ทะเบียน component เฉพาะของแต่ละเคล็ดลับ (custom renderer)
@@ -16,4 +17,5 @@ import { ClaudeCodeTokenSurvival } from "@/components/tips/custom/claude-code-to
 export const TIP_COMPONENTS: Record<string, ComponentType<{ tip: Tip }>> = {
   "ai-speed-tips": AiSpeedTips,
   "claude-code-token-survival": ClaudeCodeTokenSurvival,
+  "claude-code-quota-strategy": ClaudeCodeQuotaStrategy,
 };
