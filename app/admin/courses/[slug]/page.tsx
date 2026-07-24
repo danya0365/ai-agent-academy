@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, Sparkles, FileText } from "lucide-react";
 import { getCourseBySlug } from "@/lib/courses";
 import { formatBaht, formatDuration } from "@/lib/format";
 import { PromptCard } from "@/components/course/prompt-card";
@@ -50,17 +50,20 @@ export default async function AdminCourseDetailPage({
         <ArrowLeft className="size-4" /> กลับไปจัดการคอร์ส
       </Link>
 
-      <h1 className="mt-3 text-2xl font-black tracking-tight text-foreground sm:text-3xl">
-        {course.title}
-      </h1>
-      <p className="mt-1 text-sm text-muted">{course.subtitle}</p>
+      {/* Header card */}
+      <div className="card mt-4 p-5 sm:p-6">
+        <h1 className="text-3xl font-black tracking-tight text-foreground sm:text-4xl">
+          {course.title}
+        </h1>
+        <p className="mt-2 text-base text-muted">{course.subtitle}</p>
 
-      <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted">
-        <span className="badge bg-muted-surface text-muted">{course.level}</span>
-        <span>{formatBaht(course.price)}</span>
-        <span>· {formatDuration(course.sessionDurationMin)}</span>
-        <span>· {course.stacks.length} หัวข้อ</span>
-        <span>· /{course.slug}</span>
+        <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-muted">
+          <span className="badge bg-muted-surface text-muted">{course.level}</span>
+          <span>{formatBaht(course.price)}</span>
+          <span>· {formatDuration(course.sessionDurationMin)}</span>
+          <span>· {course.stacks.length} หัวข้อ</span>
+          <span>· /{course.slug}</span>
+        </div>
       </div>
 
       {/* AI Prompts Section */}
@@ -107,9 +110,11 @@ export default async function AdminCourseDetailPage({
       </section>
 
       {/* Course Info Preview */}
-      <section className="mt-12">
-        <h2 className="mb-3 text-lg font-black text-foreground">รายละเอียดคอร์ส</h2>
-        <div className="rounded border border-border bg-surface p-5">
+      <section className="mt-14">
+        <h2 className="mb-4 flex items-center gap-2 text-xl font-black text-foreground">
+          <FileText className="size-5 text-brand-600" /> รายละเอียดคอร์ส
+        </h2>
+        <div className="rounded-2xl border-2 border-border bg-card p-5 sm:p-6">
           <div className="whitespace-pre-line text-sm leading-relaxed text-foreground">
             {course.description}
           </div>

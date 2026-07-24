@@ -22,7 +22,7 @@ export default async function AdminCoursesPage() {
             <Link
               key={c.slug}
               href={`/admin/courses/${c.slug}`}
-              className="card flex flex-col gap-3 p-4 transition hover:ring-2 hover:ring-brand-400 sm:flex-row sm:items-center sm:justify-between"
+              className="card lift group flex items-center justify-between gap-3 p-5"
             >
               <div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -37,7 +37,7 @@ export default async function AdminCoursesPage() {
                   · {formatBaht(c.price)} ·  {c.stacks.length} หัวข้อ · /{c.slug}
                 </p>
               </div>
-              <ArrowUpRight className="size-5 shrink-0 text-muted" />
+              <ArrowUpRight className="size-5 shrink-0 text-muted transition-all group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </Link>
           ))}
         </div>

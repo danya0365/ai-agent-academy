@@ -21,16 +21,16 @@ export function PromptCard({
   };
 
   return (
-    <div className="rounded border border-border bg-surface p-4">
+    <div className="rounded-2xl border-2 border-border bg-card p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-bold text-foreground">{label}</p>
-          <p className="text-xs text-muted">{description}</p>
+          <p className="text-sm font-extrabold text-foreground">{label}</p>
+          <p className="mt-0.5 text-xs text-muted">{description}</p>
         </div>
         <button
           type="button"
           onClick={copy}
-          className="flex shrink-0 items-center gap-1.5 rounded bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-brand-700"
+          className="btn btn-accent btn-sm shrink-0"
         >
           {copied ? (
             <>
@@ -43,7 +43,7 @@ export function PromptCard({
           )}
         </button>
       </div>
-      <pre className="mt-3 overflow-x-auto rounded bg-black/5 p-3 text-xs leading-relaxed text-foreground dark:bg-white/5">
+      <pre className="mt-4 overflow-x-auto rounded-2xl border-2 border-border bg-muted-surface p-4 text-xs leading-relaxed text-foreground">
         {prompt}
       </pre>
     </div>
