@@ -25,7 +25,7 @@ const STEPS = [
     icon: ListChecks,
     title: "สั่งงานเป็นขั้นตอน",
     desc: "งานใหญ่ให้แตกเป็นขั้น ๆ แล้วให้ AI ทำทีละขั้น จะได้ผลลัพธ์แม่นกว่าการสั่งรวดเดียว",
-    cover: "bg-alt-500",
+    cover: "bg-brand-700",
   },
 ];
 
@@ -33,7 +33,7 @@ export function AiSpeedTips({ tip }: { tip: Tip }) {
   return (
     <div className="flex flex-col gap-6">
       <div className="card-flat flex items-start gap-3 bg-muted-surface p-5">
-        <Rocket className="mt-0.5 size-6 shrink-0 text-alt-600" />
+        <Rocket className="mt-0.5 size-6 shrink-0 text-brand-700" />
         <p className="text-sm leading-relaxed text-foreground">
           {tip.summary} — ทำตาม 3 ขั้นนี้ทุกวัน แล้วจะรู้สึกว่างานที่เคยกินเวลาทั้งเช้า
           เหลือแค่ไม่กี่นาที
@@ -52,7 +52,7 @@ export function AiSpeedTips({ tip }: { tip: Tip }) {
               </span>
               <div>
                 <h2 className="flex items-center gap-2 text-lg font-extrabold text-foreground">
-                  <span className="text-alt-600">{i + 1}.</span>
+                  <span className="text-brand-700">{i + 1}.</span>
                   {step.title}
                 </h2>
                 <p className="mt-1 text-sm leading-relaxed text-muted">

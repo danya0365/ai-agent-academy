@@ -6,7 +6,7 @@ import { formatBaht, COURSE_TYPE_LABELS } from "@/lib/format";
 type Course = typeof courses.$inferSelect;
 
 // สีแถบ cover แบบ deterministic จาก id (ใช้ token utilities — ไม่ hardcode hex)
-const COVERS = ["bg-brand-500", "bg-accent-500", "bg-alt-500"];
+const COVERS = ["bg-brand-500", "bg-accent-500", "bg-brand-700"];
 function coverClass(id: string): string {
   let sum = 0;
   for (let i = 0; i < id.length; i++) sum += id.charCodeAt(i);

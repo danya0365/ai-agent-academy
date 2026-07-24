@@ -1,51 +1,38 @@
 /* ============================================
-   Template: bold (DEFAULT) — Colorful Neo-Brutalist
-   อบอุ่น/ขาว · brand=rose · accent=amber · alt=teal
-   border=rose (--border = --brand-500) ให้ neo-brutalist มีสี
-   สีสัน 3 โทน: rose (หลัก), amber (รอง), teal (เสริม)
+   Template: bold (DEFAULT) — Bold Edutech
+   ครีม/ขาว ตัวอักษรเข้ม · brand=indigo · accent=amber
+   โครงสร้าง neo-brutalist: ขอบเข้ม (--border) ใช้เป็นสีเงา offset ด้วย
    ============================================ */
 
 :root,
 [data-theme="bold"] {
-  /* Brand — rose (500 = สีปุ่ม primary, เข้มพอให้ตัวอักษรขาวอ่านออก) */
-  --brand-50: #fff1f2;
-  --brand-100: #ffe4e6;
-  --brand-200: #fecdd3;
-  --brand-300: #fda4af;
-  --brand-400: #fb7185;
-  --brand-500: #e11d48;
-  --brand-600: #be123c;
-  --brand-700: #9f1239;
-  --brand-800: #881337;
-  --brand-900: #4c0519;
+  /* Brand — indigo (500 = สีปุ่ม primary, เข้มพอให้ตัวอักษรขาวอ่านออก) */
+  --brand-50: #eef2ff;
+  --brand-100: #e0e7ff;
+  --brand-200: #c7d2fe;
+  --brand-300: #a5b4fc;
+  --brand-400: #818cf8;
+  --brand-500: #4f46e5;
+  --brand-600: #4338ca;
+  --brand-700: #3730a3;
+  --brand-800: #312e81;
+  --brand-900: #1e1b4b;
 
-  /* Accent — amber/orange */
-  --accent-100: #ffedd5;
-  --accent-400: #fb923c;
-  --accent-500: #f97316;
-  --accent-600: #ea580c;
-
-  /* Alt — teal (third color สำหรับ multi-color palette) */
-  --alt-50: #f0fdfa;
-  --alt-100: #ccfbf1;
-  --alt-200: #99f6e4;
-  --alt-300: #5eead4;
-  --alt-400: #2dd4bf;
-  --alt-500: #14b8a6;
-  --alt-600: #0d9488;
-  --alt-700: #0f766e;
-  --alt-800: #115e59;
-  --alt-900: #134e4a;
+  /* Accent — amber */
+  --accent-100: #fef3c7;
+  --accent-400: #fbbf24;
+  --accent-500: #f59e0b;
+  --accent-600: #d97706;
 
   /* Surface / semantic */
-  --background: #fffaf5;
-  --foreground: #1c1917;
+  --background: #fffdf5;
+  --foreground: #15161c;
   --card: #ffffff;
-  --card-foreground: #1c1917;
-  --muted: #78716c;
-  --muted-surface: #fef2f2;
-  --border: #e11d48;
-  --ring: #fb7185;
+  --card-foreground: #15161c;
+  --muted: #6b7280;
+  --muted-surface: #f4f1e9;
+  --border: #15161c;
+  --ring: #818cf8;
   --on-brand: #ffffff;
 
   /* Status */
@@ -63,37 +50,26 @@
 
 [data-theme="bold"].dark,
 .dark[data-theme="bold"] {
-  --brand-50: #1c1017;
-  --brand-100: #2d1b23;
-  --brand-200: #3d1f2b;
-  --brand-300: #4f2435;
-  --brand-500: #f43f5e;
-  --brand-600: #e11d48;
-  --brand-700: #fda4af;
-  --brand-800: #fecdd3;
-  --brand-900: #ffe4e6;
+  /* 50–300 = พื้น/ขอบเข้ม, 500/600 = ยังอิ่ม (ปุ่ม primary คงไว้ on-brand=#fff),
+     700–900 = สีอ่อน/ข้อความ */
+  --brand-50: #1e1b3a;
+  --brand-100: #272358;
+  --brand-200: #312c6b;
+  --brand-300: #3b357f;
+  --brand-500: #6366f1;
+  --brand-600: #4f46e5;
+  --brand-700: #a5b4fc;
+  --brand-800: #c7d2fe;
+  --brand-900: #e0e7ff;
 
-  /* Accent — not redefined in dark (inherits light values) */
-
-  /* Alt — teal dark ramp */
-  --alt-50: #0f1a1a;
-  --alt-100: #142b2b;
-  --alt-200: #1a3d3d;
-  --alt-300: #1f5050;
-  --alt-500: #14b8a6;
-  --alt-600: #0d9488;
-  --alt-700: #5eead4;
-  --alt-800: #99f6e4;
-  --alt-900: #ccfbf1;
-
-  --background: #1c1017;
-  --foreground: #fef2f2;
-  --card: #2d1b23;
-  --card-foreground: #fef2f2;
-  --muted: #a8a29e;
-  --muted-surface: #2d1b23;
-  --border: #7f1d2d;
-  --ring: #fb7185;
+  --background: #0b1020;
+  --foreground: #f8fafc;
+  --card: #141a2e;
+  --card-foreground: #f8fafc;
+  --muted: #94a3b8;
+  --muted-surface: #141a2e;
+  --border: #2f3855;
+  --ring: #818cf8;
 
   --success-surface: #14532d;
   --warning-surface: #451a03;

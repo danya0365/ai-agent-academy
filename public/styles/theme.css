@@ -44,18 +44,6 @@
   --color-accent-500: var(--accent-500);
   --color-accent-600: var(--accent-600);
 
-  /* Alt scale — third color ramp for multi-color palettes (bold uses teal) */
-  --color-alt-50: var(--alt-50);
-  --color-alt-100: var(--alt-100);
-  --color-alt-200: var(--alt-200);
-  --color-alt-300: var(--alt-300);
-  --color-alt-400: var(--alt-400);
-  --color-alt-500: var(--alt-500);
-  --color-alt-600: var(--alt-600);
-  --color-alt-700: var(--alt-700);
-  --color-alt-800: var(--alt-800);
-  --color-alt-900: var(--alt-900);
-
   /* Status */
   --color-success: var(--success);
   --color-success-surface: var(--success-surface);

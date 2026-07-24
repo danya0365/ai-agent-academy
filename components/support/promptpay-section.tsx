@@ -162,7 +162,7 @@ export function PromptPaySection({ initialQR, promptPayId }: Props) {
 
       {/* ── Amount tag ── */}
       {showAmountTag && (
-        <p className="mb-2 text-xs font-bold text-brand-500">
+        <p className="mb-2 text-xs font-bold text-brand-600">
           จำนวน {mode.toLocaleString()} บาท
         </p>
       )}

@@ -33,7 +33,7 @@ export function CourseMeta({
 function Fact({ icon: Icon, children }: { icon: LucideIcon; children: React.ReactNode }) {
   return (
     <span className="card-flat inline-flex items-center gap-2 px-3 py-2 text-sm font-bold text-foreground">
-      <Icon className="size-4 shrink-0 text-alt-600" />
+      <Icon className="size-4 shrink-0 text-brand-700" />
       {children}
     </span>
   );

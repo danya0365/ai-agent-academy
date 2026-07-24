@@ -32,7 +32,7 @@ const TIERS = [
     label: "Tier 1 — Subscription",
     desc: "ใช้ของที่จ่ายอยู่แล้วก่อน",
     providers: "Claude Code · Codex · Gemini · Copilot",
-    cover: "bg-alt-500",
+    cover: "bg-brand-700",
   },
   {
     label: "Tier 2 — ตัวประหยัด",
@@ -201,7 +201,7 @@ export function ClaudeCodeTokenSurvival({ tip }: { tip: Tip }) {
       {/* 9Router คืออะไร */}
       <section>
         <h2 className="flex items-center gap-2 text-lg font-extrabold text-foreground">
-          <Route className="size-5 text-alt-600" />
+          <Route className="size-5 text-brand-700" />
           9Router คืออะไร?
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">
@@ -220,7 +220,7 @@ export function ClaudeCodeTokenSurvival({ tip }: { tip: Tip }) {
       {/* 3-tier fallback visual */}
       <section>
         <h2 className="flex items-center gap-2 text-lg font-extrabold text-foreground">
-          <Layers className="size-5 text-alt-600" />
+          <Layers className="size-5 text-brand-700" />
           Auto-Fallback 3 ชั้นทำงานยังไง
         </h2>
         <ol className="mt-3 flex flex-col gap-2">
@@ -257,7 +257,7 @@ export function ClaudeCodeTokenSurvival({ tip }: { tip: Tip }) {
       {/* ขั้นตอนทำจริง */}
       <section>
         <h2 className="flex items-center gap-2 text-lg font-extrabold text-foreground">
-          <Terminal className="size-5 text-alt-600" />
+          <Terminal className="size-5 text-brand-700" />
           ลงมือทำทีละขั้น
         </h2>
 
@@ -271,7 +271,7 @@ export function ClaudeCodeTokenSurvival({ tip }: { tip: Tip }) {
                 </span>
                 <div className="min-w-0 flex-1">
                   <h3 className="flex items-center gap-2 text-lg font-extrabold text-foreground">
-                    <span className="text-alt-600">{i + 1}.</span>
+                    <span className="text-brand-700">{i + 1}.</span>
                     {step.title}
                   </h3>
                   {step.desc && (
@@ -312,7 +312,7 @@ export function ClaudeCodeTokenSurvival({ tip }: { tip: Tip }) {
                           key={j}
                           className="flex items-start gap-2.5 text-sm leading-relaxed text-muted"
                         >
-                          <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-accent-500" />
+                          <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-brand-700" />
                           <span>{b}</span>
                         </li>
                       ))}
@@ -327,7 +327,7 @@ export function ClaudeCodeTokenSurvival({ tip }: { tip: Tip }) {
                   )}
                   {step.note && (
                     <div className="mt-3 flex items-start gap-2 rounded-xl border border-border bg-muted-surface p-3">
-                      <Info className="mt-0.5 size-4 shrink-0 text-accent-500" />
+                      <Info className="mt-0.5 size-4 shrink-0 text-brand-700" />
                       <p className="text-xs leading-relaxed text-muted">
                         {step.note}
                       </p>
@@ -368,7 +368,7 @@ export function ClaudeCodeTokenSurvival({ tip }: { tip: Tip }) {
 
         {/* สรุปจบ flow หลัก — พร้อมใช้ */}
         <div className="card-flat mt-4 flex items-start gap-3 bg-muted-surface p-4">
-          <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-alt-600" />
+          <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-brand-700" />
           <p className="text-sm leading-relaxed text-foreground">
             <span className="font-bold">เท่านี้ก็รอดแล้ว!</span> จากนี้พอโควต้า Claude
             Code หลักหมด 9Router จะสลับไปใช้ provider สำรองที่ต่อไว้ให้อัตโนมัติ —
@@ -380,7 +380,7 @@ export function ClaudeCodeTokenSurvival({ tip }: { tip: Tip }) {
       {/* เครดิต + แหล่งอ้างอิงทางการ (เผื่อเอกสารมีการเปลี่ยนแปลง) */}
       <div className="card-flat flex flex-col gap-3 bg-muted-surface p-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
-          <Route className="mt-0.5 size-5 shrink-0 text-alt-600" />
+          <Route className="mt-0.5 size-5 shrink-0 text-brand-700" />
           <p className="text-sm leading-relaxed text-muted">
             ขั้นตอนติดตั้งอ้างอิงจากเว็บทางการของ{" "}
             <span className="font-semibold text-foreground">9Router</span> —

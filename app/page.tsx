@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 const FEATURES = [
   { icon: Sparkles, title: "ผู้สอนตัวจริง", desc: "เรียนกับคนที่ใช้ AI ทำงานจริง ไม่ใช่แค่ทฤษฎี", cover: "bg-brand-500" },
   { icon: Zap, title: "จ่ายแล้วเริ่มได้ทันที", desc: "สมัคร โอน แนบสลิป ระบบยืนยันที่นั่งอัตโนมัติ", cover: "bg-accent-500" },
-  { icon: RefreshCw, title: "เนื้อหาอัปเดตเสมอ", desc: "ตามทันเครื่องมือ AI ใหม่ ๆ ที่เปลี่ยนเร็วทุกเดือน", cover: "bg-alt-500" },
+  { icon: RefreshCw, title: "เนื้อหาอัปเดตเสมอ", desc: "ตามทันเครื่องมือ AI ใหม่ ๆ ที่เปลี่ยนเร็วทุกเดือน", cover: "bg-brand-700" },
 ];
 
 export default async function HomePage() {

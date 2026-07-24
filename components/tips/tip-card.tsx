@@ -3,7 +3,7 @@ import { Lightbulb, ArrowRight, Clock } from "lucide-react";
 import type { Tip } from "@/lib/tips";
 
 // สีแถบ cover แบบ deterministic จาก slug (ใช้ token utilities — ไม่ hardcode hex)
-const COVERS = ["bg-brand-500", "bg-accent-500", "bg-alt-500"];
+const COVERS = ["bg-brand-500", "bg-accent-500", "bg-brand-700"];
 function coverClass(slug: string): string {
   let sum = 0;
   for (let i = 0; i < slug.length; i++) sum += slug.charCodeAt(i);
