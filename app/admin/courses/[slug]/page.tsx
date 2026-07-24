@@ -7,13 +7,16 @@ import { PromptCard } from "@/components/course/prompt-card";
 
 export const dynamic = "force-dynamic";
 
+const BRAND_STYLE =
+  "Neo-brutalist bold edutech style. Thick 2px borders with hard offset shadows. Bold sans-serif typography. Vibrant orange/coral accent color (brand: #f97316). High contrast. Bold rounded pill badges. Energetic, modern Thai ed-tech vibe. Painterly digital illustration style.";
+
 const COVER_PROMPT = (c: { title: string; subtitle: string; level: string; highlights: string[] }) =>
   [
     `Professional course cover image for "${c.title}"`,
     `Subtitle: ${c.subtitle}`,
     `Level: ${c.level}`,
     c.highlights.length > 0 ? `Highlights: ${c.highlights.join(", ")}` : "",
-    "Style: Modern tech education, vibrant but professional, clean composition, suitable for web hero section, 1200x630 px, no text overlay",
+    `Style: ${BRAND_STYLE} Suitable for web hero section, 1200x630 px, no text overlay`,
   ]
     .filter(Boolean)
     .join(". ");
@@ -22,14 +25,14 @@ const OG_PROMPT = (c: { title: string; subtitle: string }) =>
   [
     `Social media OG image for online course "${c.title}"`,
     `Tagline: ${c.subtitle}`,
-    "Style: Bold gradient background, minimal design, readable when cropped square or wide, 1200x630 px, space left for text overlay, no text in image",
+    `Style: ${BRAND_STYLE} Bold gradient background, minimal, readable cropped square or wide, 1200x630 px, space left for text overlay`,
   ].join(". ");
 
 const STACK_CARD_PROMPT = (courseTitle: string, stack: { title: string; desc: string }) =>
   [
     `Visual thumbnail for course "${courseTitle}" topic: ${stack.title}`,
     stack.desc,
-    "Style: Flat illustration or 3D render, modern ed-tech aesthetic, 800x600 px, no text",
+    `Style: ${BRAND_STYLE} Flat illustration or 3D render, 800x600 px, no text`,
   ].join(". ");
 
 export default async function AdminCourseDetailPage({
