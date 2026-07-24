@@ -38,7 +38,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-card shadow-2xl">
+      <div className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-2xl border-2 border-border bg-card shadow-2xl">
         {title && (
           <div className="flex items-center justify-between border-b border-border px-5 py-4">
             <h2 className="text-base font-bold text-foreground">{title}</h2>

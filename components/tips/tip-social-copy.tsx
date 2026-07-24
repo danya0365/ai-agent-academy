@@ -47,7 +47,7 @@ export function TipSocialCopy({
       <button
         type="button"
         onClick={() => setIsOpen(true)}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-sm font-medium text-muted transition hover:border-brand-500 hover:text-brand-600"
+        className="btn btn-secondary btn-sm shrink-0"
       >
         <Share2 className="size-4" />
         แชร์ Social
@@ -100,7 +100,7 @@ function CopyCard({
   const charCount = text.length;
 
   return (
-    <div className="rounded-xl border border-border bg-muted-surface p-4">
+    <div className="rounded-xl border-2 border-border bg-card p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-sm font-bold text-foreground">{label}</p>
@@ -129,7 +129,7 @@ function CopyCard({
       </div>
 
       {/* preview — always visible inside modal */}
-      <div className="mt-3 whitespace-pre-wrap rounded-lg border border-border bg-card p-3 text-xs leading-relaxed text-muted">
+      <div className="mt-3 whitespace-pre-wrap rounded-lg border-2 border-border bg-muted-surface p-3 text-xs leading-relaxed text-muted">
         {text}
       </div>
     </div>
