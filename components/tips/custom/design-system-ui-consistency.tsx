@@ -61,7 +61,61 @@ const COMP_CLASSES: CompClass[] = [
   },
 ];
 
-// ── Before/After Code ────────────────────────────────────────────────────────
+// ── Prompt Templates ──────────────────────────────────────────────────────────
+const PROMPTS = [
+  {
+    icon: Code2,
+    title: "Prompt บอก AI ครั้งแรก — แปะ Design Tokens ให้ AI รู้",
+    code: `คุณกำลังทำงานในโปรเจคที่ใช้ Design System นี้:
+
+**Design Tokens (CSS variables):**
+- --background / --card / --border → พื้นหลัง
+- --foreground / --muted → สีข้อความ
+- --brand-500 / --accent-500 → สีแบรนด์
+- --on-brand → สีตัวอักษรบนพื้น brand
+
+**Component Classes (Tailwind):**
+- \`card\` / \`card-flat\` / \`card lift\` → Card
+- \`btn btn-primary\` / \`btn-secondary\` / \`btn-accent\` → ปุ่ม
+- \`badge bg-*\` → Badge
+- \`input\` → Form input
+- \`text-muted\` → ข้อความรอง
+- \`border-border\` → ขอบ
+
+⚠️ ห้าม hardcode hex/size — ใช้ class ของ DS เท่านั้น`,
+    note: "แปะไว้ใน System Prompt หรือ Project Instructions (CLAUDE.md) — AI จะจำและใช้ class ถูกตลอด",
+  },
+  {
+    icon: FileCode,
+    title: "Prompt สั่งงาน — ให้ AI เขียน Component ด้วย DS",
+    code: `ใช้ Design System ของโปรเจคสร้าง Section "คอร์สแนะนำ" ประกอบด้วย:
+- หัวข้อ H2
+- Grid 3 คอลัมน์
+- แต่ละ card มี: รูป, หัวข้อ, คำอธิบาย, ปุ่ม "ดูเพิ่มเติม"
+- ใช้ \`card lift\` สำหรับ card
+- ปุ่มใช้ \`btn btn-primary\`
+- ข้อความรองใช้ \`text-muted\`
+
+⚠️ ห้าม hardcode ค่าสี/ขนาด/ระยะ — ใช้ class ของ DS เท่านั้น`,
+    note: "ใส่ท้าย prompt ทุกครั้งที่ให้ AI เขียน UI — AI จะเลือก class ให้เหมาะสมเอง",
+  },
+  {
+    icon: Layers,
+    title: "Prompt สำหรับ Claude Code / AI Agent — เพิ่มใน CLAUDE.md",
+    code: `## Design System
+
+โปรเจคนี้ใช้ Design System ผ่าน CSS Utility classes:
+- สี: bg-brand-500, text-muted, border-border, bg-accent-500
+- พื้นหลัง: bg-background, bg-card, bg-muted-surface
+- ข้อความ: text-foreground, text-muted, text-on-brand, text-brand-700
+- Component: card, card-flat, .card.lift, btn btn-primary, btn btn-secondary, badge, input
+- ระยะ: p-5 (card padding), gap-3/4 (stack), mt-3/4 (section)
+
+⚠️ IMPORTANT: ห้าม hardcode hex/size/radius — ใช้ class ของ DS เท่านั้น
+ไฟล์ CSS อยู่ที่ public/styles/ — เปิดอ่านได้ถ้าต้องการ`,
+    note: "ใส่ใน .claude/CLAUDE.md หรือ .cursorrules — Agent จะใช้ Design System อัตโนมัติทุกครั้ง",
+  },
+];
 const BEFORE_CODE = `<div style={{
   background: "#fff",
   borderRadius: "16px",
@@ -413,6 +467,69 @@ export function DesignSystemUiConsistency({ tip }: { tip: Tip }) {
             <span className="font-bold text-brand-700">13 บรรทัด</span>{" "}
             — AI ใช้ class ของ DS แล้ว อ่านง่ายขึ้น เข้าใจโครงสร้าง更快
             Theme เปลี่ยนก็ไม่ต้องแก้
+          </p>
+        </div>
+      </section>
+
+      {/* Prompt Templates */}
+      <section>
+        <h2 className="flex items-center gap-2 text-lg font-extrabold text-foreground">
+          <Lightbulb className="size-5 text-brand-700" />
+          5. Prompt ตัวอย่าง — คัดลอกไปใช้ได้เลย
+        </h2>
+
+        <p className="mt-2 text-sm leading-relaxed text-muted">
+          คัดลอก prompt ด้านล่างไปวางใน System Prompt, CLAUDE.md หรือส่งให้ AI
+          โดยตรง — AI จะใช้ Design System ของคุณถูกต้องทุกครั้ง
+        </p>
+
+        <div className="mt-4 flex flex-col gap-4">
+          {PROMPTS.map((p, i) => {
+            const Icon = p.icon;
+            return (
+              <div key={i} className="card overflow-hidden">
+                {/* Header */}
+                <div className="flex items-center gap-3 border-b border-border bg-brand-500/10 px-5 py-3">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-500 text-on-brand">
+                    <Icon className="size-5" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="flex items-center gap-2 text-sm font-extrabold text-foreground">
+                      <span className="flex size-5 items-center justify-center rounded bg-brand-700 text-[10px] font-bold text-on-brand">
+                        {i + 1}
+                      </span>
+                      {p.title}
+                    </h3>
+                  </div>
+                </div>
+
+                {/* Code */}
+                <pre className="overflow-x-auto bg-card p-4 text-xs leading-relaxed">
+                  <code>{p.code}</code>
+                </pre>
+
+                {/* Note */}
+                {p.note && (
+                  <div className="flex items-start gap-2 border-t border-border bg-muted-surface px-5 py-3">
+                    <Info className="mt-0.5 size-3.5 shrink-0 text-brand-700" />
+                    <p className="text-xs leading-relaxed text-muted">
+                      {p.note}
+                    </p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-4 flex items-start gap-2 rounded-xl border-2 border-accent-500 bg-muted-surface p-3">
+          <Lightbulb className="mt-0.5 size-4 shrink-0 text-accent-500" />
+          <p className="text-xs leading-relaxed text-muted">
+            <span className="font-bold text-foreground">Pro tip: </span>
+            ถ้าใช้ Claude Code ให้เพิ่ม prompts เหล่านี้ใน{" "}
+            <code className="rounded bg-muted-surface px-1 py-0.5 font-mono text-xs">CLAUDE.md</code>{" "}
+            หรือ <code className="rounded bg-muted-surface px-1 py-0.5 font-mono text-xs">AGENTS.md</code>{" "}
+            — Agent จะจำ Design System ของคุณตลอดทุก session ไม่ต้องบอกซ้ำอีก!
           </p>
         </div>
       </section>
