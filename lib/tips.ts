@@ -46,6 +46,36 @@ export type Tip = {
 
 export const TIPS: Tip[] = [
   {
+    slug: "claude-code-effort-secret",
+    title: "ตั้ง Effort ใน Claude Code ยังไงให้คุ้มทุก Token",
+    summary:
+      "ถ้าใช้ Claude Fable ตั้ง high ก็พอ — ไม่ต้องไปถึง max เพราะมันไม่เดา แต่ถ้าใช้ Deepseek ตอน quota ต้องตั้ง ultracode + xhigh + workflow ไม่งั้นมันจะมโน!",
+    category: "เพิ่มประสิทธิภาพ",
+    readingTime: "3 นาที",
+    createdAt: "2026-07-24",
+    productTags: ["ทำงาน", "ประสิทธิภาพ"],
+    social: {
+      post:
+        "เคล็ดลับตั้ง Effort ใน Claude Code ให้คุ้มทุก Token\n\nความลับง่ายนิดเดียว:\n\n• ถ้าใช้ Model แพง (Fable) → ตั้ง effort แค่ high ก็พอ\n  เพราะ Fable ไม่เดา — อะไรไม่แน่ใจมันสแกนโค้ดเอง\n  ตั้ง effort สูงไป → กิน token ฟรี!\n\n• ถ้าใช้ Model ถูก (Deepseek ฯลฯ) → ต้องตั้ง effort สูง\n  เปิด ultracode + xhigh + workflow\n  เพราะ Model ถูกชอบเดาและมโน\n  พอตั้ง effort สูง มันจะเลิกเดา แล้วไปสำรวจโค้ดก่อนลงมือ\n\n• คน Token ไม่หมด → ตั้ง max ไว้ตลอดก็ได้\n  Agent จะไม่เดาเลย แต่ทำงานช้าลงหน่อย\n\nสรุป: ตั้ง effort ให้เหมาะกับ Model แล้วคุณจะประหยัด Token ได้เยอะ",
+      comment:
+        "ตั้ง Effort ใน Claude Code ยังไงให้คุ้ม — Model แพงแค่ high, Model ถูกต้อง ultracode\n{{LINK}}",
+    },
+    sections: [
+      {
+        heading: "1. Model แพง → แค่ Effort high ก็พอ",
+        body: 'Claude Fable (และ Model เก่งๆ) มันไม่เดา — ถ้ามันไม่แน่ใจ มันจะสแกนโค้ดที่เกี่ยวข้องหาคำตอบเอง การตั้ง effort สูงกว่า high จึงไม่มีประโยชน์ แถมกิน Token ฟรี',
+      },
+      {
+        heading: "2. Model ถูก → ต้อง Effort สูง + Ultracode + Workflow",
+        body: "ปัญหาของ Model ถูกๆ คือมันชอบเดาและคิดไปเอง วิธีแก้: ตั้ง effort เป็น ultracode + xhigh + workflow แล้วมันจะเลิกเดา ส่งคำขอไปสำรวจโค้ดที่เกี่ยวข้องก่อนลงมือ — ผลลัพธ์ดีขึ้นมาก",
+      },
+      {
+        heading: "3. Token ไม่หมด → ตั้ง Effort Max ตลอดก็ได้",
+        body: "ถ้า quota ท่านเหลือเฟือ ตั้ง effort สูงสุดไว้ตลอด Agent จะทำงานแบบรัดกุมทุกครั้ง ไม่มีการเดา แต่ข้อเสียคืองานจะใช้เวลามากขึ้นเล็กน้อย",
+      },
+    ],
+  },
+  {
     slug: "ai-side-income",
     title: "หารายได้เสริมด้วย AI ฉบับคนเริ่มต้น",
     summary:
